@@ -1,0 +1,52 @@
+---
+Organization: Cognitive Industries — Les Industries Cognitives
+Project: AI-IDP / AegisTrace
+Author: Pierre-Edward Procyk
+Copyright: © 2026 Pierre-Edward Procyk. All rights reserved.
+File: project-control/CHECKPOINT.md
+Title: Checkpoint
+Version: 2.0.0
+Last Material Revision: 2026-08-01
+---
+
+# Checkpoint
+
+## Current State
+
+Local verification and final corpus reconciliation are complete on Windows at `C:\Cognitive Industries\AI-IDP-AegisTrace`. The `test-full` suite passed 113/113 tests; a clean demo returned `verification: OK`; its four-event ledger passed hash-chain and event-hash verification; and Tectonic 0.16.9 compiled a visually inspected 13-page paper. The corpus contains 25 specification documents, 14 JSON Schemas, and 57 bibliography entries.
+
+All 12 previously stale PDFs and both stale DOCX files were regenerated from their canonical Markdown sources with project version 2.0.0 and project date 2026-08-01. The 12 PDFs passed a 48-page visual gate; the three previously repaired government PDFs passed an 11-page visual gate; and the paper passed a 13-page visual gate. The DOCX files passed structural, style, table, and canonical-source coverage checks; native Word/LibreOffice rendering was unavailable and is disclosed. Current-facing paths, manifests, publication metadata, legal-status naming, release records, and the ten numbered ZIPs were reconciled. The final package partition contains 257 unique canonical file members with zero duplicates, zero missing canonical members, zero byte mismatches, and successful CRC validation. Blocker B-006 is resolved. External deployment phases have not been executed.
+
+## Exact Next Actions (if context resumes)
+
+If a new agent context resumes this project, perform the following in order:
+
+1. Verify and extract `AI-IDP-NEXT-AI-HANDOFF-2026-08-02.zip`; read `CORPUS_AUDIT_REPORT.md`, `CURRENT_STATE.json`, `NEXT_AI_EXECUTION_PLAN.md`, and `NEXT_AI_PROVIDER_PROMPT.txt`.
+2. Reproduce the local evidence: archive hashes/CRCs, canonical checksums, 113 tests, clean demo, demo-ledger verification, brand-original hashes, and Tectonic paper build.
+3. Revalidate changeable legal and regulatory claims against primary official sources immediately before external submission.
+4. Report the reproduced results to Pierre-Edward Procyk and wait for explicit confirmation before beginning arXiv work.
+5. Follow the action-specific confirmation gates for final arXiv submission, GitHub push, every social publication, and every government email send.
+6. Replace only the designated arXiv and GitHub link placeholders, and only after real URLs exist.
+
+## Open Processes
+
+None. The Phase A verification run is complete and external actions are paused for human confirmation.
+
+## Validation State
+
+Current evidence: 113/113 tests passed; the clean demo returned `verification: OK`; the demo ledger hash chain and event hashes verified; Tectonic produced a 13-page PDF with zero undefined references, zero missing glyphs, and zero overfull boxes; 72 distinct release/paper PDF pages passed visual inspection; and the ten numbered ZIPs match canonical bytes. The inactive local OpenTelemetry receiver at `localhost:4318` produced a non-failing export warning. See `project-control/VALIDATION_STATUS.md` for the broader gate state and disclosed limits.
+
+## Relevant Paths
+
+- Root: `C:\Cognitive Industries\AI-IDP-AegisTrace`
+- Project control: `project-control/`
+- Implementation: `src/aegistrace/`
+- Tests: `tests/`
+- arXiv paper: `paper/`
+- Government package: `government/`
+- University package: `university/`
+- Release: `release/`
+
+## Blockers
+
+No local corpus blocker is open. External submissions, publication, pushes, posts, and email sends remain unperformed and subject to Pierre-Edward Procyk's explicit confirmation at each required gate. Native DOCX visual rendering and pre-submission legal/regulatory refresh remain disclosed validation tasks, not fabricated completion claims.

@@ -1,0 +1,185 @@
+artifact_path,artifact_type,format,producing_phase,producing_agent,status,checksum_algorithm,checksum,notes
+project-control/VERIFIED_AUTHOR_DATA.md,control,md,P0,A01-guardian,complete,sha256,,Authoritative identity record
+project-control/VERIFIED_CONTACT_DATA.json,control,json,P0,A01-guardian,complete,sha256,,Machine-readable contact data
+project-control/MISSING_AUTHOR_DATA.md,control,md,P0,A01-guardian,complete,sha256,,Register of absent fields
+project-control/PUBLICATION_METADATA_STATUS.md,control,md,P0,A01-guardian,complete,sha256,,Forbids fabricated identifiers
+project-control/PROJECT_STATUS.md,control,md,P0,A02-orchestrator,complete,sha256,,Living status snapshot
+project-control/DECISION_LOG.md,control,md,P0,A02-orchestrator,complete,sha256,,Autonomous decisions
+project-control/MASTER_TASK_GRAPH.json,control,json,P0,A02-orchestrator,complete,sha256,,P0-P6 task graph
+brand/originals/SHA256SUMS.txt,brand,txt,P0,A01-guardian,complete,sha256,,Originals checksum
+brand/originals/CI-Logo-3D-Hexagon-Gold-Cyan-Violet_Official-Brand-Identity-Transparent-V2.png,brand,png,P0,A01-guardian,complete,sha256,e62028872d4004deb8908e38e6085784ba1bbd733e7404d0376ef64d6e296822,Official 3D hexagonal logo
+brand/originals/CI-Logo-Brand-Lockup-Horizontal_Cognitive-Industries-Bilingual-Gold-Text-Transparent.png,brand,png,P0,A01-guardian,complete,sha256,c5ed7859f5d7cd5ac4cd174c42f9d0437ae7a2511d9ba25925a3375292ed1d19,Bilingual lockup
+brand/originals/Cognitive_industries_Brandcard_guidelines_and_branding_id.png,brand,png,P0,A01-guardian,complete,sha256,b637f33261ef2e830e807dd00aa3ac6811a6f29e3120d229b09a9b0d8dbbcbf9,Brand guidelines card
+README.md,governance,md,P0,A02-orchestrator,complete,sha256,,Repository entry
+PROJECT_CHARTER.md,governance,md,P0,A01-guardian,complete,sha256,,Charter
+PROJECT_SCOPE_LOCK.md,governance,md,P0,A01-guardian,complete,sha256,,Scope lock
+AUTHORSHIP_AND_IP.md,governance,md,P0,A01-guardian,complete,sha256,,IP declaration
+GOVERNANCE.md,governance,md,P0,A01-guardian,complete,sha256,,Governance model
+SECURITY.md,governance,md,P0,A09-security,complete,sha256,,Security policy
+PRIVACY.md,governance,md,P0,A10-privacy,complete,sha256,,Privacy policy
+CONTRIBUTING.md,governance,md,P0,A02-orchestrator,complete,sha256,,Contribution policy
+CODE_OF_CONDUCT.md,governance,md,P0,A02-orchestrator,complete,sha256,,Conduct
+CHANGELOG.md,governance,md,P0,A02-orchestrator,complete,sha256,,Changelog
+RELEASE_POLICY.md,governance,md,P0,A35-release,complete,sha256,,Release policy
+LICENSING_STATUS.md,governance,md,P0,A01-guardian,complete,sha256,,No licence applied
+TRADEMARK_AND_BRAND_POLICY.md,governance,md,P0,A01-guardian,complete,sha256,,Trademark policy
+CITATION.cff,governance,yaml,P0,A27-editor,complete,sha256,,Citation metadata
+AUTHORS.md,governance,md,P0,A01-guardian,complete,sha256,,Authors
+NOTICE.md,governance,md,P0,A01-guardian,complete,sha256,,Third-party notices
+AGENTS.md,governance,md,P0,A02-orchestrator,complete,sha256,,Agent protocol
+SKILL.md,governance,md,P0,A02-orchestrator,complete,sha256,,Skill description
+MASTER_HANDOFF.md,governance,md,P0,A02-orchestrator,complete,sha256,,Handoff
+ARTIFACT_MANIFEST.md,governance,md,P0,A02-orchestrator,complete,sha256,,Manifest
+ASSUMPTIONS.md,governance,md,P0,A02-orchestrator,complete,sha256,,Assumptions
+LIMITATIONS.md,governance,md,P0,A02-orchestrator,complete,sha256,,Limitations
+spec/AI-IDP-CORE.md,spec,md,P3,A20-architect,complete,sha256,,Core spec
+spec/AI-IDP-CANADA.md,spec,md,P3,A04-constitutional,complete,sha256,,Canada-specific spec
+spec/TERMINOLOGY.md,spec,md,P1,A03-protocol,complete,sha256,,Terminology
+spec/ACTOR_MODEL.md,spec,md,P3,A20-architect,complete,sha256,,Actor model
+spec/IDENTITY_PROTOCOL.md,spec,md,P3,A20-architect,complete,sha256,,Identity protocol
+spec/IDENTITY_LIFECYCLE.md,spec,md,P3,A20-architect,complete,sha256,,Lifecycle
+spec/DELEGATION_PROTOCOL.md,spec,md,P3,A20-architect,complete,sha256,,Delegation
+spec/AUTHORIZATION_PROTOCOL.md,spec,md,P3,A20-architect,complete,sha256,,Authorization
+spec/APPROVAL_PROTOCOL.md,spec,md,P3,A20-architect,complete,sha256,,Approval
+spec/EVENT_PROTOCOL.md,spec,md,P3,A20-architect,complete,sha256,,Event protocol
+spec/PERMANENT_RECORD_PROTOCOL.md,spec,md,P3,A20-architect,complete,sha256,,Permanent record
+spec/RESOURCE_TRACE_PROTOCOL.md,spec,md,P3,A20-architect,complete,sha256,,Resource trace
+spec/QUALITY_EVIDENCE_PROTOCOL.md,spec,md,P3,A13-quality,complete,sha256,,Quality evidence
+spec/REGISTRY_PROTOCOL.md,spec,md,P3,A20-architect,complete,sha256,,Registry
+spec/FEDERATION_PROTOCOL.md,spec,md,P3,A20-architect,complete,sha256,,Federation
+spec/OFFLINE_PROTOCOL.md,spec,md,P3,A20-architect,complete,sha256,,Offline
+spec/DISCLOSURE_PROTOCOL.md,spec,md,P3,A10-privacy,complete,sha256,,Disclosure
+spec/REVOCATION_PROTOCOL.md,spec,md,P3,A20-architect,complete,sha256,,Revocation
+spec/CORRECTION_PROTOCOL.md,spec,md,P3,A20-architect,complete,sha256,,Correction
+spec/INCIDENT_PROTOCOL.md,spec,md,P3,A09-security,complete,sha256,,Incident
+spec/AUDIT_PROTOCOL.md,spec,md,P3,A09-security,complete,sha256,,Audit
+spec/CERTIFICATION_PROTOCOL.md,spec,md,P3,A17-admin,complete,sha256,,Certification
+spec/CONFORMANCE_LEVELS.md,spec,md,P3,A13-quality,complete,sha256,,Conformance levels
+spec/EXTENSION_POLICY.md,spec,md,P3,A20-architect,complete,sha256,,Extension policy
+spec/VERSIONING_POLICY.md,spec,md,P3,A22-schema,complete,sha256,,Versioning policy
+schemas/jurisdiction.schema.json,schema,json,P3,A22-schema,complete,sha256,,Jurisdiction schema
+schemas/provider.schema.json,schema,json,P3,A22-schema,complete,sha256,,Provider
+schemas/model.schema.json,schema,json,P3,A22-schema,complete,sha256,,Model
+schemas/deployment.schema.json,schema,json,P3,A22-schema,complete,sha256,,Deployment
+schemas/controller.schema.json,schema,json,P3,A22-schema,complete,sha256,,Controller
+schemas/principal.schema.json,schema,json,P3,A22-schema,complete,sha256,,Principal
+schemas/agent.schema.json,schema,json,P3,A22-schema,complete,sha256,,Agent
+schemas/agent-instance.schema.json,schema,json,P3,A22-schema,complete,sha256,,Agent instance
+schemas/task.schema.json,schema,json,P3,A22-schema,complete,sha256,,Task
+schemas/delegation.schema.json,schema,json,P3,A22-schema,complete,sha256,,Delegation
+schemas/authorization.schema.json,schema,json,P3,A22-schema,complete,sha256,,Authorization
+schemas/event.schema.json,schema,json,P3,A22-schema,complete,sha256,,Event
+schemas/resource.schema.json,schema,json,P3,A22-schema,complete,sha256,,Resource
+schemas/quality-evidence.schema.json,schema,json,P3,A22-schema,complete,sha256,,Quality evidence
+src/aegistrace/__init__.py,code,py,P4,A21-engineer,complete,sha256,,Package init
+src/aegistrace/identity/__init__.py,code,py,P4,A21-engineer,complete,sha256,,Identity module
+src/aegistrace/identity/ids.py,code,py,P4,A21-engineer,complete,sha256,,Identifier model
+src/aegistrace/identity/keys.py,code,py,P4,A21-engineer,complete,sha256,,Key management
+src/aegistrace/identity/lifecycle.py,code,py,P4,A21-engineer,complete,sha256,,Lifecycle ops
+src/aegistrace/registry/__init__.py,code,py,P4,A21-engineer,complete,sha256,,Registry module
+src/aegistrace/registry/base.py,code,py,P4,A21-engineer,complete,sha256,,Registry base
+src/aegistrace/registry/memory.py,code,py,P4,A21-engineer,complete,sha256,,In-memory registry
+src/aegistrace/ledger/__init__.py,code,py,P4,A21-engineer,complete,sha256,,Ledger module
+src/aegistrace/ledger/append_only.py,code,py,P4,A21-engineer,complete,sha256,,Append-only ledger
+src/aegistrace/ledger/merkle.py,code,py,P4,A21-engineer,complete,sha256,,Merkle root
+src/aegistrace/signing/__init__.py,code,py,P4,A21-engineer,complete,sha256,,Signing module
+src/aegistrace/signing/ed25519.py,code,py,P4,A21-engineer,complete,sha256,,Ed25519 signer
+src/aegistrace/signing/canonical.py,code,py,P4,A21-engineer,complete,sha256,,Canonicalization
+src/aegistrace/events/__init__.py,code,py,P4,A21-engineer,complete,sha256,,Events module
+src/aegistrace/events/models.py,code,py,P4,A21-engineer,complete,sha256,,Event models
+src/aegistrace/events/collector.py,code,py,P4,A21-engineer,complete,sha256,,Event collector
+src/aegistrace/delegation/__init__.py,code,py,P4,A21-engineer,complete,sha256,,Delegation
+src/aegistrace/delegation/broker.py,code,py,P4,A21-engineer,complete,sha256,,Delegation broker
+src/aegistrace/authorization/__init__.py,code,py,P4,A21-engineer,complete,sha256,,Authorization
+src/aegistrace/authorization/engine.py,code,py,P4,A21-engineer,complete,sha256,,Policy engine
+src/aegistrace/manifests/__init__.py,code,py,P4,A21-engineer,complete,sha256,,Manifests
+src/aegistrace/manifests/resource.py,code,py,P4,A21-engineer,complete,sha256,,Resource manifest
+src/aegistrace/adapters/__init__.py,code,py,P4,A24-git,complete,sha256,,Adapters
+src/aegistrace/adapters/filesystem.py,code,py,P4,A24-git,complete,sha256,,Filesystem watcher
+src/aegistrace/adapters/git.py,code,py,P4,A24-git,complete,sha256,,Git adapter
+src/aegistrace/adapters/github.py,code,py,P4,A24-git,complete,sha256,,GitHub evidence adapter
+src/aegistrace/adapters/database.py,code,py,P4,A23-db,complete,sha256,,Database adapter
+src/aegistrace/adapters/mcp.py,code,py,P4,A21-engineer,complete,sha256,,MCP stub
+src/aegistrace/cli/__init__.py,code,py,P4,A21-engineer,complete,sha256,,CLI
+src/aegistrace/cli/verify.py,code,py,P4,A21-engineer,complete,sha256,,verify CLI
+src/aegistrace/cli/audit.py,code,py,P4,A21-engineer,complete,sha256,,audit CLI
+src/aegistrace/cli/reconstruct.py,code,py,P4,A21-engineer,complete,sha256,,reconstruct CLI
+src/aegistrace/cli/admin.py,code,py,P4,A21-engineer,complete,sha256,,admin CLI
+src/aegistrace/api/__init__.py,code,py,P4,A21-engineer,complete,sha256,,API
+src/aegistrace/api/server.py,code,py,P4,A21-engineer,complete,sha256,,FastAPI server
+src/aegistrace/storage/__init__.py,code,py,P4,A23-db,complete,sha256,,Storage
+src/aegistrace/storage/sqlite.py,code,py,P4,A23-db,complete,sha256,,SQLite backend
+tests/unit/test_identity.py,test,py,P4,A21-engineer,complete,sha256,,Identity tests
+tests/unit/test_ledger.py,test,py,P4,A21-engineer,complete,sha256,,Ledger tests
+tests/unit/test_signing.py,test,py,P4,A21-engineer,complete,sha256,,Signing tests
+tests/integration/test_lifecycle.py,test,py,P4,A21-engineer,complete,sha256,,Lifecycle integration
+tests/security/test_attacks.py,test,py,P5,A25-security,complete,sha256,,Attack tests
+tests/privacy/test_redaction.py,test,py,P5,A10-privacy,complete,sha256,,Privacy tests
+tests/permanence/test_permanence.py,test,py,P5,A09-security,complete,sha256,,Permanence tests
+tests/conformance/test_conformance.py,test,py,P5,A13-quality,complete,sha256,,Conformance tests
+pyproject.toml,code,toml,P4,A21-engineer,complete,sha256,,Project config
+Makefile,code,mk,P4,A21-engineer,complete,sha256,,Make targets
+Dockerfile,code,dockerfile,P4,A21-engineer,complete,sha256,,Container image
+university/UNIVERSITY_RESEARCH_REPORT.md,doc,md,P6,A27-editor,complete,sha256,,University report
+university/UNIVERSITY_RESEARCH_REPORT.docx,doc,docx,P6,A27-editor,complete,sha256,,University report DOCX
+university/UNIVERSITY_RESEARCH_REPORT.pdf,doc,pdf,P6,A27-editor,complete,sha256,,University report PDF
+paper/main.tex,paper,tex,P6,A28-arxiv,complete,sha256,,arXiv main
+paper/references.bib,paper,bib,P6,A28-arxiv,complete,sha256,,Bibliography
+paper/aegis-trace-arxiv.pdf,paper,pdf,P6,A28-arxiv,complete,sha256,,Compiled paper
+government/CANADIAN_NATIONAL_PROJECT_PROPOSAL.md,doc,md,P6,A29-gov,complete,sha256,,Proposal
+government/CANADIAN_NATIONAL_PROJECT_PROPOSAL.docx,doc,docx,P6,A29-gov,complete,sha256,,Proposal DOCX
+government/CANADIAN_NATIONAL_PROJECT_PROPOSAL.pdf,doc,pdf,P6,A29-gov,complete,sha256,,Proposal PDF
+government/CANADIAN_POLICY_WHITE_PAPER.md,doc,md,P6,A29-gov,complete,sha256,,White paper
+government/CANADIAN_POLICY_WHITE_PAPER.pdf,doc,pdf,P6,A29-gov,complete,sha256,,White paper PDF
+government/PROPOSED_AI_ACTOR_IDENTITY_AND_TRACEABILITY_ACT.md,doc,md,P6,A30-legislative,complete,sha256,,Draft statute
+government/FEDERAL_PROVINCIAL_JURISDICTION_ANALYSIS.md,doc,md,P6,A04-constitutional,complete,sha256,,Jurisdiction
+government/CHARTER_ANALYSIS.md,doc,md,P6,A04-constitutional,complete,sha256,,Charter
+government/PRIVACY_AND_HUMAN_RIGHTS_ANALYSIS.md,doc,md,P6,A10-privacy,complete,sha256,,Privacy/HR
+government/OFFICIAL_PROJECT_DOCUMENT_EN.md,doc,md,P6,Codex-/root,complete,sha256,423d49af27a80d1c2634ea8912fc3c9ce73ece601d18d606fa6cca5d6147973f,Canonical English source for the official government-facing PDF
+OFFICIAL_PROJECT_DOCUMENT_EN.pdf,doc,pdf,P6,Codex-/root,complete,sha256,34d9975e76fc152dc755d76c88c8dc728350f89ab5f2cace1e88f0203a5bc932,Official English document regenerated and visually verified
+government/DOCUMENT_OFFICIEL_PROJET_FR.md,doc,md,P6,Codex-/root,complete,sha256,aed365a7b7dd8b16c60892e9695594755324d51125912d14204831c5a5e545a2,Source canonique en français canadien du document officiel
+DOCUMENT_OFFICIEL_PROJET_FR.pdf,doc,pdf,P6,Codex-/root,complete,sha256,ea6d7fda0176a2c7520ff905f045a49953a94036c53cefc9b3dcc6daa268a535,Document officiel français régénéré et vérifié visuellement
+government/NOTE_DE_SYNTHESE_FR.md,doc,md,P6,Codex-/root,complete,sha256,b5c857082f7e9a6d2e35c6e46e4086a934414b3204f30e3d0dacf565af94cc66,Source canonique de la note de synthèse
+government/NOTE_DE_SYNTHESE_FR.pdf,doc,pdf,P6,Codex-/root,complete,sha256,6aba6842fc51cb8454f1739aa615f9b7194b2d045ad48df51c9e02bbfaaff774,Note de synthèse régénérée et vérifiée visuellement
+scripts/build_government_pdfs.py,build-tool,py,P6,Codex-/root,complete,sha256,514a19d32002144573963d8fc128d803d375cd80a8a71251a0903e73b5d793de,Reproducible branded renderer for canonical government PDFs
+scripts/build_release_derivatives.py,build-tool,py,P6,Codex-/root,complete,sha256,,Reproducible renderer for release PDFs and DOCX derivatives
+scripts/build_next_ai_handoff.py,build-tool,py,P6,Codex-/root,complete,sha256,,Deterministic next-provider handoff builder
+scripts/rebuild_numbered_archives.py,build-tool,py,P6,Codex-/root,complete,sha256,,Deterministic canonical-byte builder for the ten numbered archives
+scripts/reconcile_release_checksums.py,build-tool,py,P6,Codex-/root,complete,sha256,,Deterministic canonical-file checksum generator and verifier
+tests/unit/test_project_metadata.py,test,py,P5,Codex-/root,complete,sha256,,Project version and date regression tests
+impact/business-and-operations/BUSINESS_AND_OPERATIONS_IMPACT_REPORT.md,doc,md,P2,A14-business,complete,sha256,,Business report
+impact/business-and-operations/BUSINESS_AND_OPERATIONS_IMPACT_REPORT.pdf,doc,pdf,P2,A14-business,complete,sha256,,Business PDF
+impact/human-resources/HR_AND_LABOUR_IMPACT_REPORT.md,doc,md,P2,A15-hr,complete,sha256,,HR report
+impact/human-resources/HR_AND_LABOUR_IMPACT_REPORT.pdf,doc,pdf,P2,A15-hr,complete,sha256,,HR PDF
+impact/societal/SOCIETAL_IMPACT_ASSESSMENT.md,doc,md,P2,A16-societal,complete,sha256,,Societal report
+impact/societal/SOCIETAL_IMPACT_ASSESSMENT.pdf,doc,pdf,P2,A16-societal,complete,sha256,,Societal PDF
+technical/AEGISTRACE_TECHNICAL_ARCHITECTURE.md,doc,md,P3,A20-architect,complete,sha256,,Technical architecture
+technical/AEGISTRACE_TECHNICAL_ARCHITECTURE.pdf,doc,pdf,P3,A20-architect,complete,sha256,,Technical architecture PDF
+threat-model/THREAT_MODEL.md,doc,md,P3,A09-security,complete,sha256,,Threat model
+docs/quickstart.md,doc,md,P4,A26-docs,complete,sha256,,Quickstart
+docs/developer-guide.md,doc,md,P4,A26-docs,complete,sha256,,Developer guide
+docs/architecture-guide.md,doc,md,P4,A26-docs,complete,sha256,,Architecture guide
+docs/auditor-guide.md,doc,md,P4,A26-docs,complete,sha256,,Auditor guide
+docs/regulator-guide.md,doc,md,P4,A26-docs,complete,sha256,,Regulator guide
+docs/cli-guide.md,doc,md,P4,A26-docs,complete,sha256,,CLI guide
+docs/api-guide.md,doc,md,P4,A26-docs,complete,sha256,,API guide
+examples/federal-coding-agent/README.md,example,md,P4,A26-docs,complete,sha256,,Example 1
+examples/vibe-coding-project/README.md,example,md,P4,A26-docs,complete,sha256,,Example 2
+release/metadata/author.json,metadata,json,P0,A01-guardian,complete,sha256,,Author metadata
+release/metadata/organization.json,metadata,json,P0,A01-guardian,complete,sha256,,Organization metadata
+release/metadata/contact.json,metadata,json,P0,A01-guardian,complete,sha256,,Contact metadata
+release/metadata/publication_metadata.json,metadata,json,P0,A01-guardian,complete,sha256,,Publication metadata
+release/CHECKSUMS.sha256,release,sha256,P6,A35-release,complete,sha256,,Top-level checksums
+release/NUMBERED_ARCHIVES.sha256,release,sha256,P6,Codex-/root,complete,sha256,,Integrity hashes for the ten numbered archives
+release/FINAL_COMPLETION_REPORT.md,report,md,P6,A35-release,complete,sha256,,Completion report
+release/VALIDATION_REPORT.md,report,md,P6,A32-validator,complete,sha256,,Validation report
+AI-IDP-01-ARXIV-PAPER.zip,release,zip,P6,A35-release,complete,sha256,,Numbered arXiv source package
+AI-IDP-02-SOURCE-CODE.zip,release,zip,P6,A35-release,complete,sha256,,Numbered source-code package
+AI-IDP-03-SPECS-SCHEMAS.zip,release,zip,P6,A35-release,complete,sha256,,Numbered specifications and schemas package
+AI-IDP-04-GOVERNMENT.zip,release,zip,P6,A35-release,complete,sha256,,Numbered government package
+AI-IDP-05-IMPACT-REPORTS.zip,release,zip,P6,A35-release,complete,sha256,,Numbered impact-report package
+AI-IDP-06-UNIVERSITY-TECHNICAL.zip,release,zip,P6,A35-release,complete,sha256,,Numbered university and technical package
+AI-IDP-07-RESEARCH.zip,release,zip,P6,A35-release,complete,sha256,,Numbered research package
+AI-IDP-08-PROJECT-CONTROL.zip,release,zip,P6,A35-release,complete,sha256,,Numbered project-control package
+AI-IDP-09-BRAND.zip,release,zip,P6,A35-release,complete,sha256,,Numbered brand package
+AI-IDP-10-ROOT-AND-DELIVERABLES.zip,release,zip,P6,A35-release,complete,sha256,,Numbered root and deliverables package

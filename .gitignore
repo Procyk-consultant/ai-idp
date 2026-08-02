@@ -1,0 +1,129 @@
+# Cognitive Industries — Les Industries Cognitives
+# Project: AI-IDP / AegisTrace
+# Author: Pierre-Edward Procyk
+# Copyright: © 2026 Pierre-Edward Procyk. All rights reserved.
+# File: .gitignore
+# Version: 2.0.0
+# Last Material Revision: 2026-07-30
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+
+# Testing
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+pytestdebug.log
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.settings/
+.classpath
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Build artifacts
+*.pdf
+!paper/*.pdf
+!technical/*.pdf
+!government/*.pdf
+!impact/**/*.pdf
+!university/*.pdf
+!OFFICIAL_PROJECT_DOCUMENT_EN.pdf
+!DOCUMENT_OFFICIEL_PROJET_FR.pdf
+*.docx
+!university/*.docx
+!government/*.docx
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+
+# AegisTrace runtime artifacts
+.aitrace/
+.aitrace-demo/
+.aitrace-*/
+*.jsonl
+!spec/**/*.jsonl
+!examples/**/*.jsonl
+!project-control/RUN_LOG.jsonl
+*.db
+*.sqlite3
+
+# Environment and secrets
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+!brand/originals/*.png
+secrets/
+
+# Release archive (too large for Git; use Git LFS or release attachments)
+release/AI-IDP-AegisTrace-*-archive.zip
+release/AI-IDP-AegisTrace-*-archive.zip.sha256
+AI-IDP-[0-9][0-9]-*.zip
+AI-IDP-NEXT-AI-HANDOFF-*.zip
+AI-IDP-NEXT-AI-HANDOFF-*.zip.sha256
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# mypy
+.mypy_cache/
+dmypy.json
+dmypy/
+
+# ruff
+.ruff_cache/
+
+# Type checking
+py.typed

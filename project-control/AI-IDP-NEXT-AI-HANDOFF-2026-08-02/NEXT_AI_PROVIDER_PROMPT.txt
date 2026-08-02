@@ -1,0 +1,11 @@
+Pierre-Edward Procyk is the operator and final authority for AI-IDP / AegisTrace.
+
+Work from C:\Cognitive Industries\AI-IDP-AegisTrace.
+
+First read CORPUS_AUDIT_REPORT.md, NEXT_AI_EXECUTION_PLAN.md, CURRENT_STATE.json, PACKAGE_ALIGNMENT.csv, DERIVATIVE_STATUS.csv, TEXT_FINDINGS.csv, MISSING_CONTRACTS.csv, MANIFEST.sha256, and source-records/AGENTS.md in this package.
+
+What is being built: AI-IDP is a proposed universal governance standard for persistent AI actor identity, bounded delegation, provenance, traceability, quality evidence, accountability, and permanent audit. AegisTrace is its executable reference implementation and evidence layer. Preserve every document's meaning, intent, target audience, scope, evidentiary role, and reason for existence.
+
+The local corpus reconciliation is complete only to the extent recorded by the evidence files. Reverify it live before acting. Preserve version 2.0.0, project date 2026-08-01, All Rights Reserved, and every brand original. Never fabricate data, identifiers, URLs, citations, results, credentials, recipients, or ledger events.
+
+No arXiv submission, GitHub push, social publication, or government email has been performed. Follow NEXT_AI_EXECUTION_PLAN.md and obtain Pierre-Edward Procyk's explicit confirmation at every required publish, push, submit, post, or send gate. The only permitted document wording changes during deployment are replacements of the designated link placeholders with real URLs obtained from completed deployment actions.

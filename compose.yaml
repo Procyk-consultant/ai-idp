@@ -1,0 +1,28 @@
+# Cognitive Industries — Les Industries Cognitives
+# Project: AI-IDP / AegisTrace
+# Author and Intellectual Property Owner: Pierre-Edward Procyk
+# Copyright: © 2026 Pierre-Edward Procyk. All rights reserved.
+# File: compose.yaml
+#
+# Local composition for development and testing.
+# Not used for external deployment during the autonomous run.
+
+services:
+  aegistrace:
+    build: .
+    image: aegistrace:2.0.0
+    container_name: aegistrace
+    volumes:
+      - ./:/app
+    working_dir: /app
+    command: python -m aegistrace.cli admin demo --out /tmp/demo
+    restart: "no"
+
+  api:
+    build: .
+    image: aegistrace:2.0.0
+    container_name: aegistrace-api
+    ports:
+      - "127.0.0.1:8765:8000"
+    command: uvicorn aegistrace.api.server:app --host 0.0.0.0 --port 8000
+    restart: "no"

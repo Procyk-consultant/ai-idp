@@ -1,0 +1,86 @@
+{
+  "input": "C:\\Cognitive Industries\\AI-IDP-AegisTrace\\government\\CANADIAN_NATIONAL_PROJECT_PROPOSAL.docx",
+  "fonts_by_char_count": {
+    "Consolas": 1698,
+    "Arial": 446
+  },
+  "direct_run_formatting_runs": 93,
+  "direct_paragraph_formatting_paragraphs": 14,
+  "heading_like_paragraphs_not_heading_style": [
+    {
+      "para_index": 1,
+      "text": "Canadian National Project Proposal",
+      "style": "Normal"
+    },
+    {
+      "para_index": 103,
+      "text": "Field",
+      "style": "Normal"
+    },
+    {
+      "para_index": 104,
+      "text": "Value",
+      "style": "Normal"
+    }
+  ],
+  "examples": {
+    "direct_run_formatting": [
+      {
+        "para_index": 1,
+        "run_text": "Canadian National Project Proposal",
+        "style": "Normal"
+      },
+      {
+        "para_index": 2,
+        "run_text": "AI-IDP \u2014 Universal AI Identity, Delegation, Provenance, Traceability, Quality, A",
+        "style": "Normal"
+      },
+      {
+        "para_index": 13,
+        "run_text": "Document ID: AI-IDP-GOV-PROP-2.0.0",
+        "style": "Normal"
+      },
+      {
+        "para_index": 14,
+        "run_text": "Version: 2.0.0",
+        "style": "Normal"
+      },
+      {
+        "para_index": 15,
+        "run_text": "Date: 2026-08-01",
+        "style": "Normal"
+      }
+    ],
+    "direct_paragraph_formatting": [
+      {
+        "para_index": 4,
+        "text": "Pierre-Edward Procyk",
+        "style": "Normal"
+      },
+      {
+        "para_index": 5,
+        "text": "Founder / CEO",
+        "style": "Normal"
+      },
+      {
+        "para_index": 6,
+        "text": "Cognitive Industries \u2014 Les Industries Cognitives",
+        "style": "Normal"
+      },
+      {
+        "para_index": 7,
+        "text": "Saguenay, Qu\u00e9bec, Canada",
+        "style": "Normal"
+      },
+      {
+        "para_index": 8,
+        "text": "p.procyk.media@gmail.com",
+        "style": "Normal"
+      }
+    ]
+  },
+  "notes": [
+    "Direct formatting is not always wrong, but it often causes inconsistent output when templates change.",
+    "Heading-like paragraphs not using Heading styles can break TOC and accessibility."
+  ]
+}

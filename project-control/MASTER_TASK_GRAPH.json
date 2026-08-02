@@ -1,0 +1,98 @@
+{
+  "schema_version": "1.0.0",
+  "generated_at": "2026-08-01T01:26:00Z",
+  "project": {
+    "name": "AI-IDP",
+    "reference_implementation": "AegisTrace",
+    "root_path": "C:\\Cognitive Industries\\AI-IDP-AegisTrace"
+  },
+  "phases": [
+    {
+      "id": "P0",
+      "name": "Authority, project constitution, source inventory, environment inspection",
+      "status": "complete",
+      "tasks": [
+        {"id": "P0-1", "name": "Inventory environment", "status": "complete"},
+        {"id": "P0-2", "name": "Inventory brand assets", "status": "complete"},
+        {"id": "P0-3", "name": "Create project root", "status": "complete"},
+        {"id": "P0-4", "name": "Initialize project-control", "status": "complete"}
+      ]
+    },
+    {
+      "id": "P1",
+      "name": "Research protocol, terminology, evidence registers, source hierarchy",
+      "status": "complete",
+      "tasks": [
+        {"id": "P1-1", "name": "Terminology map", "status": "complete"},
+        {"id": "P1-2", "name": "Source hierarchy", "status": "complete"},
+        {"id": "P1-3", "name": "Research protocol document", "status": "complete"},
+        {"id": "P1-4", "name": "Evidence register scaffold", "status": "complete"}
+      ]
+    },
+    {
+      "id": "P2",
+      "name": "Legal, policy, scientific, social, HR, business, standards research",
+      "status": "complete",
+      "tasks": [
+        {"id": "P2-1", "name": "Canadian legal report", "status": "complete"},
+        {"id": "P2-2", "name": "Privacy and human-rights report", "status": "complete"},
+        {"id": "P2-3", "name": "Indigenous data-governance report", "status": "complete"},
+        {"id": "P2-4", "name": "Business and operations report", "status": "complete"},
+        {"id": "P2-5", "name": "HR and labour report", "status": "complete"},
+        {"id": "P2-6", "name": "Societal impact report", "status": "complete"},
+        {"id": "P2-7", "name": "Administrative implementation report", "status": "complete"},
+        {"id": "P2-8", "name": "Standards crosswalk", "status": "complete"}
+      ]
+    },
+    {
+      "id": "P3",
+      "name": "Formal requirements, architecture, schemas, threat model, test plan",
+      "status": "complete",
+      "tasks": [
+        {"id": "P3-1", "name": "Actor/identity/delegation/event/registry/permanence/quality models", "status": "complete"},
+        {"id": "P3-2", "name": "JSON Schemas (core)", "status": "complete"},
+        {"id": "P3-3", "name": "Threat model", "status": "complete"},
+        {"id": "P3-4", "name": "Test plan", "status": "complete"}
+      ]
+    },
+    {
+      "id": "P4",
+      "name": "Functional implementation, integrations, documentation, examples",
+      "status": "complete",
+      "tasks": [
+        {"id": "P4-1", "name": "AegisTrace core (identity, registry, ledger, signing)", "status": "complete"},
+        {"id": "P4-2", "name": "Delegation, authorization, approval", "status": "complete"},
+        {"id": "P4-3", "name": "Adapters (filesystem, git, github, db, mcp stubs)", "status": "complete"},
+        {"id": "P4-4", "name": "CLIs (verify, audit, reconstruct, admin)", "status": "complete"},
+        {"id": "P4-5", "name": "Examples", "status": "complete"},
+        {"id": "P4-6", "name": "Documentation", "status": "complete"}
+      ]
+    },
+    {
+      "id": "P5",
+      "name": "Experiments, benchmarks, attack testing, conformity, reproducibility",
+      "status": "complete",
+      "tasks": [
+        {"id": "P5-1", "name": "Benchmark scenarios", "status": "complete"},
+        {"id": "P5-2", "name": "Attack tests", "status": "complete"},
+        {"id": "P5-3", "name": "Conformance suite", "status": "complete"},
+        {"id": "P5-4", "name": "Reproducibility package", "status": "complete"}
+      ]
+    },
+    {
+      "id": "P6",
+      "name": "Academic paper, university report, government proposal, validation, release",
+      "status": "complete",
+      "tasks": [
+        {"id": "P6-1", "name": "University report (md+docx+pdf)", "status": "complete"},
+        {"id": "P6-2", "name": "arXiv paper (LaTeX + compiled PDF)", "status": "complete"},
+        {"id": "P6-3", "name": "Government proposal (md+docx+pdf)", "status": "complete"},
+        {"id": "P6-4", "name": "Policy white paper (md+pdf)", "status": "complete"},
+        {"id": "P6-5", "name": "Independent validation report", "status": "complete"},
+        {"id": "P6-6", "name": "Release package, checksums, archive", "status": "complete"}
+      ]
+    }
+  ],
+  "critical_path": ["P0", "P1", "P2", "P3", "P4", "P5", "P6"],
+  "blockers": []
+}

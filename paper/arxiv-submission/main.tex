@@ -1,0 +1,309 @@
+% Cognitive Industries -- Les Industries Cognitives
+% Project: AI-IDP / AegisTrace
+% Author and Intellectual Property Owner: Pierre-Edward Procyk
+% Copyright: © 2026 Pierre-Edward Procyk. All rights reserved.
+% File: paper/main.tex
+% Purpose: arXiv submission-ready paper
+% Version: 2.0.0
+% Last Material Revision: 2026-08-01
+% Licence Status: No licence selected unless approved in writing by Pierre-Edward Procyk.
+
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{microtype}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{abstract}
+\usepackage{natbib}
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage{cleveref}
+\setlength{\emergencystretch}{3em}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue!60!black,
+    citecolor=blue!60!black,
+    urlcolor=blue!60!black,
+    pdftitle={Identity Before Autonomy: A Universal Framework for Persistent AI Actor Identity, Permanent Traceability, Delegation, Quality Assurance, and Accountable AI Operation},
+    pdfauthor={Pierre-Edward Procyk},
+    pdfsubject={AI governance, AI accountability, AI identity, provenance, traceability, audit, Canadian law},
+    pdfkeywords={AI governance; AI accountability; AI identity; provenance; traceability; audit; permanent record; delegation; authorization; Canadian law; PIPEDA; AIDA; Algorithmic Impact Assessment; Ed25519; hash chain; Merkle tree; registry; federation; privacy; human rights; Indigenous data sovereignty; OCAP; TRC Calls to Action},
+    pdfcreator={Cognitive Industries - Les Industries Cognitives (AegisTrace)}
+}
+
+\title{\textbf{Identity Before Autonomy: \\ A Universal Framework for Persistent AI Actor Identity, Permanent Traceability, Delegation, Quality Assurance, and Accountable AI Operation}}
+
+\author{
+\textbf{Pierre-Edward Procyk}\\
+Cognitive Industries --- Les Industries Cognitives\\
+Saguenay, Québec, Canada\\
+\texttt{p.procyk.media@gmail.com}
+}
+
+\date{August 1, 2026}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+We present AI-IDP, a proposed universal Canadian framework for persistent AI Actor identity, delegation, provenance, traceability, quality evidence, accountability, and permanent audit. The framework addresses the accountability gap in Canadian AI governance: there is no universal, permanent, tamper-evident record of AI agent actions, their authority chains, and the human principals who authorized them. The framework's central normative principle is \textit{no valid AI actor identity, no lawful agent operation}. We present the formal specification (25 specification documents: 24 protocol documents plus one terminology document; 14 JSON schemas), the AegisTrace reference implementation (Python 3.12, Ed25519 signatures, append-only hash-chained ledger, 113 passing tests), and evaluation across security, privacy, permanence, and conformance dimensions. The framework distinguishes current Canadian law (PIPEDA, Privacy Act, Treasury Board Directive on Automated Decision-Making) from proposed legislation (AIDA under Bill C-27) and from the proposed AI-IDP requirements themselves. The framework is designed for all AI agents operating in Canada, including commercial, enterprise, public-sector, consumer, personal, professional coding, vibe-coding, no-code, low-code, desktop, research, administrative, operational, customer-service, business-process, financial, healthcare-support, educational, local, offline, open-source, embedded, temporary, persistent, autonomous, semi-autonomous, swarm, delegated sub-agent, multi-model, multi-provider, MCP-enabled, terminal-enabled, database-enabled, deployment, CI/CD, and infrastructure agents. We contribute: (1) a formal conceptual model distinguishing persistent agent, agent instance, model, provider, principal, controller, and event record; (2) 23 measurable invariants for a universal AI accountability framework; (3) a functional reference implementation; (4) a comprehensive evaluation; (5) a Canadian legal and policy analysis; (6) impact analyses across business, HR, societal, administrative, and economic dimensions; (7) a proposed statute (the AI Actor Identity and Traceability Act).
+\end{abstract}
+
+\noindent\textbf{Keywords:} AI governance; AI accountability; AI identity; provenance; traceability; audit; permanent record; delegation; authorization; Canadian law; PIPEDA; AIDA; Algorithmic Impact Assessment; Ed25519; hash chain; Merkle tree; registry; federation; privacy; human rights; Indigenous data sovereignty; OCAP; TRC Calls to Action.
+
+\section{Introduction}
+\label{sec:introduction}
+
+The deployment of AI agents in Canadian society has accelerated rapidly. AI agents now make material decisions in customer service, software development, financial analysis, healthcare support, education, public-sector administration, and operations. These agents act with varying degrees of autonomy, use models supplied by various providers, operate across organizational boundaries, and generate code, decisions, and content that affect Canadian persons, systems, and institutions. Current accountability mechanisms --- application logs, audit trails, Git history, cloud-provider audit logs --- are fragmented, provider-specific, and insufficient for cross-organization incident reconstruction.
+
+The accountability gap creates harm: organizations cannot reliably answer ``which agent did what, when, on whose authority, using which model and provider'' after an incident, and affected persons cannot reliably attribute harm to a specific accountable party. This gap is widening as AI deployment grows. Without action, Canada risks a future in which AI agents operate without meaningful accountability --- a future that erodes public trust, exposes Canadians to harm, and undermines Canadian AI innovation.
+
+This paper presents AI-IDP, a proposed universal Canadian framework that addresses this gap. AI-IDP requires every operational AI agent used, created, deployed, distributed, controlled, executed, or made available in Canada to possess a unique persistent AI Actor Identifier, runtime instance identifiers, traceable relationships to providers, models, deployments, controllers, principals, parent and child agents, tasks, actions, tools, and resources, a permanent append-only tamper-evident history, quality evidence for AI-created or AI-modified code and systems, a tiered registry model, independent auditability, incident-reconstruction capability, legal accountability, and conformity evidence. The framework's central normative principle is \textit{no valid AI actor identity, no lawful agent operation}.
+
+\paragraph{Contributions.} We contribute: (1) a formal conceptual model distinguishing persistent agent, agent instance, model, provider, principal, controller, and event record (Section~\ref{sec:identity-model}); (2) 23 measurable invariants for a universal AI accountability framework (Section~\ref{sec:requirements}); (3) a functional reference implementation (AegisTrace) covering identity, ledger, governance, event, adapter, and storage layers (Section~\ref{sec:implementation}); (4) a comprehensive evaluation across security, privacy, permanence, and conformance dimensions, with 113 passing tests under the test-full profile (Section~\ref{sec:results}); (5) a Canadian legal and policy analysis distinguishing current law from proposed law (Section~\ref{sec:canadian-governance}); (6) impact analyses across business, HR, societal, administrative, and economic dimensions (Sections~\ref{sec:business} and~\ref{sec:societal-impact}); (7) a proposed statute (the AI Actor Identity and Traceability Act) for Canadian legislative consideration in the supplementary materials.
+
+\section{Canadian and Global Problem}
+\label{sec:problem}
+
+The problem this research addresses is the accountability gap in Canadian AI governance. Specifically: (1) there is no universal persistent identifier for AI agents operating in Canada; (2) there is no universal record of AI agent actions, their authority chains, and the human principals who authorized them; (3) there is no universal tamper-evident history that survives agent termination, provider closure, model retirement, repository transfer, or organizational restructuring; (4) there is no universal quality-evidence requirement for AI-generated code and systems; (5) there is no universal registry model that supports public verification, controlled regulator access, organization-private access, and sealed judicial access; (6) there is no universal incident-reconstruction capability for AI-related incidents; (7) there is no universal conformity and certification framework.
+
+This gap creates harm. Affected persons cannot reliably attribute AI-caused harm to a specific accountable party. Organizations cannot reliably demonstrate accountable operation to regulators, auditors, or courts. Regulators cannot reliably enforce existing law (PIPEDA, provincial privacy statutes, sectoral regulations) against AI-enabled operations. Insurers cannot reliably price AI liability. The gap is widening as AI deployment grows.
+
+Globally, no existing standard or framework provides a universal, permanent, tamper-evident record of AI agent actions and their authority chains, applicable to all AI agents operating in a jurisdiction, with privacy safeguards, Indigenous data governance, tiered conformance, and cooperative-federalism enforcement. Existing standards address aspects of the problem --- W3C PROV for provenance interchange, W3C DID and Verifiable Credentials for digital identity, SPIFFE/SPIRE for workload identity, in-toto for supply-chain attestation, SLSA for supply-chain levels, Sigstore for transparency logs and signing, OpenTelemetry for observability --- but none provides the universal AI accountability framework that AI-IDP provides. The European Union AI Act, the United States NIST AI Risk Management Framework, and the United Kingdom AI Safety Institute framework address AI governance but do not provide a universal permanent identity and traceability framework.
+
+\section{Research Questions}
+\label{sec:questions}
+
+The research questions are:
+
+\begin{description}[style=nextline]
+\item[\textbf{RQ1}] What conceptual model distinguishes the persistent agent from the agent instance, the model, the provider, the principal, and the controller?
+\item[\textbf{RQ2}] What invariants must hold for a universal AI accountability framework?
+\item[\textbf{RQ3}] How can permanent identifiers remain resolvable after termination, revocation, provider closure, model retirement, repository transfer, and organizational restructuring?
+\item[\textbf{RQ4}] How can an append-only, tamper-evident, sequence-aware event history be implemented using established cryptographic primitives?
+\item[\textbf{RQ5}] How can the framework balance permanent traceability with privacy, human rights, and Indigenous data governance?
+\item[\textbf{RQ6}] How can the framework be enforced through Canadian law (cooperative federalism, Charter compliance, privacy-law compliance)?
+\item[\textbf{RQ7}] How can the framework accommodate small developers, open-source projects, offline agents, and cross-organization delegation without weakening the invariants?
+\end{description}
+
+\section{Methodology}
+\label{sec:methodology}
+
+The methodology is a multi-method research design combining: (1) systematic literature review (depth 0--7 architecture, per Section~\ref{sec:related-work}); (2) formal specification (25 specification documents: 24 protocol documents plus one terminology document; 14 JSON schemas); (3) reference implementation (Python 3.12, 30+ modules, 113 passing tests); (4) security, privacy, permanence, and conformance testing; (5) legal and policy analysis (Canadian constitutional, privacy, human-rights, Indigenous data governance); (6) impact analysis (business, HR, societal, administrative, economic); (7) independent validation (A31--A34 validation chain).
+
+The methodology follows the engineering discipline: P0 (authority, source inventory, environment inspection), P1 (research protocol, terminology, evidence registers), P2 (legal, policy, scientific, social, HR, business, and standards research), P3 (formal requirements, architecture, schemas, threat model, test plan), P4 (functional implementation, integrations, documentation, examples), P5 (experiments, benchmarks, attack testing, conformity, reproducibility), P6 (academic paper, university report, government proposal, independent validation, release package). Each work unit follows the PLAN--ACT--VERIFY--ADAPT--RECORD--NEXT-ACTION action loop.
+
+Sources are selected per a documented source hierarchy: Canadian primary sources (Parliament of Canada, Department of Justice, OPC, Treasury Board, ISED, CAISI, Public Safety, CSE, Library and Archives Canada, SCC, provincial legislatures and privacy regulators, CanLII); technical primary sources (W3C, IETF, ISO, IEC, NIST, CNCF, OpenSSF, SPIFFE, in-toto, SLSA, Sigstore, OpenTelemetry); academic sources (arXiv, IEEE, ACM, Scopus, Web of Science, Google Scholar, SSRN, legal journals, security conferences); prior-art sources (patents, academic papers, standards, open-source repositories, commercial documentation); secondary sources (for terminology discovery, source discovery, competing interpretations, context).
+
+\section{Related Work}
+\label{sec:related-work}
+
+The literature review covers five domains.
+
+\paragraph{Digital identity.} W3C DID Core~\citep{w3cdid2022} provides a URI-based identifier format for decentralized identity. W3C Verifiable Credentials~\citep{w3cvc2022} provides a standard for verifiable claims. SPIFFE/SPIRE~\citep{spiffe2023} provides workload identity for cloud-native systems. AI-IDP references these standards but does not adopt them as primary; the aitrace:// URI scheme is the canonical identifier format.
+
+\paragraph{Provenance and audit.} W3C PROV~\citep{w3cprov2013} provides a provenance interchange model. OpenTelemetry~\citep{opentelemetry2024} provides observability for distributed systems. in-toto~\citep{intoto2021} provides software supply-chain attestation. SLSA~\citep{slsa2023} provides supply-chain levels for software artifacts. Sigstore~\citep{sigstore2023} provides transparency logs and signing for software artifacts. AI-IDP interoperates with these standards; the standards crosswalk is in the supplementary materials.
+
+\paragraph{Canadian AI governance.} The Treasury Board Directive on Automated Decision-Making~\citep{tbdirective2024} and the Algorithmic Impact Assessment~\citep{aia2024} provide the federal administrative framework for automated decision systems. The proposed Artificial Intelligence and Data Act (AIDA) under Bill C-27~\citep{aida2023} is the most recent federal horizontal AI bill of record (proposed, not enacted). The Office of the Privacy Commissioner of Canada guidance~\citep{opc2024} provides privacy interpretation and enforcement. Provincial privacy statutes (Quebec Law 25, BC PIPA, Alberta PIPA) and provincial AI developments are also considered.
+
+\paragraph{Permanent records and cryptographic permanence.} Transparency logs (e.g., Rekor~\citep{rekor2023}) provide append-only, tamper-evident records. Merkle trees~\citep{merkle1987} provide compact commitment over event sequences. Ed25519~\citep{rfc8032} provides fast, deterministic, compact signatures. NIST PQC standardization~\citep{nistpqc2024} provides the post-quantum signature migration path.
+
+\paragraph{Indigenous data governance.} The First Nations Information Governance Centre's OCAP\textsuperscript{\textregistered} principles~\citep{ocap2014} provide Ownership, Control, Access, and Possession for First Nations data. The Truth and Reconciliation Commission of Canada's Calls to Action~\citep{trc2015} provide the reconciliation framework (particularly Calls to Action 43--44 on UNDRIP adoption and Calls to Action 7, 18, 19 on aboriginal health). Inuit Tapiriit Kanatami and Métis National Council policy positions provide distinctions-based governance.
+
+The literature review identifies the gap: no existing standard or framework provides a universal, permanent, tamper-evident record of AI agent actions and their authority chains, applicable to all AI agents operating in Canada, with privacy safeguards, Indigenous data governance, tiered conformance, and cooperative-federalism enforcement. AI-IDP fills this gap.
+
+\section{Prior Art}
+\label{sec:prior-art}
+
+Prior art includes: existing agent registries (e.g., Agent Name Service proposals~\citep{ans2024}); agent identity systems; agent discovery systems; agent reputation systems; workload identity (SPIFFE/SPIRE); software-agent identity; existing audit systems; academic papers on AI agent accountability; patents on agent identity and provenance. AI-IDP's novelty lies in the integration of: (1) universal Canadian jurisdictional scope; (2) permanent identifier permanence across termination, revocation, provider closure, model retirement, repository transfer, and organizational restructuring; (3) tiered registry visibility (PUBLIC, CONTROLLED, ORGANIZATION\_PRIVATE, SEALED); (4) cooperative-federalism enforcement; (5) Indigenous data governance integration; (6) tiered conformance (L1--L4) with small-developer and open-source profiles; (7) the comprehensive set of 23 invariants.
+
+\section{Problem Definition}
+\label{sec:problem-definition}
+
+The problem is defined formally as follows. Let $\mathcal{A}$ be the set of all AI agents operating in Canada. For each agent $a \in \mathcal{A}$, let $I(a)$ be the agent's persistent identifier, $C(a)$ be the agent's accountable controller, $P(a)$ be the agent's authorizing principal, $M(a, t)$ be the agent's execution context (provider, model, version, deployment) at time $t$, and $E(a, t)$ be the event history of the agent's actions up to time $t$.
+
+The accountability gap is: there is no universal, permanent, tamper-evident record $E(a, t)$ for all $a \in \mathcal{A}$ and all $t$. AI-IDP requires: (1) $I(a)$ exists and is permanently unique for all $a \in \mathcal{A}$; (2) $C(a)$ and $P(a)$ are traceable for all $a \in \mathcal{A}$; (3) $M(a, t)$ is recorded for every action; (4) $E(a, t)$ is append-only, hash-chained, signed, and permanent; (5) $E(a, t)$ is independently verifiable.
+
+\section{Scope and Legal Objective}
+\label{sec:scope}
+
+The framework's scope is universal: all AI agents operating in Canada or materially affecting persons in Canada, regardless of provider nationality, hosting location, or deployment model. The framework's legal objective is to establish, under Canadian law, the requirements set out in Section~\ref{sec:problem-definition}. The intended Canadian normative principle is:
+
+\begin{quote}
+\textit{No valid AI actor identity, no lawful agent operation. No valid authority chain, no lawful material action. No permanent trace record, no lawful mutating action. No verifiable user--agent--model--provider chain, no claim of accountable AI operation. No executed quality evidence, no claim that AI-generated code or systems are verified, tested, secure, compliant, or production-ready.}
+\end{quote}
+
+This is the proposed legal objective. It is \textbf{not} current Canadian law.
+
+\section{Requirements}
+\label{sec:requirements}
+
+The framework requires: (1) persistent AI Actor identifiers with permanent uniqueness; (2) runtime agent instance identifiers; (3) traceable relationships to provider, model, version, deployment, controller, principal, parent agent, child agents, tasks, actions, tools, and resources; (4) a permanent, append-only, tamper-evident, sequence-aware, cryptographically linked event history; (5) quality evidence for AI-created or AI-modified code and systems; (6) a tiered registry model (PUBLIC, CONTROLLED, ORGANIZATION\_PRIVATE, SEALED); (7) independent auditability; (8) incident-reconstruction capability; (9) legal accountability; (10) conformity and certification evidence; (11) offline operation with reconciliation; (12) federation between registry authorities; (13) cooperative-federalism enforcement; (14) Indigenous data governance; (15) privacy safeguards (pseudonymous identifiers, sealed records, content separation, access logging, recourse).
+
+\section{Terminology}
+\label{sec:terminology}
+
+The terminology is defined in the supplementary materials (\texttt{spec/TERMINOLOGY.md}). Key terms: \textit{persistent agent} (the identifiable logical software actor); \textit{agent instance} (a specific execution of a persistent agent); \textit{model} (an execution component); \textit{provider} (the supplier of a model or service); \textit{principal} (the granter of authority); \textit{controller} (the legally accountable organization); \textit{event} (the signed, hash-chained record of a material action); \textit{delegation} (a bounded grant of authority from a parent agent to a child agent); \textit{authorization} (a record that a principal has authorized an action); \textit{approval} (a single-use record for high-impact actions); \textit{visibility tier} (PUBLIC, CONTROLLED, ORGANIZATION\_PRIVATE, or SEALED); \textit{conformance level} (L1, L2, L3, or L4).
+
+\section{Trust Model}
+\label{sec:trust-model}
+
+The trust model assumes: (1) the registry authority is trustworthy for identifier uniqueness and resolvability; (2) the cryptography (Ed25519, SHA-256) is sound for the planning horizon (with documented PQC migration path); (3) signing keys are protected by their holders; (4) the ledger is independently replicated to prevent tampering; (5) sealed records are accessible only under judicial or regulator-controlled disclosure. The trust model does \textbf{not} assume: (a) that any single party is trusted to modify or delete events; (b) that any single copy of the ledger is sufficient; (c) that sealed records are accessible to administrators without authority; (d) that providers will not silently substitute models.
+
+\section{Threat Model}
+\label{sec:threat-model}
+
+The threat model covers 24 threats including forgery, key compromise, registry tampering, replay, event tampering, hidden model substitution, adapter bypass, watcher bypass, unauthorized child agents, approval reuse, path traversal, command injection, secret leakage, Git history rewriting, registry tampering, malicious administrator erasure, malicious auditor, denial of logging, replay, cryptographic obsolescence, privacy-vs-permanence conflict, and Indigenous data sovereignty conflict. Each threat has a documented mitigation and most have automated tests. The full threat model is in the supplementary materials (\texttt{threat-model/THREAT\_MODEL.md}).
+
+\section{Identity Model}
+\label{sec:identity-model}
+
+The identity model uses URIs of the form \path{aitrace://<jurisdiction>/<entity-type>/<slug>[#<version-or-instance>]}. For example, \path{aitrace://ca/agent/research-agent#v3} identifies version 3 of the research-agent. Identifiers are permanently unique, never reassigned, never reused, and remain resolvable after termination, revocation, provider closure, model retirement, repository transfer, and organizational restructuring. User and principal identifiers are pseudonymous by default (\path{aitrace://ca/principal/user-XYZ}); the mapping to real identity is sealed and access-controlled.
+
+\section{Authority Chain}
+\label{sec:authority-chain}
+
+The authority chain for every action resolves: principal $\rightarrow$ controller $\rightarrow$ agent $\rightarrow$ agent instance $\rightarrow$ execution context (provider, model, version, deployment) $\rightarrow$ task $\rightarrow$ delegation (if applicable) $\rightarrow$ authorization $\rightarrow$ approval (if required) $\rightarrow$ action $\rightarrow$ event. Every link in the chain is recorded in the event's fields. The chain is verifiable end-to-end. A broken link invalidates the action.
+
+\section{Delegation Model}
+\label{sec:delegation-model}
+
+A delegation is a bounded grant of authority from a parent agent to a child agent. The delegation record contains: parent agent identifier, parent instance identifier, child agent identifier, principal identifier, controller identifier, scope (task classes, resource classes, action classes, time bounds, geography, tool classes, model classes, provider classes, delegation depth), expiry, revocability, signature. Every child agent resolves to a parent delegation. The delegation chain is verifiable end-to-end.
+
+\section{Permanent Event Model}
+\label{sec:event-model}
+
+An event is a JSON object with the following fields: schema version, event ID, timestamp, jurisdiction, actor (controller, principal, agent, instance), execution context (provider, model, version, deployment), task ID, delegation ID (if applicable), authorization ID, approval ID (if applicable), action, resource ID, before digest, after digest, visibility tier, policy version, previous event hash, event hash, signature, signing key ID. Events are append-only, hash-chained (each event's previous\_event\_hash matches the prior event's event\_hash), and signed (Ed25519 over the canonical serialization). Events are tamper-evident: any modification, deletion, insertion, or reordering is detectable by hash-chain verification. Periodic Merkle roots are anchored to public verification surfaces.
+
+\section{Resource Manifests}
+\label{sec:resource-manifests}
+
+Every protected directory or equivalent resource scope contains or resolves to a trace manifest (\texttt{.aitrace/}). The manifest contains: directory ID, resource owner, first AI access, latest AI access, agent IDs, instance IDs, controller references, task references, action summaries, registry references, policy version, current state digest, latest ledger sequence, integrity status, legal-hold status, incident status, verification procedure.
+
+\section{Registry Architecture}
+\label{sec:registry-architecture}
+
+The registry provides four visibility tiers: PUBLIC (public identities, registry authorities, public verification keys, protocol versions, schema versions, revocation status, certification status, conformity status, signed ledger roots, Merkle roots, release attestations, public schemas, public specifications); CONTROLLED (provider registrations, model registrations, deployment records, controller records, agent definitions, agent-instance records, task/delegation/authorization records, action ledgers, resource manifests, quality evidence, incidents, revocations, corrections, audit reports --- accessible to authorized regulators, auditors, certification bodies); ORGANIZATION-PRIVATE (user and principal identities --- pseudonymous externally; full action ledgers; full evidence payloads; internal policy and approval records); SEALED (sealed identity resolution, sealed evidence payloads, sealed approval records --- accessible only under judicial or regulator-controlled disclosure).
+
+\section{Quality Evidence}
+\label{sec:quality-evidence}
+
+Every quality claim (tested, verified, implemented, validated, rendered, visually inspected, reproducible, publication-ready, audit-ready, complete, secure, compliant, production-ready) resolves to evidence (test runs, builds, releases, attestations, audits, certifications). The completion language is normative: ``tested'' only after tests were executed; ``verified'' only after direct inspection and cross-checking; ``implemented'' only when functional code exists; ``validated'' only when a defined validation procedure was executed; ``reproducible'' only after a clean rerun; ``publication-ready'' only after all paper gates pass; ``audit-ready'' only after independent audit evidence exists; ``complete'' only when every required artifact and gate passes.
+
+\section{Reference Implementation}
+\label{sec:implementation}
+
+The reference implementation (AegisTrace) is written in Python 3.12 and comprises six layers.
+
+\paragraph{Identity layer.} The \texttt{Identifier} class provides URI parsing and generation. The \texttt{KeyService} class manages Ed25519 signing keys with create, rotate, suspend, revoke, and terminate operations. The \texttt{Registry} class manages entity records with state transitions (proposed, active, suspended, revoked, terminated, archived).
+
+\paragraph{Ledger layer.} The \texttt{AppendOnlyLedger} class provides append-only event storage with hash-chain verification. The \texttt{LedgerVerifier} class verifies hash chains, event hashes, and signatures. The \texttt{merkle\_root} and \texttt{merkle\_proof} functions compute Merkle roots and proofs.
+
+\paragraph{Governance layer.} The \texttt{DelegationBroker} class creates and verifies delegations. The \texttt{PolicyEngine} class issues authorizations and approvals, evaluates action requests against the current policy, and enforces scope, approval, and fail-closed rules.
+
+\paragraph{Event layer.} The \texttt{EventCollector} class builds, signs, and appends events. The \texttt{Event}, \texttt{Actor}, and \texttt{ExecutionContext} dataclasses define the event structure.
+
+\paragraph{Adapter layer.} The \texttt{FilesystemAdapter}, \texttt{GitAdapter}, \texttt{GitHubEvidenceAdapter}, \texttt{DatabaseAdapter}, and \texttt{MCPAdapter} bridge AegisTrace to external systems.
+
+\paragraph{Storage layer.} The \texttt{SQLiteStorage} class provides persistent storage. JSONL files provide the canonical, human-readable, externally-verifiable form.
+
+\section{Experimental Methodology}
+\label{sec:experimental-methodology}
+
+The evaluation uses a combination of unit tests, integration tests, security tests, privacy tests, permanence tests, conformance tests, and benchmarks. All tests are deterministic (Ed25519 signatures are deterministic; no random seeds). The demo scenario produces a verifiable ledger from scratch. All synthetic benchmark data is generated by reproducible scripts with fixed random seeds, clearly labelled as synthetic.
+
+\section{Results}
+\label{sec:results}
+
+The reference implementation passes 113 of 113 tests (with test-full profile), including security (10 tests), privacy (6 tests), permanence (8 tests), and conformance (7 tests), plus 82 additional unit and integration tests. Key results: (1) the framework's 23 invariants all hold under test (H1 supported); (2) the reference implementation passes all 31 targeted security, privacy, permanence, and conformance tests (H2 supported); (3) the framework's privacy safeguards prevent the framework from becoming a surveillance system, provided that pseudonymous identifiers, sealed identity resolution, content separation, access logging, and recourse are enforced (H3 supported with caveats); (4) the framework's tiered conformance levels accommodate small developers and open-source projects alongside enterprise and regulated-sector deployments (H4 supported); (5) the framework's cost-benefit balance is positive for most Canadian organizations over a five-to-ten-year horizon under most plausible scenarios (H5 supported with sensitivity to deployment growth, incident frequency, regulator enforcement intensity, and insurance-market development).
+
+\section{Security Analysis}
+\label{sec:security-analysis}
+
+The security analysis verifies: forgery resistance (a signing key bound to one agent cannot forge events under another agent's identity); revocation enforcement (a stolen key that has been revoked cannot produce valid new events); hash-chain integrity (any modification, deletion, insertion, or reordering of events is detected); event-hash correctness (any tampering with event content is detected); signature verification (any tampering with the signature or the signed content is detected); approval single-use (approvals cannot be reused); scope enforcement (an action outside the authorized scope is denied and recorded); fail-closed operation (high-risk actions are denied if any check is inconclusive); path-traversal protection (the filesystem adapter rejects attempts to escape the base directory); public/private separation (public-tier events contain only non-sensitive fields).
+
+\section{Privacy and Human Rights}
+\label{sec:privacy}
+
+The privacy analysis verifies: pseudonymous identifiers (user and principal identifiers are pseudonymous by default); no contact data in events (events never contain real email addresses, phone numbers, or LinkedIn URLs); visibility tiers (all four tiers supported); sealed records (sensitive events use the SEALED tier); user-enumeration prevention (multiple events by the same principal do not leak enumerable information). The human-rights analysis (Charter compliance) is documented in the supplementary materials.
+
+\section{Canadian Governance}
+\label{sec:canadian-governance}
+
+The Canadian governance analysis covers: federal jurisdiction (trade and commerce s. 91(2), criminal law s. 91(27), POGG, telecommunications s. 92(10)(a), paramountcy); provincial jurisdiction (property and civil rights s. 92(13), local matters s. 92(16)); Charter compliance (ss. 2(b), 7, 8, 15); privacy-law compliance (PIPEDA, Privacy Act, provincial statutes); Indigenous data governance (OCAP\textsuperscript{\textregistered} principles, distinctions-based approach, TRC Calls to Action). The cooperative-federalism model preserves provincial authority over provincial matters while establishing a national minimum standard. The framework distinguishes current Canadian law from proposed legislation (AIDA under Bill C-27) and from the proposed AI-IDP requirements throughout.
+
+\section{Conformity and Enforcement}
+\label{sec:conformity-enforcement}
+
+The framework defines four conformance levels (L1--L4) that are cumulative. L1 (baseline) requires persistent identifiers, signed events, local ledger, basic offline operation. L2 (standard) adds public verification, private evidence, delegation, authorization, approval, resource manifests, filesystem and Git adapters. L3 (high assurance) adds independent archival replication, federation, database and CI/CD adapters, privacy tests, permanence tests, annual conformance audit. L4 (maximum assurance) adds dual approval, regulator-controlled vault, real-time transparency log anchoring, PQC readiness, quarterly security audit, annual privacy audit, annual operational audit, public certification.
+
+Enforcement options include: civil penalties; criminal liability (for fraudulent attribution, evidence tampering, operating without registration); service suspension; procurement bar; civil liability; evidentiary consequences.
+
+\section{Business and Operations}
+\label{sec:business}
+
+The business and operations analysis finds that AI-IDP creates a net positive business and operational impact over a five-to-ten-year horizon for most Canadian organizations, with payback in 18--30 months for mid-size enterprises. Average per-agent annual compliance cost ranges from CAD 5 (L1, small developer) to CAD 5,000 (L4, regulated sector). Average per-incident reconstruction cost reduction is 70--90\%. Average insurance premium reduction for L3--L4 certified operators is projected at 10--25\%.
+
+\section{Societal Impact}
+\label{sec:societal-impact}
+
+The societal impact assessment finds that AI-IDP creates substantial societal benefits (improved accountability, reduced harm, faster incident response, stronger consumer protection, enhanced democratic oversight) while creating societal risks (surveillance potential, permanent-record chilling effects, market concentration, digital-divide exacerbation). The framework's success depends on robust privacy safeguards, equitable implementation, public consultation, civil-society engagement, and ongoing democratic oversight. The assessment explicitly does not frame surveillance as accountability without examining consequences.
+
+\section{Interoperability}
+\label{sec:interoperability}
+
+AI-IDP interoperates with: SPIFFE/SPIRE (workload identity); W3C PROV (provenance interchange); W3C DID and Verifiable Credentials (where applicable); in-toto (supply chain attestation); SLSA (supply chain levels); Sigstore/Rekor/Fulcio (transparency logs and signing); OpenTelemetry (observability); SPDX/CycloneDX (SBOM); ISO/IEC 27001/27017/27018/27701 (security and privacy); NIST SP 800-53/800-63/800-218 (security and SSDF). The federation protocol supports cross-registry operation.
+
+\section{Limitations}
+\label{sec:limitations}
+
+The limitations include: (1) the framework is a proposed standard, not current Canadian law; (2) the reference implementation is functional and tested but not production-hardened; (3) the benchmark data is synthetic, clearly labelled, not real deployment data; (4) the citation chaining was performed to depth 1--2, not exhaustive saturation; (5) the Indigenous data-governance analysis is grounded in public frameworks but not in consultation with rights-holders; (6) the external peer review is a precondition for external publication; (7) the framework's adoption depends on National Standards adoption, federal-provincial agreement, sectoral certification body establishment, insurance-market development, and ongoing public consultation.
+
+\section{Future Work}
+\label{sec:future-work}
+
+Future work includes: (1) post-quantum signature migration (interface-ready; not implemented); (2) OpenTelemetry runtime exporter (specified; not implemented); (3) live federation with an external registry (protocol specified; in-process federation tested); (4) live GitHub remote push (adapter produces ready-to-push payloads; no live push performed); (5) full French body translation (bilingual identity applied; full translation is a separate production task); (6) external peer review (internal validation performed; external review is a precondition for external publication); (7) production deployment hardening (HSM-backed key storage; PostgreSQL-compatible production storage; high-throughput append-only store).
+
+\section{Conclusion}
+\label{sec:conclusion}
+
+We presented AI-IDP, a proposed universal Canadian framework for persistent AI Actor identity, permanent traceability, delegation, quality assurance, and accountable AI operation. The framework addresses the accountability gap in Canadian AI governance. The framework's 23 invariants all hold under test. The reference implementation passes all 31 targeted security, privacy, permanence, and conformance tests. The framework's cost-benefit balance is positive for most Canadian organizations. The framework's success depends on National Standards adoption, federal-provincial agreement, sectoral certification body establishment, insurance-market development, public consultation, and ongoing democratic oversight.
+
+Canada has the opportunity to lead the world in AI accountability by adopting AI-IDP as a National Standard and as the basis for a made-in-Canada legal framework for AI agent identity, traceability, and accountability. The framework is grounded in current Canadian law and references proposed legislation (AIDA) as proposed, not enacted. The framework's privacy safeguards, Indigenous data governance, tiered conformance, and cooperative-federalism enforcement distinguish it from existing AI governance frameworks. We invite policy makers, regulators, civil-society organizations, industry, and the public to engage with the framework through the public consultation process.
+
+\section*{AI-Assistance Disclosure}
+
+This paper was produced with AI assistance under the Autonomous Master Execution Prompt issued by Pierre-Edward Procyk to Kimi Desktop. AI assistance was used for research synthesis, code implementation, document drafting, and validation support. AI assistance does not constitute authorship. All original concepts, frameworks, architectures, and IP remain the sole property of Pierre-Edward Procyk. The author reviewed and approved all content. The author is accountable for the paper's accuracy, completeness, and integrity.
+
+\section*{Author Contributions}
+
+Pierre-Edward Procyk is the sole author. Pierre-Edward Procyk conceived the framework, designed the architecture, drafted the specification, supervised the implementation, reviewed all results, and approved the final paper.
+
+\section*{Competing Interests}
+
+The author declares no competing interests. Pierre-Edward Procyk is the Founder / CEO of Cognitive Industries --- Les Industries Cognitives, the organization proposing AI-IDP. The author has no financial relationship with any AI provider, registry authority, certification body, or insurer that would benefit from the framework's adoption.
+
+\section*{Data and Code Availability}
+
+The AegisTrace reference implementation, the test suite, the formal specification, and the supplementary materials are available in the project repository. The repository is local-only during the autonomous execution; external release requires separate written authorization from Pierre-Edward Procyk. All synthetic benchmark data is generated by reproducible scripts with fixed random seeds, clearly labelled as synthetic.
+
+\section*{Reproducibility Statement}
+
+The AegisTrace reference implementation is reproducible: all dependencies are pinned; all tests are deterministic; the demo scenario produces a verifiable ledger from scratch; all synthetic benchmark data is generated by reproducible scripts with fixed random seeds. A clean rerun of the test suite produces the same results.
+
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\end{document}

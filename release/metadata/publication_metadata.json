@@ -1,0 +1,63 @@
+{
+  "_metadata": {
+    "organization": "Cognitive Industries — Les Industries Cognitives",
+    "project": "AI-IDP / AegisTrace",
+    "author": "Pierre-Edward Procyk",
+    "copyright": "© 2026 Pierre-Edward Procyk. All rights reserved.",
+    "file": "release/metadata/publication_metadata.json",
+    "version": "2.0.0",
+    "last_material_revision": "2026-08-01",
+    "licence_status": "No licence selected unless approved in writing by Pierre-Edward Procyk."
+  },
+  "publication_metadata": {
+    "arxiv_id": null,
+    "arxiv_id_status": "NOT ASSIGNED — no external submission performed",
+    "doi": null,
+    "doi_status": "NOT ASSIGNED",
+    "isbn": null,
+    "isbn_status": "NOT APPLICABLE",
+    "official_repository_url": null,
+    "official_repository_url_status": "NOT PUBLISHED — local repository only",
+    "publication_date": null,
+    "publication_date_status": "NOT EXTERNALLY PUBLISHED",
+    "submission_packages_prepared": [
+      {
+        "package": "arXiv LaTeX project + compiled PDF",
+        "location": "paper/",
+        "submitted": false,
+        "ready_for": "arXiv (cs.CY, cs.CR)"
+      },
+      {
+        "package": "Canadian government proposal",
+        "location": "government/CANADIAN_NATIONAL_PROJECT_PROPOSAL.{md,docx,pdf}",
+        "submitted": false,
+        "ready_for": "Parliamentary / ministerial submission"
+      },
+      {
+        "package": "Policy white paper",
+        "location": "government/CANADIAN_POLICY_WHITE_PAPER.{md,pdf}",
+        "submitted": false,
+        "ready_for": "Policy consultation"
+      },
+      {
+        "package": "Draft statute",
+        "location": "government/PROPOSED_AI_ACTOR_IDENTITY_AND_TRACEABILITY_ACT.md",
+        "submitted": false,
+        "ready_for": "Legislative review"
+      },
+      {
+        "package": "Standards Council route materials",
+        "location": "government/CANADIAN_NATIONAL_PROJECT_PROPOSAL.{md,docx,pdf}; government/CANADIAN_POLICY_WHITE_PAPER.{md,pdf}",
+        "submitted": false,
+        "ready_for": "SCC review"
+      },
+      {
+        "package": "University research report",
+        "location": "university/UNIVERSITY_RESEARCH_REPORT.{md,docx,pdf}",
+        "submitted": false,
+        "ready_for": "Academic review"
+      }
+    ],
+    "prohibition": "No artifact in this repository may contain a fabricated arXiv identifier, DOI, ISBN, official repository URL, or publication date. Submission-eligible packages remain in their prepared state until Pierre-Edward Procyk issues separate written authorization."
+  }
+}

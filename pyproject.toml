@@ -1,0 +1,79 @@
+# Cognitive Industries — Les Industries Cognitives
+# Project: AI-IDP / AegisTrace
+# Version: 2.0.0
+# Last Material Revision: 2026-08-01
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aegistrace"
+version = "2.0.0"
+description = "Reference implementation of the AI-IDP standard: Universal AI Identity, Delegation, Provenance, Traceability, Quality, Accountability, and Permanent Audit"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "No licence selected unless approved in writing by Pierre-Edward Procyk. All rights reserved." }
+authors = [
+    { name = "Pierre-Edward Procyk", email = "p.procyk.media@gmail.com" },
+]
+dependencies = [
+    "cryptography>=44.0",
+    "pydantic>=2.0",
+    "fastapi>=0.115",
+    "uvicorn>=0.30",
+    "jsonschema>=4.20",
+    "requests>=2.31",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+    "ruff>=0.6",
+    "mypy>=1.10",
+]
+test-full = [
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+    "ruff>=0.6",
+    "mypy>=1.10",
+    "psycopg2-binary>=2.9",
+    "opentelemetry-api>=1.40",
+    "opentelemetry-sdk>=1.40",
+    "opentelemetry-exporter-otlp>=1.40",
+]
+postgres = ["psycopg2-binary>=2.9"]
+otel = [
+    "opentelemetry-api>=1.40",
+    "opentelemetry-sdk>=1.40",
+    "opentelemetry-exporter-otlp>=1.40",
+]
+pqc = ["liboqs-python>=0.10"]
+hsm-pkcs11 = ["PyKCS11>=1.5"]
+hsm-aws = ["boto3>=1.30"]
+hsm-azure = ["azure-keyvault-keys>=4.8", "azure-identity>=1.16"]
+hsm-gcp = ["google-cloud-kms>=2.15"]
+
+[project.scripts]
+aegistrace = "aegistrace.cli.__main__:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B"]
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = false
+ignore_missing_imports = true

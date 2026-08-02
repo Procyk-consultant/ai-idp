@@ -1,0 +1,54 @@
+﻿finding,path,line,text
+DEPLOYMENT_PLACEHOLDER,HERMES_HANDOFF_PROMPT.md,22,"8. When you encounter [INSERT ARXIV LINK] or [INSERT GITHUB LINK], replace them with the actual URLs you obtain during deployment. These are the ONLY text changes you are permitted to make."
+DEPLOYMENT_PLACEHOLDER,HERMES_HANDOFF_PROMPT.md,62,"B16. After submission, record the arXiv identifier (e.g., arXiv:2607.XXXXX)"
+DEPLOYMENT_PLACEHOLDER,HERMES_HANDOFF_PROMPT.md,63,B17. Save the arXiv ID to a file: echo arXiv:2607.XXXXX > project-control\ARXIV_ID.txt
+DEPLOYMENT_PLACEHOLDER,HERMES_HANDOFF_PROMPT.md,81,D3. In PUBLISHING_CONTENT.md: replace [INSERT ARXIV LINK] with the actual arXiv URL (https://arxiv.org/abs/XXXXX)
+DEPLOYMENT_PLACEHOLDER,HERMES_HANDOFF_PROMPT.md,82,D4. In PUBLISHING_CONTENT.md: replace [INSERT GITHUB LINK] with the actual GitHub URL
+DEPLOYMENT_PLACEHOLDER,HERMES_HANDOFF_PROMPT.md,83,D5. In LINKEDIN_CONTENT_TEMPLATES.md: replace [ARXIV LINK] with the actual arXiv URL
+DEPLOYMENT_PLACEHOLDER,HERMES_HANDOFF_PROMPT.md,84,D6. In LINKEDIN_CONTENT_TEMPLATES.md: replace [GITHUB LINK] with the actual GitHub URL
+DEPLOYMENT_PLACEHOLDER,LINKEDIN_CONTENT_TEMPLATES.md,25,"**Instructions:** Post in order, 2 per week. Replace `[ARXIV LINK]` with your actual arXiv link once published. Replace `[GITHUB LINK]` with your GitHub repo link. Engage with comments within 2 hours of posting."
+DEPLOYMENT_PLACEHOLDER,LINKEDIN_CONTENT_TEMPLATES.md,60,The paper is on arXiv: [ARXIV LINK]
+DEPLOYMENT_PLACEHOLDER,LINKEDIN_CONTENT_TEMPLATES.md,61,The code is on GitHub: [GITHUB LINK]
+DEPLOYMENT_PLACEHOLDER,LINKEDIN_CONTENT_TEMPLATES.md,89,This isn't theoretical. The reference implementation (AegisTrace) works today: [GITHUB LINK]
+DEPLOYMENT_PLACEHOLDER,LINKEDIN_CONTENT_TEMPLATES.md,119,For financial institutions: AI-IDP at conformance level L3-L4 directly addresses OSFI's requirements. The reference implementation is available today: [GITHUB LINK]
+DEPLOYMENT_PLACEHOLDER,LINKEDIN_CONTENT_TEMPLATES.md,123,The paper: [ARXIV LINK]
+DEPLOYMENT_PLACEHOLDER,LINKEDIN_CONTENT_TEMPLATES.md,124,The framework: [GITHUB LINK]
+DEPLOYMENT_PLACEHOLDER,LINKEDIN_CONTENT_TEMPLATES.md,160,The code: [GITHUB LINK]
+DEPLOYMENT_PLACEHOLDER,LINKEDIN_CONTENT_TEMPLATES.md,161,The paper: [ARXIV LINK]
+DEPLOYMENT_PLACEHOLDER,LINKEDIN_CONTENT_TEMPLATES.md,196,Paper: [ARXIV LINK]
+DEPLOYMENT_PLACEHOLDER,LINKEDIN_CONTENT_TEMPLATES.md,197,Privacy analysis: [GITHUB LINK]/government/PRIVACY_AND_HUMAN_RIGHTS_ANALYSIS.pdf
+DEPLOYMENT_PLACEHOLDER,LINKEDIN_CONTENT_TEMPLATES.md,228,Paper: [ARXIV LINK]
+DEPLOYMENT_PLACEHOLDER,LINKEDIN_CONTENT_TEMPLATES.md,229,Indigenous data governance analysis: [GITHUB LINK]/research/synthesis/INDIGENOUS_DATA_GOVERNANCE_ANALYSIS.md
+DEPLOYMENT_PLACEHOLDER,LINKEDIN_CONTENT_TEMPLATES.md,258,Paper: [ARXIV LINK]
+DEPLOYMENT_PLACEHOLDER,LINKEDIN_CONTENT_TEMPLATES.md,259,Framework: [GITHUB LINK]
+DEPLOYMENT_PLACEHOLDER,LINKEDIN_CONTENT_TEMPLATES.md,294,Paper: [ARXIV LINK]
+DEPLOYMENT_PLACEHOLDER,LINKEDIN_CONTENT_TEMPLATES.md,295,Code: [GITHUB LINK]
+DEPLOYMENT_PLACEHOLDER,PUBLISHING_CONTENT.md,100,The paper is now available on arXiv: [INSERT ARXIV LINK]
+DEPLOYMENT_PLACEHOLDER,PUBLISHING_CONTENT.md,101,The code is on GitHub: [INSERT GITHUB LINK]
+DEPLOYMENT_PLACEHOLDER,PUBLISHING_CONTENT.md,138,Paper: [INSERT ARXIV LINK]
+DEPLOYMENT_PLACEHOLDER,PUBLISHING_CONTENT.md,139,Code: [INSERT GITHUB LINK]
+DEPLOYMENT_PLACEHOLDER,PUBLISHING_CONTENT.md,160,4. **Replace placeholders** — Replace [INSERT ARXIV LINK] and [INSERT GITHUB LINK] with actual URLs
+DEPLOYMENT_PLACEHOLDER,REPLACE_PLACEHOLDERS.bat,7,"REM  This script replaces [INSERT ARXIV LINK], [INSERT GITHUB LINK],"
+DEPLOYMENT_PLACEHOLDER,REPLACE_PLACEHOLDERS.bat,8,"REM  [ARXIV LINK], and [GITHUB LINK] with the actual URLs obtained"
+DEPLOYMENT_PLACEHOLDER,REPLACE_PLACEHOLDERS.bat,55,echo   [INSERT ARXIV LINK] and [ARXIV LINK] with: %ARXIV_URL%
+DEPLOYMENT_PLACEHOLDER,REPLACE_PLACEHOLDERS.bat,56,echo   [INSERT GITHUB LINK] and [GITHUB LINK] with: %GITHUB_URL%
+DEPLOYMENT_PLACEHOLDER,REPLACE_PLACEHOLDERS.bat,73,"powershell -Command ""(Get-Content PUBLISHING_CONTENT.md -Raw) -replace '\[INSERT ARXIV LINK\]', '%ARXIV_URL%' -replace '\[INSERT GITHUB LINK\]', '%GITHUB_URL%' | Set-Content PUBLISHING_CONTENT.md -NoNewline"""
+DEPLOYMENT_PLACEHOLDER,REPLACE_PLACEHOLDERS.bat,77,"powershell -Command ""(Get-Content LINKEDIN_CONTENT_TEMPLATES.md -Raw) -replace '\[INSERT ARXIV LINK\]', '%ARXIV_URL%' -replace '\[INSERT GITHUB LINK\]', '%GITHUB_URL%' -replace '\[ARXIV LINK\]', '%ARXIV_URL%' -replace '\[GITHUB LINK\]', '%GITHUB_URL%' | Set-Content LINKEDIN_CONTENT_TEMPLATES.md -NoNewline"""
+DEPLOYMENT_PLACEHOLDER,REPLACE_PLACEHOLDERS.bat,81,"powershell -Command ""(Get-Content README.md -Raw) -replace '\[INSERT ARXIV LINK\]', '%ARXIV_URL%' -replace '\[INSERT GITHUB LINK\]', '%GITHUB_URL%' -replace '\[ARXIV LINK\]', '%ARXIV_URL%' -replace '\[GITHUB LINK\]', '%GITHUB_URL%' | Set-Content README.md -NoNewline"""
+DEPLOYMENT_PLACEHOLDER,REPLACE_PLACEHOLDERS.bat,85,"powershell -Command ""(Get-Content HERMES_HANDOFF_PROMPT.md -Raw) -replace '\[INSERT ARXIV LINK\]', '%ARXIV_URL%' -replace '\[INSERT GITHUB LINK\]', '%GITHUB_URL%' -replace '\[ARXIV LINK\]', '%ARXIV_URL%' -replace '\[GITHUB LINK\]', '%GITHUB_URL%' | Set-Content HERMES_HANDOFF_PROMPT.md -NoNewline"""
+HISTORICAL_OBSOLETE_LINUX_ROOT,project-control/DECISION_LOG.md,18,- **Decision:** Place the root at `/home/z/my-project/download/ai-idp-aegistrace/`.
+HISTORICAL_OLD_TEST_CLAIM,project-control/RUN_LOG.jsonl,3,"{""schema_version"":""1.0.0"",""generated_at"":""2026-08-01T17:23:36.0004528-04:00"",""session_id"":""019fbee5-48a2-7f30-8cab-fd850d853a97"",""trace_id"":""ai-idp-deployment-verification-2026-08-01"",""event"":{""seq"":1000,""timestamp"":""2026-08-01T17:23:36.0004528-04:00"",""phase"":""PHASE-A"",""agent"":""Codex-/root"",""action"":""deployment_verification_and_paper_correction"",""status"":""complete"",""detail"":{""authorization"":""Pierre-Edward Procyk explicitly authorized the required corrective work and requested configured logging "
+CONFIG_PLACEHOLDER,release/FINAL_COMPLETION_REPORT.md,133,export AEGISTRACE_PG_HOST=your-db-host
+CONFIG_PLACEHOLDER,release/FINAL_COMPLETION_REPORT.md,136,export AEGISTRACE_PG_USER=your-user
+CONFIG_PLACEHOLDER,release/FINAL_COMPLETION_REPORT.md,168,export AEGISTRACE_GITHUB_TOKEN=ghp_your_pat_here
+CONFIG_PLACEHOLDER,release/FINAL_COMPLETION_REPORT.md,169,export AEGISTRACE_GITHUB_OWNER=your-github-username-or-org
+CONFIG_PLACEHOLDER,release/FINAL_COMPLETION_REPORT.md,170,export AEGISTRACE_GITHUB_PUBLIC_REPO=your-public-verification-repo
+CONFIG_PLACEHOLDER,release/FINAL_COMPLETION_REPORT.md,171,export AEGISTRACE_GITHUB_PRIVATE_REPO=your-private-evidence-repo  # optional
+DEPLOYMENT_PLACEHOLDER,scripts/build_government_pdfs.py,602,"if ""[INSERT "" in markdown or ""[ARXIV LINK]"" in markdown or ""[GITHUB LINK]"" in markdown:"
+DEPLOYMENT_PLACEHOLDER,scripts/build_next_ai_handoff.py,286,"""DEPLOYMENT_PLACEHOLDER"": re.compile(r""\[INSERT [^\]]+\]|\[(?:ARXIV|GITHUB) LINK\]|2607\.X+""),"
+CONFIG_PLACEHOLDER,scripts/build_next_ai_handoff.py,291,"r""ghp_your_pat_here|your-(?:db-host|user|github-username-or-org|public-verification-repo|private-evidence-repo)"","
+HISTORICAL_OLD_TEST_CLAIM,scripts/build_next_ai_handoff.py,430,"2. **Twelve PDFs and both DOCX files are demonstrably stale against the release contract.** Visible identifiers include v1.0.0 or v1.1.0 and 2026-07-24. Several materially disagree with their current Markdown sources, including 89 tests versus 113. The two paper PDFs do not expose release version/date markers in extractable text and are separately recorded as unverified release facts, although the paper was previously compiled and visually inspected."
+VALIDATION_GUARD_OLD_TEST_COUNT,scripts/build_release_derivatives.py,102,"forbidden_text=_forbidden(""89 passing tests""),"
+VALIDATION_GUARD_OLD_TEST_COUNT,scripts/build_release_derivatives.py,121,"forbidden_text=_forbidden(""89 passing tests""),"
+VALIDATION_GUARD_OLD_TEST_COUNT,scripts/build_release_derivatives.py,271,"forbidden_text=_forbidden(""89 passing tests""),"
+CONFIG_PLACEHOLDER,src/aegistrace/adapters/github_remote.py,32,3. Set AEGISTRACE_GITHUB_OWNER=<your-github-username-or-org>

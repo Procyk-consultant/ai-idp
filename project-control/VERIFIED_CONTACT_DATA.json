@@ -1,0 +1,91 @@
+{
+  "schema_version": "1.0.0",
+  "generated_at": "2026-08-01T01:26:00Z",
+  "source": "Master Execution Prompt Section G — verified author instructions supplied by Pierre-Edward Procyk",
+  "author": {
+    "full_name": "Pierre-Edward Procyk",
+    "role": "Founder / CEO"
+  },
+  "organization": {
+    "formal_name": "Cognitive Industries — Les Industries Cognitives",
+    "english_name": "Cognitive Industries",
+    "french_name": "Les Industries Cognitives",
+    "brand_positioning": "Premium Cognitive Systems"
+  },
+  "location": {
+    "city_region": "Saguenay",
+    "province": "Québec",
+    "country": "Canada"
+  },
+  "contact": {
+    "primary_email": "p.procyk.media@gmail.com",
+    "secondary_email": "p.1o9.cognitive@outlook.com",
+    "telephone": "+1 (581) 668-2372",
+    "linkedin": "https://www.linkedin.com/in/pierre-edward-procyk-223b75305"
+  },
+  "brand_assets": [
+    {
+      "file": "brand/originals/CI-Logo-3D-Hexagon-Gold-Cyan-Violet_Official-Brand-Identity-Transparent-V2.png",
+      "sha256": "e62028872d4004deb8908e38e6085784ba1bbd733e7404d0376ef64d6e296822",
+      "dimensions": "1024x1024",
+      "format": "PNG RGBA",
+      "role": "Official 3D hexagonal brand identity"
+    },
+    {
+      "file": "brand/originals/CI-Logo-Brand-Lockup-Horizontal_Cognitive-Industries-Bilingual-Gold-Text-Transparent.png",
+      "sha256": "c5ed7859f5d7cd5ac4cd174c42f9d0437ae7a2511d9ba25925a3375292ed1d19",
+      "dimensions": "1536x1024",
+      "format": "PNG RGBA",
+      "role": "Official bilingual horizontal lockup"
+    },
+    {
+      "file": "brand/originals/Cognitive_industries_Brandcard_guidelines_and_branding_id.png",
+      "sha256": "b637f33261ef2e830e807dd00aa3ac6811a6f29e3120d229b09a9b0d8dbbcbf9",
+      "dimensions": "1024x1536",
+      "format": "PNG RGB",
+      "role": "Official brand-guidelines reference card"
+    }
+  ],
+  "palette": {
+    "gold": "#B89A5E",
+    "navy": "#0F1728",
+    "blue": "#334155",
+    "cyan": "#77D5F0",
+    "ivory": "#FBF7EE",
+    "warm_white": "#F8F4EC",
+    "charcoal": "#1F2937",
+    "violet_restrained": "#6B5B95"
+  },
+  "typography": {
+    "preferred": "Suisse International (only when licensed and locally available; never bundled)",
+    "operational_alternative": "Manrope (SIL Open Font License, safe to bundle)"
+  },
+  "unavailable_fields": [
+    "official website",
+    "street address",
+    "postal code",
+    "ORCID",
+    "university affiliation",
+    "faculty",
+    "department",
+    "government contact",
+    "academic degree",
+    "professional licence",
+    "fax number",
+    "additional telephone numbers",
+    "additional email addresses",
+    "GitHub username",
+    "legal company-registration number",
+    "tax number",
+    "project sponsor"
+  ],
+  "publication_metadata_status": {
+    "arxiv_id": "not assigned — no external submission performed",
+    "doi": "not assigned",
+    "isbn": "not applicable",
+    "official_repository_url": "not published",
+    "publication_date": "not externally published"
+  },
+  "ip_notice": "© 2026 Pierre-Edward Procyk. Cognitive Industries — Les Industries Cognitives. All rights reserved. No licence is granted by implication. Any external use, implementation, adaptation, reproduction, publication, distribution, or commercialization requires prior written authorization from the rights holder.",
+  "licence_status": "No licence selected unless approved in writing by Pierre-Edward Procyk."
+}

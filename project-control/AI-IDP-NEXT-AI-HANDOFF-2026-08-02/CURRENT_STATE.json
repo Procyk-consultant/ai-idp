@@ -1,0 +1,41 @@
+{
+  "schema_version": "1.0.0",
+  "generated_at": "2026-08-02",
+  "project": "AI-IDP / AegisTrace",
+  "version": "2.0.0",
+  "project_date": "2026-08-01",
+  "live_root": "C:\\Cognitive Industries\\AI-IDP-AegisTrace",
+  "authority": "Pierre-Edward Procyk",
+  "licence_status": "All Rights Reserved; no public licence applied",
+  "directory_files_inventoried": 277,
+  "numbered_archives": 10,
+  "unique_packaged_members": 257,
+  "total_packaged_members": 257,
+  "local_reconciliation_complete": true,
+  "external_deployment_complete": false,
+  "archive_mismatches": 0,
+  "missing_canonical_members": 0,
+  "stale_or_unverified_derivatives": [
+    "paper/aegis-trace-arxiv.pdf",
+    "paper/main.pdf"
+  ],
+  "stale_derivatives": [],
+  "unverified_release_markers": [
+    "paper/aegis-trace-arxiv.pdf",
+    "paper/main.pdf"
+  ],
+  "missing_claimed_paths": [],
+  "last_verified_tests": {
+    "passed": 113,
+    "failed": 0
+  },
+  "paper": {
+    "pages": 13,
+    "references": 57,
+    "tectonic_version": "0.16.9"
+  },
+  "document_validation_limit": "The two DOCX files passed structural and source-coverage checks; native Word/LibreOffice visual rendering was unavailable.",
+  "external_actions_performed_during_audit": false,
+  "next_required_document": "NEXT_AI_EXECUTION_PLAN.md",
+  "next_action": "Reverify the sealed local corpus and request Pierre-Edward Procyk's authorization before beginning arXiv deployment."
+}

@@ -1,0 +1,135 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aegistrace.cognitiveindustries.ca/schemas/authorization.schema.json",
+  "title": "Authorization",
+  "description": "A record that a principal has authorized a specific action or class of actions",
+  "type": "object",
+  "_metadata": {
+    "organization": "Cognitive Industries — Les Industries Cognitives",
+    "project": "AI-IDP / AegisTrace",
+    "author": "Pierre-Edward Procyk",
+    "copyright": "© 2026 Pierre-Edward Procyk. All rights reserved.",
+    "licence_status": "No licence selected unless approved in writing by Pierre-Edward Procyk.",
+    "file": "schemas/authorization.schema.json",
+    "version": "2.0.0",
+    "last_material_revision": "2026-08-01"
+  },
+  "properties": {
+    "authorization_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "principal_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "controller_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "agent_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "task_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "delegation_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "scope": {
+      "type": "object"
+    },
+    "policy_version": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string",
+      "enum": [
+        "active",
+        "revoked",
+        "expired"
+      ]
+    },
+    "issued_at": {
+      "$ref": "#/$defs/iso8601_timestamp"
+    },
+    "expires_at": {
+      "$ref": "#/$defs/iso8601_timestamp"
+    },
+    "signature": {
+      "$ref": "#/$defs/ed25519_signature"
+    },
+    "signing_key_id": {
+      "$ref": "#/$defs/identifier"
+    }
+  },
+  "required": [
+    "authorization_id",
+    "principal_id",
+    "controller_id",
+    "agent_id",
+    "task_id",
+    "policy_version",
+    "state",
+    "issued_at",
+    "signature",
+    "signing_key_id"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^aitrace://ca/[a-z-]+/[a-zA-Z0-9._-]+(#[a-zA-Z0-9._-]+)?$",
+      "description": "AI-IDP identifier URI"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "iso8601_timestamp": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|[+-]\\d{2}:\\d{2})$",
+      "description": "ISO 8601 UTC timestamp"
+    },
+    "ed25519_signature": {
+      "type": "string",
+      "pattern": "^Ed25519:[0-9A-Za-z+/=]+$"
+    },
+    "visibility_tier": {
+      "type": "string",
+      "enum": [
+        "PUBLIC",
+        "CONTROLLED",
+        "ORGANIZATION_PRIVATE",
+        "SEALED"
+      ]
+    },
+    "entity_state": {
+      "type": "string",
+      "enum": [
+        "proposed",
+        "active",
+        "suspended",
+        "revoked",
+        "terminated",
+        "archived"
+      ]
+    },
+    "jurisdiction": {
+      "type": "string",
+      "enum": [
+        "ca",
+        "ca-qc",
+        "ca-on",
+        "ca-bc",
+        "ca-ab",
+        "ca-mb",
+        "ca-sk",
+        "ca-ns",
+        "ca-nb",
+        "ca-nl",
+        "ca-pe",
+        "ca-nt",
+        "ca-nu",
+        "ca-yt"
+      ]
+    }
+  }
+}

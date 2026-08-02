@@ -1,0 +1,51 @@
+# Cognitive Industries — Les Industries Cognitives
+# Project: AI-IDP / AegisTrace
+# Author: Pierre-Edward Procyk
+# Copyright: © 2026 Pierre-Edward Procyk. All rights reserved.
+# File: .gitattributes
+# Version: 2.0.0
+# Last Material Revision: 2026-07-30
+
+# Auto-detect text files
+* text=auto
+
+# Source files
+*.py text diff=python
+*.md text
+*.txt text
+*.yaml text
+*.yml text
+*.toml text
+*.json text
+*.csv text
+*.tex text
+*.bib text
+*.sh text
+*.js text
+*.css text
+*.html text
+
+# Binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.pdf binary
+*.docx binary
+*.zip binary
+*.db binary
+*.sqlite3 binary
+
+# Linguist language detection (for GitHub)
+*.py linguist-language=Python
+*.md linguist-language=Markdown
+*.tex linguist-language=TeX
+*.bib linguist-language=BibTeX
+*.json linguist-language=JSON
+*.yaml linguist-language=YAML
+*.toml linguist-language=TOML
+
+# Export ignore (files not included in GitHub archive downloads)
+.github export-ignore
+.gitattributes export-ignore
+.gitignore export-ignore
