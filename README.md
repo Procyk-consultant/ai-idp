@@ -6,7 +6,13 @@ Last Material Revision: 2026-08-01
 
 © 2026 Pierre-Edward Procyk. Cognitive Industries — Les Industries Cognitives. All rights reserved.
 
-> **Status:** Submission-ready (v2.0.0). No external publication, arXiv submission, government submission, public repository release, or public licence has been performed. External release requires separate written authorization from Pierre-Edward Procyk.
+> **Status:** v2.0.0 pushed to GitHub. No external publication, arXiv submission, government submission, or public licence has been performed. External release requires separate written authorization from Pierre-Edward Procyk.
+
+---
+
+## Repository
+
+**GitHub:** https://github.com/Procyk-consultant/ai-idp
 
 ---
 

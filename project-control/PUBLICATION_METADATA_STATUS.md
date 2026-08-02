@@ -24,7 +24,7 @@ The AI-IDP / AegisTrace project is being produced under an autonomous execution 
 | arXiv identifier | NOT ASSIGNED | No external submission performed |
 | DOI | NOT ASSIGNED | No registration authority contacted |
 | ISBN | NOT APPLICABLE | Not a book |
-| Official repository URL | NOT PUBLISHED | Local repository only |
+|| Official repository URL | https://github.com/Procyk-consultant/ai-idp | Pushed 2026-08-02 ||
 | External publication date | NOT PUBLISHED | Internal preparation only |
 | Government submission | NOT PERFORMED | Forbidden by mandate |
 | Standards Council submission | NOT PERFORMED | Forbidden by mandate |

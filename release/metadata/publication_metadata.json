@@ -16,8 +16,8 @@
     "doi_status": "NOT ASSIGNED",
     "isbn": null,
     "isbn_status": "NOT APPLICABLE",
-    "official_repository_url": null,
-    "official_repository_url_status": "NOT PUBLISHED — local repository only",
+    "official_repository_url": "https://github.com/Procyk-consultant/ai-idp",
+    "official_repository_url_status": "PUBLISHED — pushed 2026-08-02",
     "publication_date": null,
     "publication_date_status": "NOT EXTERNALLY PUBLISHED",
     "submission_packages_prepared": [
