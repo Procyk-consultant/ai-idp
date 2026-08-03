@@ -1,4 +1,5 @@
-# AI-IDP / AegisTrace
+# AI-IDP
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21769036.svg)](https://doi.org/10.5281/zenodo.21769036) / AegisTrace
 
 Last Material Revision: 2026-08-01
 
@@ -243,4 +244,5 @@ See `project-control/PROJECT_STATUS.md`, `release/FINAL_COMPLETION_REPORT.md`, a
 **Tests:** 113/113 passing  
 **arXiv paper:** Compiles via Tectonic (13 pages, 57 bibliography entries)
 
-# AI-IDP / AegisTrace
+# AI-IDP
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21769036.svg)](https://doi.org/10.5281/zenodo.21769036) / AegisTrace
