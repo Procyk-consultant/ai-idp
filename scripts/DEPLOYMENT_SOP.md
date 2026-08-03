@@ -139,11 +139,6 @@ def create_source_zip():
     exclude = {
         '.venv', '__pycache__', '.pytest_cache', '.mypy_cache', '.ruff_cache',
         '.git', '.github', 'release', 'backups', '*.log', '*.zip',
-        'OFFICIAL_EMAIL_TEMPLATES.md', 'LINKEDIN_CONTENT_TEMPLATES.md',
-        'ARXIV_SUBMISSION_INSTRUCTIONS.md', 'GITHUB_PUSH_INSTRUCTIONS.md',
-        'OFFICIAL_PROJECT_DOCUMENT_EN.pdf', 'DOCUMENT_OFFICIEL_PROJET_FR.pdf',
-        'government/OFFICIAL_PROJECT_DOCUMENT_EN.md',
-        'government/DOCUMENT_OFFICIEL_PROJET_FR.md',
     }
     with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED, compresslevel=6) as zf:
         for f in ROOT.rglob('*'):

@@ -55,7 +55,7 @@ These are the documents that only you can submit because they require accounts i
 | **Why** | To propose AI-IDP as a national standard and legislative framework |
 | **What for** | Policy adoption; legislative consideration; national standards route |
 | **Format** | PDF for formal submission; DOCX if editable versions are requested |
-| **Cover letter** | Use `brand/CONTACT_BLOCKS.md` — the "Government Proposal" block |
+| **Cover letter** | Use your standard professional correspondence block with name, organization, location, and email |
 
 ### 1.3 Standards Council of Canada Submission
 

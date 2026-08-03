@@ -77,8 +77,8 @@ python -m aegistrace.cli verify --ledger .aitrace-demo\ledger.jsonl
 | Bibliography references | 58 | `paper/references.bib` |
 | arXiv paper | 1 (13 pages) | `paper/main.tex` + `paper/main.pdf` |
 | Official PDFs | 2 (EN + FR) | Project root |
-| Email templates | 6 | `OFFICIAL_EMAIL_TEMPLATES.md` |
-| LinkedIn posts | 8 | `LINKEDIN_CONTENT_TEMPLATES.md` |
+
+
 | Documentation guides | 14 | `docs/` |
 | Brand assets | 3 (originals preserved) | `brand/originals/` |
 
@@ -91,10 +91,6 @@ python -m aegistrace.cli verify --ledger .aitrace-demo\ledger.jsonl
 | `PROJECT_ROADMAP.pdf` | Complete project roadmap (phases, steps, targets) |
 | `OFFICIAL_PROJECT_DOCUMENT_EN.pdf` | Official English document for government |
 | `DOCUMENT_OFFICIEL_PROJET_FR.pdf` | Official French document for Quebec government |
-| `OFFICIAL_EMAIL_TEMPLATES.md` | Ready-to-send email templates |
-| `LINKEDIN_CONTENT_TEMPLATES.md` | 8-post LinkedIn content series |
-| `GITHUB_PUSH_INSTRUCTIONS.md` | Step-by-step GitHub push guide |
-| `ARXIV_SUBMISSION_INSTRUCTIONS.md` | Step-by-step arXiv submission guide |
 | `FILING_INSTRUCTIONS.md` | What goes where, to who, why |
 
 ---
