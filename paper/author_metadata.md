@@ -20,7 +20,7 @@ Licence Status: No licence selected unless approved in writing by Pierre-Edward 
 - **Location:** Saguenay, Québec, Canada
 - **Primary email:** p.procyk.media@gmail.com
 - **Secondary email:** p.1o9.cognitive@outlook.com
-- **Telephone:** +1 (581) 668-2372
+- **Telephone:** 
 - **LinkedIn:** https://www.linkedin.com/in/pierre-edward-procyk-223b75305
 
 ## Authorship Roles

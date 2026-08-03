@@ -6,7 +6,7 @@ Role: Founder / CEO
 Copyright: © 2026 Pierre-Edward Procyk. All rights reserved.
 Contact: p.procyk.media@gmail.com
 Secondary Contact: p.1o9.cognitive@outlook.com
-Telephone: +1 (581) 668-2372
+Telephone: 
 Location: Saguenay, Québec, Canada
 File: project-control/VERIFIED_AUTHOR_DATA.md
 Title: Verified Author and Contact Data
@@ -52,7 +52,7 @@ This file is the single authoritative source of verified author, organization, a
 
 - **Primary email:** p.procyk.media@gmail.com
 - **Secondary organizational email:** p.1o9.cognitive@outlook.com
-- **Telephone:** +1 (581) 668-2372
+- **Telephone:** 
 - **LinkedIn:** https://www.linkedin.com/in/pierre-edward-procyk-223b75305
 
 ## Standard Author Blocks
@@ -66,7 +66,7 @@ Cognitive Industries — Les Industries Cognitives
 Saguenay, Québec, Canada
 p.procyk.media@gmail.com
 p.1o9.cognitive@outlook.com
-+1 (581) 668-2372
+
 LinkedIn: linkedin.com/in/pierre-edward-procyk-223b75305
 ```
 

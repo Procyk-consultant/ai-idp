@@ -260,7 +260,7 @@ These are internal documents you keep for your own reference, governance, and au
 5. Confirm you are the sole authority for external publication
 
 ### Who to Contact
-- **You (Pierre-Edward Procyk):** p.procyk.media@gmail.com, +1 (581) 668-2372
+- **You (Pierre-Edward Procyk):** p.procyk.media@gmail.com, 
 - **Secondary email:** p.1o9.cognitive@outlook.com
 - **LinkedIn:** linkedin.com/in/pierre-edward-procyk-223b75305
 

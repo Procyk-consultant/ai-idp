@@ -22,7 +22,7 @@ Cognitive Industries — Les Industries Cognitives
 Saguenay, Québec, Canada
 p.procyk.media@gmail.com
 p.1o9.cognitive@outlook.com
-+1 (581) 668-2372
+
 LinkedIn: linkedin.com/in/pierre-edward-procyk-223b75305
 ```
 

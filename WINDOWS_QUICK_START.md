@@ -112,7 +112,7 @@ Founder / CEO
 Cognitive Industries — Les Industries Cognitives  
 Saguenay, Québec, Canada  
 p.procyk.media@gmail.com  
-+1 (581) 668-2372  
+  
 
 © 2026 Pierre-Edward Procyk. Cognitive Industries — Les Industries Cognitives. All rights reserved.
 

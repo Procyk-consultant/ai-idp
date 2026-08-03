@@ -6,7 +6,7 @@ Role: Founder / CEO
 Copyright: © 2026 Pierre-Edward Procyk. All rights reserved.
 Contact: p.procyk.media@gmail.com
 Secondary Contact: p.1o9.cognitive@outlook.com
-Telephone: +1 (581) 668-2372
+Telephone: 
 Location: Saguenay, Québec, Canada
 File: government/CANADIAN_NATIONAL_PROJECT_PROPOSAL.md
 Title: Canadian National Project Proposal — AI-IDP
@@ -31,7 +31,7 @@ Licence Status: No licence selected unless approved in writing by Pierre-Edward 
 
 **Proposed by:** Pierre-Edward Procyk, Founder / CEO, Cognitive Industries — Les Industries Cognitives, Saguenay, Québec, Canada.
 
-**Contact:** p.procyk.media@gmail.com | p.1o9.cognitive@outlook.com | +1 (581) 668-2372 | LinkedIn: linkedin.com/in/pierre-edward-procyk-223b75305
+**Contact:** p.procyk.media@gmail.com | p.1o9.cognitive@outlook.com |  | LinkedIn: linkedin.com/in/pierre-edward-procyk-223b75305
 
 **Status:** Submission-ready. Not submitted. No external submission, government contact, or licence application has been performed. External submission requires separate written authorization from Pierre-Edward Procyk.
 

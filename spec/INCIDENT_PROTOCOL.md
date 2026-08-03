@@ -6,7 +6,7 @@ Role: Founder / CEO
 Copyright: © 2026 Pierre-Edward Procyk. All rights reserved.
 Contact: p.procyk.media@gmail.com
 Secondary Contact: p.1o9.cognitive@outlook.com
-Telephone: +1 (581) 668-2372
+Telephone: 
 Location: Saguenay, Québec, Canada
 File: spec/INCIDENT_PROTOCOL.md
 Title: Incident Protocol
