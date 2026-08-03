@@ -107,7 +107,7 @@ try {
     Write-Log "Warning: Could not verify GitHub repo: $_" "WARN"
 }
 
-# ─── STEP 3: ZENODO DEPOSITION =====
+# ─── STEP 2: ZENODO DEPOSITION =====
 Write-Log "=== STEP 2: Zenodo Deposition ==="
 
 $env:ZENODO_TOKEN = $ZenodoToken
@@ -117,7 +117,7 @@ Write-Log "Running Hermes deployment script..."
 Set-Location "C:\Users\Agenc\AppData\Local\hermes"
 
 try {
-    $result = python scripts/deploy_all.py 2>&1
+    $result = python skills/automation/browser-automation-locked/references/deploy_all.py 2>&1
     Write-Log "Deployment output: $result"
     
     if ($LASTEXITCODE -eq 0) {
@@ -132,7 +132,7 @@ try {
     exit 1
 }
 
-# ─── STEP 4: VERIFY ZENODO DOI =====
+# ─── STEP 3: VERIFY ZENODO DOI =====
 Write-Log "=== STEP 3: Verify Zenodo DOI ==="
 Start-Sleep 5
 
@@ -161,8 +161,8 @@ try {
     Write-Log "Could not verify Zenodo: $_" "WARN"
 }
 
-# ─── STEP 5: VERIFY GITHUB DOI UPDATE =====
-Write-Log "=== STEP 4: Verify GitHub DOI Update ==="
+# ─── STEP 3: VERIFY GITHUB DOI UPDATE =====
+Write-Log "=== STEP 3: Verify GitHub DOI Update ==="
 Start-Sleep 3
 
 try {
