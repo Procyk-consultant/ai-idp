@@ -44,8 +44,8 @@ class FilesystemAdapter:
         # Path traversal protection
         try:
             p.relative_to(self.base_dir)
-        except ValueError:
-            raise PermissionError(f"path traversal blocked: {path}")
+        except ValueError as exc:
+            raise PermissionError(f"path traversal blocked: {path}") from exc
         return p
 
     def before(self, path: Path) -> str | None:

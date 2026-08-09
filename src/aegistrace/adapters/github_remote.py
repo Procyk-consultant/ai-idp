@@ -51,6 +51,10 @@ except ImportError:
     _REQUESTS_AVAILABLE = False
 
 
+# Type alias for JSON-serializable types
+JsonValue = str | int | float | bool | None | list["JsonValue"] | dict[str, "JsonValue"]
+
+
 @dataclass
 class GitHubConfig:
     """Configuration for GitHub remote integration.
@@ -313,12 +317,11 @@ class GitHubRemotePusher:
         """
         self.config.validate()
         url = f"{self.config.api_base}/user/repos"
-        body = {
+        body: dict[str, JsonValue] = {
             "name": repo,
             "private": private,
             "description": description,
             "auto_init": True,
-            "gitignore_template": "Python" if not private else None,
         }
         response = requests.post(url, headers=self._headers(), json=body, timeout=30)
         response.raise_for_status()

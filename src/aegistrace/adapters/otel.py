@@ -50,7 +50,7 @@ class OTelConfig:
     service_namespace: str = "cognitive-industries"
     service_version: str = "2.0.0"
     endpoint: str = ""  # if empty, uses OTEL_EXPORTER_OTLP_ENDPOINT env
-    headers: dict[str, str] = None  # type: ignore
+    headers: dict[str, str] | None = None
 
     @classmethod
     def from_env(cls) -> OTelConfig:

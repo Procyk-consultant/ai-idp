@@ -189,7 +189,7 @@ class MLDSA65Scheme(SignatureScheme):
             ) from e
 
     def generate_keypair(self, key_id: str) -> KeyPair:
-        oqs = self._ensure_liboqs()
+        self._ensure_liboqs()
         # Real implementation:
         # with oqs.Signature("ML-DSA-65") as signer:
         #     public_key = signer.generate_keypair()
@@ -201,7 +201,7 @@ class MLDSA65Scheme(SignatureScheme):
         )
 
     def sign(self, private_key: Any, message: bytes) -> str:
-        oqs = self._ensure_liboqs()
+        self._ensure_liboqs()
         # Real implementation:
         # with oqs.Signature("ML-DSA-65", secret_key=private_key) as signer:
         #     sig = signer.sign(message)
@@ -212,7 +212,7 @@ class MLDSA65Scheme(SignatureScheme):
         )
 
     def verify(self, public_key: Any, message: bytes, signature: str) -> bool:
-        oqs = self._ensure_liboqs()
+        self._ensure_liboqs()
         if not signature.startswith("ML-DSA-65:"):
             return False
         # Real implementation:

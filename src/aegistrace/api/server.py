@@ -114,8 +114,8 @@ def create_app(
                 after_digest=req.after_digest,
             )
             return event.to_dict()
-        except (ValueError, PermissionError) as e:
-            raise HTTPException(status_code=400, detail=str(e))
+        except (ValueError, PermissionError) as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     @app.get("/events")
     def list_events() -> list[dict[str, Any]]:

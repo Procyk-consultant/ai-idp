@@ -31,10 +31,11 @@ import time
 from collections.abc import Callable, Iterator
 from dataclasses import dataclass
 from pathlib import Path
+from typing import IO
 
 from aegistrace.events.models import Event
 from aegistrace.identity.keys import KeyService
-from aegistrace.ledger.append_only import AppendOnlyLedger, LedgerVerifier
+from aegistrace.ledger.append_only import AppendOnlyLedger, LedgerVerifier, VerificationReport
 
 
 @dataclass
@@ -74,7 +75,7 @@ class BatchedLedger:
         self._last_flush = time.monotonic()
         self._flush_lock = threading.Lock()
         self._closed = False
-        self._wal_file = None
+        self._wal_file: IO[bytes] | None = None
         self._wal_lock = threading.Lock()
         self._on_flush: Callable[[list[Event]], None] | None = None
         self._background_thread: threading.Thread | None = None
@@ -223,7 +224,5 @@ class BackpressureError(RuntimeError):
     """Raised when the buffer is full and cannot accept more events."""
     pass
 
-
-from aegistrace.ledger.append_only import VerificationReport  # re-export
 
 __all__ = ["BatchConfig", "BatchedLedger", "BackpressureError", "VerificationReport"]

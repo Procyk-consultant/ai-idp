@@ -132,6 +132,8 @@ def run_demo(out_dir: Path) -> int:
         delegation_id=dlg.delegation_id,
         authorization_id=auth.authorization_id,
     )
+    # Sanity check: all four actions were recorded before verification.
+    assert {e1.action, e2.action, e3.action, e4.action} == {"SEARCH", "READ", "MODIFY", "DELEGATE"}
 
     # Verify
     verifier = LedgerVerifier(keys)
