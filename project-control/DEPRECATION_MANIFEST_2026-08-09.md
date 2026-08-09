@@ -65,6 +65,19 @@ The following were moved from the canonical root to `deprecated\2026-08-09_pre-c
 | `package.json` | standalone Playwright dependency manifest | 56 bytes |
 | `package-lock.json` | standalone Playwright dependency lockfile | 1,601 bytes |
 
+## Post-consolidation agent-artifact isolation
+
+The following untracked artefacts were found after the initial cleanup. They were moved intact to `deprecated\2026-08-09_pre-consolidation\unreviewed-agent-artifacts\` because they were not part of the controlled canonical corpus.
+
+| Item | Reason for isolation | Verification |
+|---|---|---|
+| `.github\copilot-instructions.md` | Added Mermaid-extension instructions unsupported by the controlled project toolchain | Untracked before move; archived intact |
+| `.github\instructions\mermaid.instructions.md` | Companion instruction file dependent on unsupported editor tools | Untracked before move; archived intact |
+| `tests\test_graph_agent_runtime.py` | Imported `tmp\graph_agent_runtime.py`, a temporary script archived during consolidation | Targeted pytest collection failed with `ModuleNotFoundError`; archived intact |
+| `PROJECT_REPORT_v2.0.0.md` | Unreviewed Cline-generated report containing stale project-state assertions | Untracked before move; archived intact |
+
+After isolation, the canonical suite passed 113/113 tests. OpenTelemetry export attempted the inactive local receiver at `localhost:4318` after the successful test run; this non-failing shutdown warning remains disclosed.
+
 ## Repository alignment
 
 `tmp` included 91 Git-tracked generated render and style artefacts. Their intact copies are retained in the ignored archival area; the consolidation commit formally retires only their canonical tracked copies. This is the intended repository outcome: the current source tree is clean of generated temporary material while Git history retains the former versions. Existing unrelated dirty working-tree changes are excluded from this commit.

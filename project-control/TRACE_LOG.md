@@ -436,6 +436,27 @@ Sanitized README.md by removing references to missing template files:
 - The 91 formerly tracked generated `tmp` artefacts are intentionally retired from the canonical Git tree while their archived copies remain intact.
 
 
+## [2026-08-09T23:54:53Z] [2.0.0] [ISOLATE] [Unreviewed agent artefacts] [Pierre-Edward Procyk] [All Rights Reserved]
+### Metadata
+- **Operation ID**: TRC-20260809-022
+- **Timestamp**: 2026-08-09T23:54:53Z
+- **Version**: 2.0.0
+- **Actor**: Codex, under Pierre-Edward Procyk's autonomous execution instruction
+- **Target**: Untracked files in `.github`, `tests`, and the canonical root
+- **Operation**: Reversible agent-artifact isolation
+- **Reason**: Remove unsupported, stale, and broken unreviewed work from live project paths without deleting it.
+- **Git Commit**: Pending this isolated record commit; no unrelated work included.
+- **Verification**: The affected test failed collection before isolation due to a missing archived temporary module; after isolation, the canonical suite passed 113/113 tests.
+### Content
+- Moved Mermaid extension instructions to ignored archival storage because their named tooling is not available in the controlled project environment.
+- Moved the invalid temporary-runtime test to archival storage.
+- Moved the unreviewed Cline project report to archival storage.
+### Integrity
+- All four files were untracked before movement.
+- No canonical source or brand original was modified.
+- The canonical test suite passed after isolation.
+
+
 ## [2026-08-03T00:00:16Z] [1.0.0] [SANITIZE] [WINDOWS_QUICK_START.md] [Pierre-Edward Procyk] [All Rights Reserved]
 ### Metadata
 - **Operation ID**: TRC-20260803-017

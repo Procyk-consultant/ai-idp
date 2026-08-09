@@ -36,6 +36,7 @@ See `DEPRECATION_MANIFEST_2026-08-09.md` for the exact inventory and verificatio
 4. Before restoring archival material, compare its purpose, date, file count, checksum where available, and authoritative status against the canonical corpus. Obtain explicit approval before any restoration.
 5. Do not re-add the retired `tmp` render and style artefacts. Their prior tracked history is preserved by the consolidation commit and their physical copies are retained under `deprecated`. New temporary material belongs in an ignored working directory.
 6. Record any future movement in `project-control/TRACE_LOG.md` and append the material state to `CHECKPOINT.md`; preserve a destination manifest with exact paths and verification evidence.
+7. Treat untracked output from other agents as unreviewed until it passes source, tooling, and test-scope review. Archive unsupported or stale artefacts instead of allowing them to remain in canonical source, test, or instruction paths.
 
 ## Safe recovery
 

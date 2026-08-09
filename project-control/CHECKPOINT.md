@@ -66,3 +66,13 @@ No local corpus blocker is open. External submissions, publication, pushes, post
 **Repository alignment:** The moved `tmp` directory contained 91 tracked generated assets. The consolidation commit retires their canonical tracked copies while preserving their intact physical copies in ignored archival storage. No unrelated working-tree change is included.
 
 **Records:** `project-control/DEPRECATION_MANIFEST_2026-08-09.md`, `project-control/DEPRECATION_PROCEDURE_2026-08-09.md`, and `deprecated/README.md`.
+
+---
+
+## 2026-08-09 — Unreviewed Agent-Artifact Isolation
+
+**Action:** Isolated four untracked agent artefacts into `deprecated\2026-08-09_pre-consolidation\unreviewed-agent-artifacts\`: unsupported Mermaid editor instructions, a test coupled to an archived temporary runtime, and a stale Cline-generated report.
+
+**Evidence:** The test failed collection before isolation because `graph_agent_runtime` was unavailable at its former temporary import path. The canonical suite then passed **113/113** tests. A non-failing OpenTelemetry exporter shutdown warning remains attributable to an inactive local receiver at `localhost:4318`.
+
+**Boundary:** No canonical source was changed; the items were untracked before isolation and their archived copies remain intact. No external action occurred.
