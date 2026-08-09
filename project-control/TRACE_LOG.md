@@ -412,6 +412,30 @@ Sanitized README.md by removing references to missing template files:
 - File modified in place, git diff tracked
 
 
+## [2026-08-09T23:26:00Z] [2.0.0] [CONSOLIDATE] [Canonical project directory] [Pierre-Edward Procyk] [All Rights Reserved]
+### Metadata
+- **Operation ID**: TRC-20260809-021
+- **Timestamp**: 2026-08-09T23:26:00Z
+- **Version**: 2.0.0
+- **Actor**: Codex, under explicit authorization from Pierre-Edward Procyk
+- **IP Context**: © 2026 Pierre-Edward Procyk. All rights reserved.
+- **Target**: `C:\Cognitive Industries\AI-IDP-AegisTrace`
+- **Operation**: Reversible local consolidation
+- **Reason**: Establish one clean canonical directory and remove AI-IDP-specific clutter from the Cognitive Industries parent directory without destroying source, audit, or historical material.
+- **Git Commit**: Consolidation commit; excludes unrelated working-tree changes.
+- **Verification**: Eight external directories matched pre-move counts totaling 11,157 files; fourteen external files matched pre-move byte sizes totaling 559,512,324 bytes; each source path was absent and each destination existed after the move; the archival destination was confirmed ignored by Git.
+### Content
+- Created the ignored archival area `deprecated\2026-08-09_pre-consolidation\` under the canonical root.
+- Moved alternate project roots, forensic/audit material, earlier hand-offs, and project archives from `C:\Cognitive Industries\` to `external-parent-items\`.
+- Moved caches, demo outputs, temporary browser/Zenodo/rendering material, the standalone Playwright dependency, and duplicate archives from the canonical root to `generated-and-duplicate-root-items\`.
+- Added `/deprecated/` to `.gitignore`.
+- Created the manifest and procedure in `project-control/`.
+### Integrity
+- No file was deleted or overwritten.
+- `brand/originals` was not modified.
+- The 91 formerly tracked generated `tmp` artefacts are intentionally retired from the canonical Git tree while their archived copies remain intact.
+
+
 ## [2026-08-03T00:00:16Z] [1.0.0] [SANITIZE] [WINDOWS_QUICK_START.md] [Pierre-Edward Procyk] [All Rights Reserved]
 ### Metadata
 - **Operation ID**: TRC-20260803-017
@@ -509,4 +533,3 @@ Sanitized FILING_INSTRUCTIONS.md by modifying the government submission section:
 ### Integrity
 - Entry appended to immutable trace log
 - File modified in place, git diff tracked
-

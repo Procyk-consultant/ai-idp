@@ -50,3 +50,19 @@ Current evidence: 113/113 tests passed; the clean demo returned `verification: O
 ## Blockers
 
 No local corpus blocker is open. External submissions, publication, pushes, posts, and email sends remain unperformed and subject to Pierre-Edward Procyk's explicit confirmation at each required gate. Native DOCX visual rendering and pre-submission legal/regulatory refresh remain disclosed validation tasks, not fabricated completion claims.
+
+---
+
+## 2026-08-09 — Canonical Directory Consolidation
+
+**Authority:** Pierre-Edward Procyk explicitly authorized a local cleanup that preserves all material by moving it under the official project root.
+
+**Action:** Confirmed `C:\Cognitive Industries\AI-IDP-AegisTrace` as the canonical root. Moved 8 AI-IDP-specific sibling directories (11,157 files), 14 top-level project files (559,512,324 bytes), and 14 generated/duplicate canonical-root items into `deprecated\2026-08-09_pre-consolidation\`. Added a Git ignore rule for the archival area.
+
+**Validation:** Every moved directory matched its pre-move file count; every moved standalone file matched its pre-move byte length; former source paths were absent after the move; destination paths existed; and Git confirmed the archival destination is ignored.
+
+**Preserved:** No deletion, publication, push, submission, email, or brand-original change occurred. Canonical source, `.git`, `.github`, `.venv`, and unrelated Cognitive Industries material remain in place.
+
+**Repository alignment:** The moved `tmp` directory contained 91 tracked generated assets. The consolidation commit retires their canonical tracked copies while preserving their intact physical copies in ignored archival storage. No unrelated working-tree change is included.
+
+**Records:** `project-control/DEPRECATION_MANIFEST_2026-08-09.md`, `project-control/DEPRECATION_PROCEDURE_2026-08-09.md`, and `deprecated/README.md`.

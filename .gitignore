@@ -113,6 +113,13 @@ AI-IDP-[0-9][0-9]-*.zip
 AI-IDP-NEXT-AI-HANDOFF-*.zip
 AI-IDP-NEXT-AI-HANDOFF-*.zip.sha256
 
+# Reversible archival area for superseded project material; never stage its contents.
+/deprecated/
+
+# Local generated working material; use the dated deprecated archive for retained history.
+/tmp/
+/node_modules/
+
 # Jupyter
 .ipynb_checkpoints/
 *.ipynb
