@@ -76,3 +76,13 @@ No local corpus blocker is open. External submissions, publication, pushes, post
 **Evidence:** The test failed collection before isolation because `graph_agent_runtime` was unavailable at its former temporary import path. The canonical suite then passed **113/113** tests. A non-failing OpenTelemetry exporter shutdown warning remains attributable to an inactive local receiver at `localhost:4318`.
 
 **Boundary:** No canonical source was changed; the items were untracked before isolation and their archived copies remain intact. No external action occurred.
+
+---
+
+## 2026-08-09 — Source Quality and Paper Build Verification
+
+**Action:** Integrated seven narrow source-quality corrections and retained the freshly generated canonical `paper/main.pdf`.
+
+**Validation:** Canonical suite: **113/113 passed**. Ruff on `src`: passed. Mypy on `src`: passed with no issues in 45 source files. Tectonic 0.16.9 compiled `paper/main.tex` successfully in isolated temporary output, producing `main.pdf` at 91,803 bytes. The tracked PDF is 91,804 bytes; the one-byte difference is consistent with PDF build metadata and no source text changed.
+
+**Known limit:** PDF page-count inspection could not be rerun because the available `pdfinfo` wrapper failed to resolve the local file and `pypdf` is not installed. No visual or page-count claim is made by this checkpoint.

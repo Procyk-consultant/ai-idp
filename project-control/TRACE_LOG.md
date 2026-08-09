@@ -457,6 +457,26 @@ Sanitized README.md by removing references to missing template files:
 - The canonical test suite passed after isolation.
 
 
+## [2026-08-09T23:58:09Z] [2.0.0] [VERIFY] [Source quality and paper build] [Pierre-Edward Procyk] [All Rights Reserved]
+### Metadata
+- **Operation ID**: TRC-20260809-023
+- **Timestamp**: 2026-08-09T23:58:09Z
+- **Version**: 2.0.0
+- **Actor**: Codex, under Pierre-Edward Procyk's autonomous execution instruction
+- **Target**: Seven source hardening changes and `paper/main.pdf`
+- **Operation**: Source quality validation and canonical paper build verification
+- **Reason**: Remove the remaining ambiguous working-tree changes through independent source and build checks.
+- **Git Commit**: Source hardening committed as `b52a20a`; paper PDF and evidence records pending this bounded follow-up commit.
+- **Verification**: 113/113 canonical tests passed; Ruff passed on `src`; mypy passed on 45 source files; Tectonic 0.16.9 successfully compiled `paper/main.tex` to isolated output.
+### Content
+- Kept narrow exception chaining and typing improvements, removal of an unused value assignment, and explicit demo event-set assertion.
+- Verified the existing tracked paper PDF against a fresh Tectonic build by output size: 91,804 bytes tracked versus 91,803 bytes fresh output.
+### Integrity
+- No project version, date, rights statement, brand original, or canonical source text was changed.
+- The full-suite Ruff run still reports five pre-existing unused-variable findings in tests; source lint is clean.
+- PDF page-count/visual inspection was not claimed because the available inspection helper was unavailable or failed locally.
+
+
 ## [2026-08-03T00:00:16Z] [1.0.0] [SANITIZE] [WINDOWS_QUICK_START.md] [Pierre-Edward Procyk] [All Rights Reserved]
 ### Metadata
 - **Operation ID**: TRC-20260803-017
