@@ -96,3 +96,5 @@ No local corpus blocker is open. External submissions, publication, pushes, post
 **Security hygiene:** Replaced the credential-bearing Git remote URL with credential-free `https://github.com/Procyk-consultant/ai-idp.git` for both fetch and push.
 
 **Boundary:** No government email, new publication, public licence, or social post was sent or changed.
+
+**Current external blocker:** The metadata reconciliation commit is local and verified but not yet on GitHub. Credential-free fetch succeeds; push returned HTTP 403 because the active Windows Git credential identifies `The-AI-Consultant`, which lacks write access to `Procyk-consultant/ai-idp`. Resolve by authenticating Git as a repository writer; do not share a credential in chat.

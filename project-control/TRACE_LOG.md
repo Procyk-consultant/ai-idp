@@ -493,6 +493,19 @@ Sanitized README.md by removing references to missing template files:
 - No external publication, email, government submission, licence, or social-media edit occurred.
 
 
+## [2026-08-10T00:06:43Z] [2.0.0] [BLOCKED] [GitHub metadata push] [Pierre-Edward Procyk] [All Rights Reserved]
+### Metadata
+- **Operation ID**: TRC-20260810-025
+- **Timestamp**: 2026-08-10T00:06:43Z
+- **Actor**: Codex
+- **Target**: Verified metadata commit `744ba30` to `origin/main`
+- **Result**: Credential-free fetch succeeded. Push returned HTTP 403 because the active Windows Git credential identifies `The-AI-Consultant`, which lacks write access to `Procyk-consultant/ai-idp`.
+### Integrity
+- No credential value was read, printed, changed, or exposed.
+- No retry or alternate identity was attempted.
+- The local commit remains intact and ready to push once Git is authenticated as a repository writer.
+
+
 ## [2026-08-03T00:00:16Z] [1.0.0] [SANITIZE] [WINDOWS_QUICK_START.md] [Pierre-Edward Procyk] [All Rights Reserved]
 ### Metadata
 - **Operation ID**: TRC-20260803-017
