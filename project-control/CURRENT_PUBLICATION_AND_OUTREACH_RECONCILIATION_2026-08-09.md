@@ -25,7 +25,7 @@ No public post, email, submission, push, Google Doc, NotebookLM notebook, brand 
 | Fact | Verified value | Source of truth | Required treatment |
 |---|---|---|---|
 | GitHub repository | https://github.com/Procyk-consultant/ai-idp | GitHub public API, 2026-08-09 | Use as the public code and specification link. |
-| GitHub public branch | `main`, public head `6a1007b` | GitHub public API, 2026-08-09 | Do not describe local unpushed work as public. |
+| GitHub public branch | `main`; local and remote HEADs were synchronized at the close of each verified push | Git fetch and head comparison, 2026-08-09 | Verify the exact commit immediately before citing it; do not preserve a stale hash in this operational record. |
 | Zenodo record | https://zenodo.org/records/21769036 | Zenodo public API, 2026-08-09 | Use as the citable public research archive. |
 | DOI | https://doi.org/10.5281/zenodo.21769036 | Zenodo record `21769036` | Use in scholarly and policy material; do not substitute arXiv. |
 | Zenodo publication | Title: *Identity Before Autonomy: A Universal Framework for Persistent AI Actor Identity, Permanent Traceability, Delegation, Quality Assurance, and Accountable AI Operation*; version `2.0.0`; publication date 2026-08-02 | Zenodo public API | State exactly; avoid unsupported descriptions of review or endorsement. |
@@ -39,9 +39,9 @@ No public post, email, submission, push, Google Doc, NotebookLM notebook, brand 
 | Conflict | Evidence | Correct handling |
 |---|---|---|
 | Stale publication controls | The August 8 FINAL package still says DOI not assigned and external publication not performed. | Preserve FINAL as a dated derivative. Update the canonical control record only after review; do not retroactively rewrite historical snapshots. |
-| Canonical current report is untracked | `PROJECT_REPORT_v2.0.0.md` records GitHub and Zenodo as complete but is not in the public branch. | Review its factual statements, then intentionally commit only approved verified content. |
-| Local worktree is not a release candidate | Local `main` is one commit ahead; eight tracked modifications and fifteen untracked items exist. | Categorize every item as approved source, test, generated artifact, temporary automation, or excluded local material before any commit/push. |
-| Remote configuration contains an authentication component | Read-only inspection confirms an authentication-bearing remote URL. Its age and validity were not tested. | On approval, change only the remote URL to a credential-free form and use a credential manager, GitHub CLI, or SSH for authentication. |
+| Unreviewed Cline report | `PROJECT_REPORT_v2.0.0.md` contained stale and unverified assertions. | Preserved under `deprecated/2026-08-09_pre-consolidation/unreviewed-agent-artifacts/`; do not use as current evidence. |
+| Local worktree is not a release candidate | Historical finding during the initial audit. | Resolved: all classified changes were either archived or committed in bounded, verified changes; public `main` matches local HEAD. |
+| Remote configuration contained an authentication component | The origin URL contained an authentication component before GitHub synchronization. | Resolved on 2026-08-09: origin now uses the credential-free HTTPS URL; use an approved credential manager or SSH for future authenticated pushes. |
 | Communication history is incomplete | Canonical project-control lacks an actual communications log and the published LinkedIn article URL is not recorded there. | Create an evidence-only communications log after approval; do not invent past sends, posts, or agent actions. |
 
 ## Current outreach-draft assessment

@@ -7,7 +7,7 @@ Last Material Revision: 2026-08-01
 
 © 2026 Pierre-Edward Procyk. Cognitive Industries — Les Industries Cognitives. All rights reserved.
 
-> **Status:** v2.0.0 pushed to GitHub. No external publication, arXiv submission, government submission, or public licence has been performed. External release requires separate written authorization from Pierre-Edward Procyk.
+> **Status:** v2.0.0 is public on GitHub and archived on Zenodo (DOI: [10.5281/zenodo.21769036](https://doi.org/10.5281/zenodo.21769036)). The initial LinkedIn article was published on 2026-08-08. arXiv is deferred with no identifier assigned; government and standards submissions have no verified dispatch record. The project remains All Rights Reserved; no public licence has been granted.
 
 ---
 
@@ -65,7 +65,7 @@ pytest tests/ -v
 # 4. Verify a ledger
 python -m aegistrace.cli verify --ledger .aitrace-demo\ledger.jsonl
 
-# 5. Compile the arXiv paper
+# 5. Compile the research paper
 Set-Location -LiteralPath 'paper'
 tectonic main.tex
 ```
@@ -77,10 +77,6 @@ tectonic main.tex
 ```
 ai-idp-aegistrace/
 ├── README.md                          ← you are here
-├── OFFICIAL_PROJECT_DOCUMENT_EN.pdf   ← Official English project document
-├── DOCUMENT_OFFICIEL_PROJET_FR.pdf    ← Document officiel de projet (français)
-├── OFFICIAL_EMAIL_TEMPLATES.md        ← Email templates for government presentation
-├── GITHUB_PUSH_INSTRUCTIONS.md        ← Step-by-step GitHub push instructions
 ├── FILING_INSTRUCTIONS.md             ← What goes where, to who, why
 ├── project-control/                   ← Control records, status, decisions
 ├── brand/                             ← Official brand assets (originals preserved)
@@ -99,7 +95,7 @@ ai-idp-aegistrace/
 ├── examples/                          ← Worked examples
 ├── threat-model/                      ← Threat model and attack trees
 ├── docs/                              ← Developer, auditor, regulator documentation
-├── paper/                             ← arXiv LaTeX project + compiled PDF
+├── paper/                             ← Research-paper LaTeX project + compiled PDF
 ├── scripts/                           ← Generation and utility scripts
 ├── release/                           ← Release metadata, checksums, and completion reports
 └── .github/workflows/                 ← CI workflow definitions
@@ -111,12 +107,12 @@ ai-idp-aegistrace/
 
 | Audience | Start here |
 |----------|-----------|
-| **Government of Canada** | `OFFICIAL_PROJECT_DOCUMENT_EN.pdf` |
-| **Gouvernement du Québec** | `DOCUMENT_OFFICIEL_PROJET_FR.pdf` |
+| **Government of Canada** | `government/CANADIAN_NATIONAL_PROJECT_PROPOSAL.pdf` |
+| **Gouvernement du Québec** | `government/NOTE_DE_SYNTHESE_FR.pdf` |
 | **Policy makers** | `government/CANADIAN_NATIONAL_PROJECT_PROPOSAL.pdf` |
 | **Policy analysts** | `government/CANADIAN_POLICY_WHITE_PAPER.pdf` |
 | **Legal reviewers** | `government/PROPOSED_AI_ACTOR_IDENTITY_AND_TRACEABILITY_ACT.md`, `government/FEDERAL_PROVINCIAL_JURISDICTION_ANALYSIS.pdf`, `government/CHARTER_ANALYSIS.pdf` |
-| **Academic reviewers** | `paper/main.pdf` (arXiv paper) |
+| **Academic reviewers** | `paper/main.pdf` (research paper; Zenodo archival record) |
 | **University supervisors** | `university/UNIVERSITY_RESEARCH_REPORT.pdf` |
 | **Architects** | `spec/AI-IDP-CORE.md`, `technical/AEGISTRACE_TECHNICAL_ARCHITECTURE.pdf` |
 | **Implementers** | `docs/quickstart.md`, `docs/developer-guide.md`, `src/aegistrace/` |
@@ -226,9 +222,11 @@ LinkedIn: [linkedin.com/in/pierre-edward-procyk-223b75305](https://www.linkedin.
   author = {Pierre-Edward Procyk},
   title = {AI-IDP / AegisTrace: A Universal Framework for Persistent AI Actor Identity, Permanent Traceability, Delegation, Quality Assurance, and Accountable AI Operation},
   year = {2026},
-  month = {July},
+  month = {August},
   version = {2.0.0},
-  url = {https://github.com/Procyk-consultant/ai-idp}
+  doi = {10.5281/zenodo.21769036},
+  url = {https://doi.org/10.5281/zenodo.21769036},
+  howpublished = {Code and specifications: https://github.com/Procyk-consultant/ai-idp}
 }
 ```
 
@@ -241,7 +239,4 @@ See `project-control/PROJECT_STATUS.md`, `release/FINAL_COMPLETION_REPORT.md`, a
 **Date:** Saturday 1 August 2026 (2026-08-01)  
 **Version:** 2.0.0  
 **Tests:** 113/113 passing  
-**arXiv paper:** Compiles via Tectonic (13 pages, 57 bibliography entries)
-
-# AI-IDP
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21769036.svg)](https://doi.org/10.5281/zenodo.21769036) / AegisTrace
+**Research paper:** Compiles via Tectonic; public archival record at https://doi.org/10.5281/zenodo.21769036

@@ -86,3 +86,13 @@ No local corpus blocker is open. External submissions, publication, pushes, post
 **Validation:** Canonical suite: **113/113 passed**. Ruff on `src`: passed. Mypy on `src`: passed with no issues in 45 source files. Tectonic 0.16.9 compiled `paper/main.tex` successfully in isolated temporary output, producing `main.pdf` at 91,803 bytes. The tracked PDF is 91,804 bytes; the one-byte difference is consistent with PDF build metadata and no source text changed.
 
 **Known limit:** PDF page-count inspection could not be rerun because the available `pdfinfo` wrapper failed to resolve the local file and `pypdf` is not installed. No visual or page-count claim is made by this checkpoint.
+
+---
+
+## 2026-08-10 — Public Metadata Reconciliation
+
+**Action:** Corrected canonical GitHub-facing and publication-control metadata from verified public state. The README now identifies GitHub, Zenodo DOI `10.5281/zenodo.21769036`, the 2026-08-02 Zenodo publication date, the 2026-08-08 LinkedIn article, arXiv deferral, and All Rights Reserved status. Stale nonexistent root-file references were removed.
+
+**Security hygiene:** Replaced the credential-bearing Git remote URL with credential-free `https://github.com/Procyk-consultant/ai-idp.git` for both fetch and push.
+
+**Boundary:** No government email, new publication, public licence, or social post was sent or changed.

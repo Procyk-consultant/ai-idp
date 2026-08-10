@@ -7,7 +7,7 @@ Copyright: © 2026 Pierre-Edward Procyk. All rights reserved.
 Contact: p.procyk.media@gmail.com
 File: project-control/PUBLICATION_METADATA_STATUS.md
 Title: Publication Metadata Status
-Purpose: Track the absence of external publication identifiers and forbid fabrication
+Purpose: Track verified external publication identifiers and forbid fabrication
 Version: 2.0.0
 Status: Verified
 Last Material Revision: 2026-08-01
@@ -15,20 +15,21 @@ Last Material Revision: 2026-08-01
 
 # Publication Metadata Status
 
-The AI-IDP / AegisTrace project is being produced under an autonomous execution mandate. The mandate explicitly forbids external publication, arXiv submission, government submission, emailing officials, deploying public services, releasing public repositories, and applying public licences without separate explicit authorization from Pierre-Edward Procyk.
+This record distinguishes verified public availability from unverified or unperformed submissions. It does not authorize any new publication, government submission, email, public licence, or external service deployment.
 
 ## Current Status
 
 | Field | Value | Notes |
 |------|-------|-------|
 | arXiv identifier | NOT ASSIGNED | No external submission performed |
-| DOI | NOT ASSIGNED | No registration authority contacted |
+| DOI | https://doi.org/10.5281/zenodo.21769036 | Zenodo record `21769036`; version 2.0.0; published 2026-08-02; updated 2026-08-08 |
 | ISBN | NOT APPLICABLE | Not a book |
-|| Official repository URL | https://github.com/Procyk-consultant/ai-idp | Pushed 2026-08-02 ||
-| External publication date | NOT PUBLISHED | Internal preparation only |
-| Government submission | NOT PERFORMED | Forbidden by mandate |
-| Standards Council submission | NOT PERFORMED | Forbidden by mandate |
-| Public licence applied | NONE | "No licence selected unless approved in writing by Pierre-Edward Procyk" |
+| Official repository URL | https://github.com/Procyk-consultant/ai-idp | Public `main`; live state is verified separately before any claim of current head |
+| Zenodo publication date | 2026-08-02 | Public archival record; do not describe this as peer review, endorsement, or arXiv publication |
+| LinkedIn launch article | Published 2026-08-08 | Existing article URL is recorded in `CURRENT_PUBLICATION_AND_OUTREACH_RECONCILIATION_2026-08-09.md` |
+| Government submission | NO VERIFIED DISPATCH RECORD | Do not claim a send without mailbox evidence |
+| Standards Council submission | NO VERIFIED DISPATCH RECORD | Do not claim a send without dispatch evidence |
+| Public licence applied | NONE | All Rights Reserved; no public licence granted |
 
 ## Submission-Ready Packages
 
@@ -36,7 +37,7 @@ The following packages are prepared in **submission-ready** state (formatted, va
 
 | Package | Location | Ready For | Submitted |
 |---------|----------|-----------|-----------|
-| arXiv LaTeX project + PDF | `paper/` | arXiv (cs.CY, cs.CR) | No |
+| Research paper LaTeX project + PDF | `paper/` | Future venue only if separately authorized | No arXiv submission; current priority deferred |
 | Canadian government proposal | `government/CANADIAN_NATIONAL_PROJECT_PROPOSAL.{md,docx,pdf}` | Parliamentary / ministerial submission | No |
 | Policy white paper | `government/CANADIAN_POLICY_WHITE_PAPER.{md,pdf}` | Policy consultation | No |
 | Draft statute | `government/PROPOSED_AI_ACTOR_IDENTITY_AND_TRACEABILITY_ACT.md` | Legislative review | No |
@@ -45,7 +46,7 @@ The following packages are prepared in **submission-ready** state (formatted, va
 
 ## Prohibition
 
-No artifact in this repository may contain a fabricated arXiv identifier, DOI, ISBN, official repository URL, or publication date. Submission-eligible packages must remain in their prepared state until Pierre-Edward Procyk issues separate written authorization.
+No artifact in this repository may contain a fabricated arXiv identifier, DOI, ISBN, official repository URL, or publication date. The verified Zenodo DOI and publication date may be used exactly as recorded here. New submissions and claims of emails, endorsements, reviews, or public licences remain prohibited without evidence and separate authorization.
 
 ## Activation Procedure
 

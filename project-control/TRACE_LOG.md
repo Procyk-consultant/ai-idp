@@ -477,6 +477,22 @@ Sanitized README.md by removing references to missing template files:
 - PDF page-count/visual inspection was not claimed because the available inspection helper was unavailable or failed locally.
 
 
+## [2026-08-10T00:04:40Z] [2.0.0] [RECONCILE] [Public metadata] [Pierre-Edward Procyk] [All Rights Reserved]
+### Metadata
+- **Operation ID**: TRC-20260810-024
+- **Timestamp**: 2026-08-10T00:04:40Z
+- **Actor**: Codex, under Pierre-Edward Procyk's autonomous execution instruction
+- **Target**: README, publication controls, release metadata, and local Git remote configuration
+- **Verification**: Zenodo REST record 21769036 confirms DOI 10.5281/zenodo.21769036, version 2.0.0, publication date 2026-08-02, and update 2026-08-08; the LinkedIn article is publicly reachable and dated 2026-08-08; local Git fetch/head checks confirmed prior public synchronization.
+### Content
+- Replaced stale no-publication and DOI-not-assigned assertions with verified Zenodo and LinkedIn facts.
+- Marked arXiv deferred and maintained All Rights Reserved status.
+- Removed stale root-file references from the public README and corrected government entry paths.
+- Replaced the credential-bearing `origin` URL with a credential-free HTTPS URL.
+### Integrity
+- No external publication, email, government submission, licence, or social-media edit occurred.
+
+
 ## [2026-08-03T00:00:16Z] [1.0.0] [SANITIZE] [WINDOWS_QUICK_START.md] [Pierre-Edward Procyk] [All Rights Reserved]
 ### Metadata
 - **Operation ID**: TRC-20260803-017

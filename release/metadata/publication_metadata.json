@@ -12,20 +12,23 @@
   "publication_metadata": {
     "arxiv_id": null,
     "arxiv_id_status": "NOT ASSIGNED — no external submission performed",
-    "doi": null,
-    "doi_status": "NOT ASSIGNED",
+    "doi": "10.5281/zenodo.21769036",
+    "doi_url": "https://doi.org/10.5281/zenodo.21769036",
+    "doi_status": "PUBLISHED — Zenodo record 21769036; version 2.0.0; publication date 2026-08-02; verified 2026-08-09",
     "isbn": null,
     "isbn_status": "NOT APPLICABLE",
     "official_repository_url": "https://github.com/Procyk-consultant/ai-idp",
-    "official_repository_url_status": "PUBLISHED — pushed 2026-08-02",
-    "publication_date": null,
-    "publication_date_status": "NOT EXTERNALLY PUBLISHED",
+    "official_repository_url_status": "PUBLISHED — public main branch; verify current head immediately before citing a commit",
+    "publication_date": "2026-08-02",
+    "publication_date_status": "Zenodo archival record published; this is not an arXiv submission, peer review, endorsement, or public licence",
+    "zenodo_record_url": "https://zenodo.org/records/21769036",
+    "linkedin_launch_article_url": "https://www.linkedin.com/pulse/lia-sans-identit%25C3%25A9-nest-pas-de-linnovation-cest-un-risque-procyk-bhz5c/",
     "submission_packages_prepared": [
       {
-        "package": "arXiv LaTeX project + compiled PDF",
+        "package": "Research paper LaTeX project + compiled PDF",
         "location": "paper/",
         "submitted": false,
-        "ready_for": "arXiv (cs.CY, cs.CR)"
+        "ready_for": "Future venue only if separately authorized; arXiv currently deferred"
       },
       {
         "package": "Canadian government proposal",
@@ -58,6 +61,6 @@
         "ready_for": "Academic review"
       }
     ],
-    "prohibition": "No artifact in this repository may contain a fabricated arXiv identifier, DOI, ISBN, official repository URL, or publication date. Submission-eligible packages remain in their prepared state until Pierre-Edward Procyk issues separate written authorization."
+    "prohibition": "No artifact in this repository may contain a fabricated arXiv identifier, DOI, ISBN, official repository URL, or publication date. The Zenodo DOI and publication date above are verified. New submissions, mailings, endorsements, reviews, and public licences require separate authorization and evidence."
   }
 }
