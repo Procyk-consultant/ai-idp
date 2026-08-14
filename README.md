@@ -1,7 +1,7 @@
 # AI-IDP
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21769036.svg)](https://doi.org/10.5281/zenodo.21769036) / AegisTrace
 
-Last Material Revision: 2026-08-01
+Last Material Revision: 2026-08-14
 
 **A Universal Canadian Framework for Persistent AI Actor Identity, Permanent Traceability, Delegation, Quality Assurance, and Accountable AI Operation**
 
@@ -44,7 +44,7 @@ The intended Canadian normative principle is:
 
 > **NO VALID AI ACTOR IDENTITY, NO LAWFUL AGENT OPERATION.**
 
-This is the **proposed** standard and legal objective. It is **not** current Canadian law.
+This is the **proposed** standard and legal objective. It is **not** current Canadian law. The project intentionally states the full target standard and expected end-state so that implementation, regulatory review, conformity assessment, and future adoption can be measured against a clear destination.
 
 **AegisTrace** is the reference implementation: a functional Python software system that demonstrates the standard end-to-end.
 
@@ -130,18 +130,20 @@ ai-idp-aegistrace/
 - **JSONL** append-only ledger with hash chaining
 - **Merkle trees** for public verification anchoring
 - **FastAPI** for the HTTP API
-- **SQLite** for local storage; **PostgreSQL** for production
-- **pytest** for testing (113 passing tests)
-- **Tectonic** for LaTeX compilation
+- **SQLite** for local storage; **PostgreSQL** for production*
+- **pytest** for testing (113/113 passed in the last recorded full validation on 2026-08-02)
+- **Tectonic** for LaTeX compilation (last recorded clean compile: 2026-08-02)
 
 ### Production Hardening (v2.0.0+)
 
-- **PostgreSQL storage backend** with JSONB, BIGSERIAL, SSL-by-default
-- **HSM-backed key management** (PKCS#11, AWS KMS, Azure Key Vault, GCP KMS)
+- **PostgreSQL storage backend*** with JSONB, BIGSERIAL, SSL-by-default
+- **HSM-backed key management*** (PKCS#11, AWS KMS, Azure Key Vault, GCP KMS)
 - **Batched high-throughput ledger** with write-ahead log (WAL)
-- **OpenTelemetry runtime exporter** for observability
-- **Post-quantum signature migration** (ML-DSA per FIPS 204, SLH-DSA per FIPS 205)
-- **Live GitHub remote integration** for Merkle anchor pushing
+- **OpenTelemetry runtime exporter*** for observability
+- **Post-quantum signature migration*** (ML-DSA per FIPS 204, SLH-DSA per FIPS 205)
+- **Live GitHub remote integration*** for Merkle anchor pushing
+
+> * **Capability-status note:** starred production capabilities are part of the intended high-assurance implementation and their interfaces/modules were included in the 2026-08-02 validated 113-test corpus. Live activation still depends on the corresponding external service, credential, hardware, runtime library, or endpoint. This notation preserves the intended end-state without presenting an external integration as already activated in production.
 
 ---
 
@@ -151,7 +153,7 @@ ai-idp-aegistrace/
 pytest tests/ -v
 ```
 
-**113 tests pass** across:
+**Last recorded full validation: 113/113 tests passed on 2026-08-02** across:
 - Unit tests (identity, ledger, signing, delegation, authorization, production hardening)
 - Integration tests (complete lifecycle, model/provider switch, filesystem adapter, GitHub adapter, CLI)
 - Security tests (forgery, key compromise, event tampering, deletion, reordering, replay)
@@ -159,16 +161,20 @@ pytest tests/ -v
 - Permanence tests (revocation, termination, key rotation, archive)
 - Conformance tests (schema, canonical vocabulary, invariants, append-only)
 
+**2026-08-14 CI note:** no new test or compilation run was performed during the documentation reconciliation. The latest GitHub Actions failure did not execute any workflow step because GitHub reported the account locked due to a billing issue; it is therefore not evidence of a code, test, or compilation failure.
+
 ---
 
 ## Conformance Levels
 
-AI-IDP defines four conformance levels (L1–L4):
+AI-IDP defines four conformance levels (L1–L4) as the target implementation and regulatory standard:
 
 - **L1 (Baseline):** Persistent identifiers, signed events, local ledger. For small developers and open-source.
 - **L2 (Standard):** L1 + public verification, private evidence, delegation, authorization, approval, resource manifests.
 - **L3 (High Assurance):** L2 + independent archival replication, federation, database/CI-CD adapters, annual audit. For regulated sectors.
 - **L4 (Maximum Assurance):** L3 + dual approval, regulator-controlled vault, real-time transparency log, PQC readiness. For critical infrastructure.
+
+These levels define the intended conformity destination of the standard; adoption or legal enforceability depends on the applicable standards, administrative, contractual, procurement, or legislative route.
 
 ---
 
@@ -184,12 +190,14 @@ AI-IDP defines four conformance levels (L1–L4):
 
 ## Indigenous Data Governance
 
-The framework recognizes Indigenous data sovereignty:
+The framework recognizes Indigenous data sovereignty as an important design objective where Indigenous rights, data, communities, or governance contexts are materially involved:
 - **OCAP® principles** (Ownership, Control, Access, Possession) — First Nations Information Governance Centre
 - **Distinctions-based approach** — First Nations, Inuit, and Métis
-- **TRC Calls to Action** alignment (particularly Calls 43–44, 7, 18, 19)
-- **Community-controlled access** for Indigenous community data
-- **Consultation with rights-holders is a precondition for implementation**
+- **TRC Calls to Action** alignment as a policy/design objective where relevant
+- **Community-controlled access** for Indigenous community data where applicable
+- **Meaningful rights-holder engagement before deployments that materially affect Indigenous rights, community data, or governance**
+
+This is **not a universal implementation gate for unrelated deployments**. AI-IDP preserves the objective of strong Indigenous data governance while applying engagement requirements contextually to deployments where those rights or data are actually implicated.
 
 ---
 
@@ -234,9 +242,10 @@ LinkedIn: [linkedin.com/in/pierre-edward-procyk-223b75305](https://www.linkedin.
 
 ## Status
 
-See `project-control/PROJECT_STATUS.md`, `release/FINAL_COMPLETION_REPORT.md`, and `release/VALIDATION_REPORT.md` for the consolidated completion status and limitations.
+See `project-control/PROJECT_STATUS.md`, `project-control/VALIDATION_STATUS.md`, `release/FINAL_COMPLETION_REPORT.md`, and `release/VALIDATION_REPORT.md` for the consolidated completion status, verified results, target capabilities, and limitations.
 
-**Date:** Saturday 1 August 2026 (2026-08-01)  
+**Project material date:** 2026-08-01  
+**Public reconciliation note:** 2026-08-14  
 **Version:** 2.0.0  
-**Tests:** 113/113 passing  
-**Research paper:** Compiles via Tectonic; public archival record at https://doi.org/10.5281/zenodo.21769036
+**Tests:** 113/113 passing in the last recorded full validation (2026-08-02); not rerun during the 2026-08-14 reconciliation  
+**Research paper:** Last recorded clean Tectonic compile passed on 2026-08-02; public archival record at https://doi.org/10.5281/zenodo.21769036
