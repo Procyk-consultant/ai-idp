@@ -1,6 +1,6 @@
 # Indigenous Data Governance Analysis
 
-Last Material Revision: 2026-08-01
+Last Material Revision: 2026-08-14
 
 ## Recognition of Indigenous Data Sovereignty
 
@@ -15,7 +15,7 @@ The First Nations Information Governance Centre's OCAP® principles provide a fr
 - **Access:** First Nations must have access to their data and information, regardless of where it is stored.
 - **Possession:** While ownership is the broader principle, possession refers to the physical custody of the data.
 
-AI-IDP's Indigenous data-governance provisions align with OCAP®: First Nations control access to their community's AI-IDP records; First Nations possess their community's records (or control where they are stored); First Nations have access to their records regardless of where the registry is hosted.
+AI-IDP's Indigenous data-governance provisions align with OCAP® as a design objective for deployments that materially involve First Nations community data or governance: First Nations control access to their community's AI-IDP records; First Nations possess their community's records (or control where they are stored); First Nations have access to their records regardless of where the registry is hosted.
 
 ## Distinctions-Based Approach
 
@@ -27,29 +27,33 @@ First Nations, Inuit, and Métis have different governance authority, different 
 
 ## TRC Calls to Action
 
-AI-IDP aligns with the TRC Calls to Action:
+AI-IDP treats alignment with relevant TRC Calls to Action as a policy and design objective where the deployment context materially engages Indigenous rights, services, data, or communities:
 
-- **Call to Action 43:** Adopt and implement UNDRIP. AI-IDP respects Indigenous data sovereignty as a UNDRIP-aligned principle.
-- **Call to Action 44:** Develop a national action plan to implement UNDRIP. AI-IDP's Indigenous data-governance provisions are part of such a plan.
-- **Call to Action 7:** Develop long-term Aboriginal education strategies. AI-IDP's training programs include Indigenous-specific training.
-- **Call to Action 18:** Acknowledge the current state of Aboriginal health. AI-IDP's healthcare-support agent deployments respect Indigenous health data governance.
-- **Call to Action 19:** Close health gaps. AI-IDP's healthcare-support agent deployments support Indigenous health data governance.
+- **Call to Action 43:** Adopt and implement UNDRIP. AI-IDP can support UNDRIP-aligned data-governance objectives where applicable.
+- **Call to Action 44:** Develop a national action plan to implement UNDRIP. AI-IDP can provide technical governance mechanisms that may support such objectives where adopted.
+- **Call to Action 7:** Develop long-term Aboriginal education strategies. AI-IDP deployment profiles can accommodate Indigenous-specific training objectives.
+- **Call to Action 18:** Acknowledge the current state of Aboriginal health. Healthcare-support agent deployments involving Indigenous health data should respect applicable Indigenous health-data governance.
+- **Call to Action 19:** Close health gaps. AI-IDP can support stronger accountability for AI systems used in relevant health-service contexts.
 
 ## Community-Controlled Access
 
-AI-IDP provides community-controlled access for Indigenous community data:
+Where an AI-IDP deployment materially involves Indigenous community data, the framework is designed to support community-controlled access patterns:
 
 - Indigenous communities can require that AI agent operations affecting their community data be registered with community-controlled access.
 - Indigenous communities can require sealed records for their community data.
 - Indigenous communities can require consultation before their community data is disclosed.
-- Indigenous communities can require regulator access to their community data be authorized by the community.
+- Indigenous communities can require regulator access to their community data be authorized by the community where applicable law and governance arrangements support that control.
 
-## Consultation Precondition
+## Context-Specific Rights-Holder Engagement
 
-Consultation with rights-holders is a precondition for implementation. AI-IDP's Indigenous data-governance analysis is grounded in public frameworks but not in consultation with rights-holders. Consultation must be conducted before implementation, following distinctions-based protocols with First Nations, Inuit, and Métis communities.
+Meaningful engagement with rights-holders is an important implementation objective when an AI-IDP deployment materially affects Indigenous rights, community data, governance authority, or services. In those contexts, engagement should occur before operational deployment and should follow distinctions-based protocols appropriate to the affected First Nations, Inuit, or Métis rights-holders.
+
+This requirement is **context-specific, not universal**. Indigenous committee or rights-holder participation is not a prerequisite for unrelated AI-IDP implementations that do not materially engage Indigenous rights, community data, governance, or services.
 
 ## Limitations
 
-The Indigenous data-governance analysis is grounded in public frameworks (OCAP® principles, TRC Calls to Action, public policy positions of Indigenous organizations). The analysis is not a substitute for consultation with rights-holders. The consultation precondition is documented in `project-control/ASSUMPTION_REGISTER.md` A-010 and `project-control/SOURCE_GAP_REGISTER.md` G-004.
+The Indigenous data-governance analysis is grounded in public frameworks (OCAP® principles, TRC Calls to Action, public policy positions of Indigenous organizations). It is not a substitute for rights-holder engagement in deployments where Indigenous rights, community data, governance authority, or services are materially implicated. Consultation outcomes in those contexts should be reflected in revised deployment-specific governance profiles and future versions of this analysis.
+
+The framework therefore preserves a high standard of Indigenous data governance without imposing a universal external-engagement gate on deployments for which the issue is not materially relevant.
 
 # Indigenous Data Governance Analysis
