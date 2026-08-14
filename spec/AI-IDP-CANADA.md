@@ -16,7 +16,7 @@ Document Classification: Public
 Classification: documentation
 Version: 2.0.0
 Status: Submission-ready
-Last Material Revision: 2026-08-01
+Last Material Revision: 2026-08-14
 Dependencies: AI-IDP-CORE.md; FEDERAL_PROVINCIAL_JURISDICTION_ANALYSIS.md; CHARTER_ANALYSIS.md; PRIVACY_AND_HUMAN_RIGHTS_ANALYSIS.md
 Source Basis: Master Execution Prompt; Canadian public-record legal materials; international technical standards
 Invariants: Distinguishes current law from proposed law
@@ -60,32 +60,31 @@ Foreign hosting is not a simple avoidance mechanism. The controlling organizatio
 - **Communications Security Establishment (CSE) guidance** — signals and cyber.
 - **Office of the Privacy Commissioner of Canada (OPC) guidance** — privacy interpretation and enforcement.
 
-### 2.2 Proposed
+### 2.2 Proposed / Historical Reference
 
-- **Artificial Intelligence and Data Act (AIDA), Bill C-27** — proposed horizontal AI legislation (status: proposed, not enacted). AI-IDP references AIDA as proposed legislation only.
+- **Artificial Intelligence and Data Act (AIDA), Bill C-27** — former proposed horizontal AI legislation; not enacted. AI-IDP uses it only as a historical/proposed-policy reference where relevant.
 
 ### 2.3 Provincial
 
 - **Quebec Law 25** — private-sector privacy strengthening.
-- **Quebec Quebec AI regulatory developments.
+- **Quebec AI regulatory developments** — monitor for current status before external legal reliance.
 - **British Columbia PIPA** — private-sector privacy.
 - **Alberta PIPA** — private-sector privacy.
 - **Provincial freedom-of-information and privacy acts** — public-sector privacy.
 - **Provincial consumer protection statutes** — consumer-facing AI.
 
-AI-IDP's cooperative-federalism model preserves provincial authority over provincial matters while establishing a national minimum standard. See `government/FEDERAL_PROVINCIAL_JURISDICTION_ANALYSIS.md`.
+AI-IDP's cooperative-federalism model is an intended standards and implementation architecture designed to preserve provincial authority over provincial matters while enabling a national minimum standard. See `government/FEDERAL_PROVINCIAL_JURISDICTION_ANALYSIS.md`.
 
 ## 3. Constitutional Analysis
 
-The federal government's jurisdiction over AI agent identity and traceability is grounded in:
+The project proposes federal and cooperative implementation routes based on potential heads of power including:
 
 - **Trade and commerce** (s. 91(2)) — interprovincial and international AI services.
 - **Criminal law** (s. 91(27)) — fraud, identity theft, computer crime facilitated by AI.
-- **Peace, order, and good government** (s. 91 opening) — national concern doctrine for a novel regulatory subject.
-- **Telecommunications** (s. 92(10)(a) federal jurisdiction over interprovincial telecommunications).
-- **Paramountcy** — where federal and provincial law conflict, federal law prevails.
+- **Peace, order, and good government** (s. 91 opening) — potential national-concern arguments for a novel regulatory subject.
+- **Telecommunications** (s. 92(10)(a)) — interprovincial telecommunications contexts.
 
-Provincial jurisdiction over property and civil rights (s. 92(13)) and matters of a merely local or private nature (s. 92(16)) supports provincial regulation of provincially regulated sectors. The cooperative model sets a national minimum while allowing provincial equivalent-or-stronger regimes.
+Provincial jurisdiction over property and civil rights (s. 92(13)) and matters of a merely local or private nature (s. 92(16)) supports provincial regulation of provincially regulated sectors. The proposed cooperative model targets a national baseline while allowing equivalent-or-stronger provincial regimes.
 
 See `government/CHARTER_ANALYSIS.md` for Charter implications, particularly:
 
@@ -96,39 +95,39 @@ See `government/CHARTER_ANALYSIS.md` for Charter implications, particularly:
 
 ## 4. Privacy Analysis
 
-Permanent traceability creates tension with privacy principles. The tension is resolved through:
+Permanent traceability creates tension with privacy principles. The proposed standard addresses that tension through:
 
 - **Minimization** — permanent minimal metadata only.
 - **Pseudonymization** — user and principal identifiers are pseudonymous by default.
 - **Content separation** — permanent commitments, not plaintext content.
-- **Sealed records** — sensitive information accessible under judicial or regulator authority.
+- **Sealed records** — sensitive information accessible under judicial or regulator authority where legally authorized.
 - **Access logging** — all access to sealed records is logged and auditable.
 - **Long-term signature migration** — cryptographic agility.
 - **Append-only corrections** — no erasure of history; corrections are new signed events.
 
-See `government/PRIVACY_AND_HUMAN_RIGHTS_ANALYSIS.md` for the detailed analysis, including PIPEDA's principles (consent, limited collection, limited use, accuracy, safeguards, openness, individual access, challenging compliance), the Privacy Act's application to public-sector AI, and provincial privacy statutes.
+See `government/PRIVACY_AND_HUMAN_RIGHTS_ANALYSIS.md` for the detailed analysis.
 
 ## 5. Indigenous Data Governance
 
-AI-IDP recognizes Indigenous data sovereignty. The analysis in `research/synthesis/INDIGENOUS_DATA_GOVERNANCE_ANALYSIS.md` is grounded in:
+AI-IDP recognizes Indigenous data sovereignty as an important design objective where Indigenous rights, community data, governance authority, or services are materially involved. The analysis in `research/synthesis/INDIGENOUS_DATA_GOVERNANCE_ANALYSIS.md` is grounded in:
 
 - **OCAP® principles** (First Nations Information Governance Centre) — Ownership, Control, Access, Possession.
 - **First Nations, Inuit, and Métis distinctions** — different nations have different governance authority.
-- **TRC Calls to Action** — particularly Calls to Action 43–44 (adoption and implementation of UNDRIP) and 7, 18, 19 (aboriginal health and reconciliation).
-- **Community-controlled access** — registry access for Indigenous community data is governed by the community.
+- **TRC Calls to Action** — considered as policy/design objectives where relevant to the deployment context.
+- **Community-controlled access** — supported for Indigenous community data where applicable.
 
-Consultation with rights-holders is a precondition for implementation. AI-IDP does not override Indigenous data governance; it provides hooks for community-controlled access and dispute resolution.
+Meaningful rights-holder engagement should occur before deployments that materially affect Indigenous rights, community data, governance authority, or services, using distinctions-based protocols appropriate to the affected community or nation. **This is not a universal implementation prerequisite for unrelated AI-IDP deployments.** AI-IDP does not override applicable Indigenous rights or data-governance obligations; it provides technical hooks for community-controlled access, sealed evidence, and dispute-resolution workflows where they are required.
 
 ## 6. Administrative Implementation
 
-The administrative implementation is defined in `administration/ADMINISTRATIVE_IMPLEMENTATION_PLAN.md`:
+The administrative implementation is defined in `administration/ADMINISTRATIVE_IMPLEMENTATION_PLAN.md` as a target operating model:
 
-- **National registry authority** — operator of the public and controlled tiers.
-- **Sectoral registry authorities** — for regulated sectors (finance, healthcare, public sector).
+- **National registry authority** — proposed operator of the public and controlled tiers.
+- **Sectoral registry authorities** — proposed for regulated sectors (finance, healthcare, public sector).
 - **Provincial registry authorities** — where provinces establish equivalent regimes.
-- **Certification bodies** — accredited conformity assessors.
-- **Auditor registry** — accredited auditors.
-- **Incident coordinator** — national coordinator for cross-sectoral AI incidents.
+- **Certification bodies** — proposed accredited conformity assessors.
+- **Auditor registry** — proposed accredited auditors.
+- **Incident coordinator** — proposed national coordinator for cross-sectoral AI incidents.
 - **Public-sector profile** — federal, provincial, municipal government deployments.
 - **Private-sector profile** — commercial deployments.
 - **Open-source profile** — open-source agent compliance.
@@ -137,24 +136,24 @@ The administrative implementation is defined in `administration/ADMINISTRATIVE_I
 
 ## 7. Enforcement
 
-Enforcement options are analyzed in `government/ENFORCEMENT_OPTIONS.md`:
+Enforcement options are proposed and analyzed in `government/ENFORCEMENT_OPTIONS.md`:
 
 - **Civil penalties** — administrative monetary penalties.
-- **Criminal liability** — for fraudulent attribution, evidence tampering, or operating without registration.
-- **Service suspension** — regulator authority to suspend non-compliant services.
-- **Procurement bar** — non-compliant agents are barred from federal procurement.
-- **Civil liability** — statutory civil liability for harms caused by non-compliant operation.
-- **Evidentiary consequences** — non-compliant operation creates evidentiary presumptions.
+- **Criminal liability** — for fraudulent attribution, evidence tampering, or unlawful operation if enacted.
+- **Service suspension** — potential regulator authority to suspend non-compliant services.
+- **Procurement bar** — potential procurement consequence for non-conforming agents.
+- **Civil liability** — potential statutory civil liability for harms caused by non-compliant operation.
+- **Evidentiary consequences** — potential evidentiary presumptions tied to non-compliant operation.
 
-See `government/PENALTY_OPTIONS.md` and `government/CIVIL_LIABILITY_OPTIONS.md` for the detailed analysis.
+See `government/PENALTY_OPTIONS.md` and `government/CIVIL_LIABILITY_OPTIONS.md` for the detailed proposals.
 
 ## 8. Procurement
 
-Federal procurement profile is defined in `government/FEDERAL_PROCUREMENT_PROFILE.md`. The profile integrates with the Treasury Board Contracting Policy and the Directive on Automated Decision-Making. AI agents acquired through federal procurement must be registered at conformance level L3 or higher.
+The proposed federal procurement profile is defined in `government/FEDERAL_PROCUREMENT_PROFILE.md`. The target model would integrate with Treasury Board procurement and automated-decision governance. Under the proposed AI-IDP standard, federal procurement of higher-risk AI agents would require elevated conformance levels such as L3 or higher. This is a proposed requirement, not current federal procurement law.
 
 ## 9. Algorithmic Impact Assessment
 
-The AIA extension proposal is defined in `government/AIA_EXTENSION_PROPOSAL.md`. The extension adds AI-IDP registration as a required field in the AIA, with trace-evidence requirements for high-impact automated decisions.
+The proposed AIA extension is defined in `government/AIA_EXTENSION_PROPOSAL.md`. The target design adds AI-IDP registration and trace-evidence fields for relevant automated decisions. It is a proposed extension, not a current Treasury Board requirement.
 
 ## 10. Standards Route
 
@@ -170,25 +169,22 @@ The public consultation package is in `government/PUBLIC_CONSULTATION_PACKAGE.md
 
 ## 13. Distinguishing Current from Proposed
 
-AI-IDP documents consistently distinguish:
+AI-IDP documents are required to distinguish:
 
-- **Current law** (e.g., PIPEDA, Privacy Act, provincial privacy statutes, Criminal Code computer-crime provisions).
-- **Current regulation** (e.g., AIA under the Treasury Board Directive).
-- **Current policy** (e.g., federal AI strategy).
-- **Current guidance** (e.g., OPC guidance, CCCS guidance).
-- **Current voluntary codes** (e.g., industry codes of conduct).
-- **Current standards** (e.g., ISO/IEC standards adopted in Canada).
-- **Proposed legislation** (e.g., AIDA under Bill C-27; Quebec Quebec AI regulatory developments.
-- **Expired legislation** (none referenced in this version).
-- **Pending legislation** (e.g., AIDA at committee stage).
-- **Proposed AI-IDP requirements** (the AI-IDP standard itself).
-- **Proposed future legal obligations** (the AI-IDP-based legislative proposal).
+- **Current law** — enacted statutes and regulations currently in force.
+- **Current policy/directives** — operative administrative instruments.
+- **Current guidance** — regulator or government guidance.
+- **Current voluntary codes** — non-binding codes and commitments.
+- **Current standards** — standards actually adopted or recognized by the relevant standards body.
+- **Historical or expired proposals** — including legislation that did not become law.
+- **Proposed AI-IDP requirements** — the AI-IDP standard itself.
+- **Proposed future legal obligations** — the AI-IDP-based legislative and administrative proposals.
 
 Documents that misclassify the legal status of any instrument are defective and must be corrected.
 
 ## 14. Compliance Profiles
 
-AI-IDP defines compliance profiles for:
+AI-IDP defines target compliance profiles for:
 
 - **Federal public sector** — Treasury Board AIA integration; federal procurement profile.
 - **Provincial public sector** — provincial AIA-equivalent integration; provincial procurement profile.
@@ -203,11 +199,12 @@ See `government/PUBLIC_SECTOR_IMPLEMENTATION_PROFILE.md`, `government/PRIVATE_SE
 
 ## 15. Effective Date
 
-AI-IDP's effective date is contingent on:
+AI-IDP's effective date is contingent on the adoption route pursued, including one or more of:
 
-- Legislative authorization (if the legislative route is pursued)
-- Standards Council of Canada adoption (if the standards route is pursued)
-- Treasury Board Directive amendment (if the administrative route is pursued)
-- Provincial agreement (if the cooperative federalism model is pursued)
+- Legislative authorization
+- Standards Council of Canada adoption or another recognized standards route
+- Treasury Board or other administrative adoption
+- Provincial agreement or equivalent provincial implementation
+- Contractual/procurement adoption in organizations choosing to implement the standard voluntarily
 
-AI-IDP's effective date is **not** triggered by this preparation. The preparation produces a submission-ready proposal; the effective date is determined by the authorizing body.
+AI-IDP's effective date is **not** triggered by this preparation. The preparation defines the target standard and submission-ready proposal; legal or institutional enforceability is determined by the applicable authorizing or adopting body.
