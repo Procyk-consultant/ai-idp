@@ -7,7 +7,7 @@ Purpose: PostgreSQL-backed persistent storage for production AegisTrace deployme
 Classification: infrastructure
 Security Classification: internal
 Version: 2.0.0
-Last Material Revision: 2026-08-01
+Last Material Revision: 2026-08-16
 Licence Status: No licence selected unless approved in writing by Pierre-Edward Procyk.
 """
 from __future__ import annotations
@@ -20,7 +20,7 @@ from typing import Any
 
 try:
     import psycopg2
-    from psycopg2.extras import RealDictCursor
+    from psycopg2.extras import RealDictCursor, execute_values
     _PSYCOPG2_AVAILABLE = True
 except ImportError:
     _PSYCOPG2_AVAILABLE = False
@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS events (
     signing_key_id TEXT NOT NULL,
     payload JSONB NOT NULL
 );
-CREATE INDEX IF NOT EXISTS idx_events_seq ON events(seq);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_events_seq_unique ON events(seq);
 CREATE INDEX IF NOT EXISTS idx_events_action ON events(action);
 CREATE INDEX IF NOT EXISTS idx_events_signing_key ON events(signing_key_id);
 CREATE INDEX IF NOT EXISTS idx_events_timestamp ON events(timestamp);
@@ -93,20 +93,28 @@ CREATE INDEX IF NOT EXISTS idx_access_log_accessor ON access_log(accessor_id);
 """
 
 
+def _payload_dict(value: Any) -> dict[str, Any]:
+    """Normalize psycopg2 JSONB output to a dictionary."""
+    if isinstance(value, dict):
+        return dict(value)
+    if isinstance(value, str):
+        parsed = json.loads(value)
+        if not isinstance(parsed, dict):
+            raise TypeError("JSONB payload is not an object")
+        return parsed
+    raise TypeError(f"unsupported JSONB payload type: {type(value).__name__}")
+
+
 @dataclass
 class PostgresConfig:
-    """Configuration for the PostgreSQL backend.
+    """Connection configuration for the PostgreSQL backend."""
 
-    Connection parameters follow the standard libpq format. Production
-    deployments should source these from environment variables or a
-    secrets manager — never from a checked-in file.
-    """
     host: str = "localhost"
     port: int = 5432
     database: str = "aegistrace"
     user: str = "aegistrace"
-    password: str = ""  # sourced from env in production
-    sslmode: str = "require"  # require SSL in production
+    password: str = ""
+    sslmode: str = "require"
 
     @classmethod
     def from_env(cls) -> PostgresConfig:
@@ -130,22 +138,9 @@ class PostgresConfig:
 class PostgresStorage:
     """PostgreSQL-backed persistent storage for AegisTrace.
 
-    This backend is suitable for production multi-tenant deployments.
-    It uses JSONB columns for flexible schema evolution, BIGSERIAL for
-    sequence ordering, and indexes on the most common query paths
-    (seq, action, signing_key_id, timestamp, entity_type, state).
-
-    Invariants:
-        - All write operations are transactional.
-        - Event IDs are unique (PRIMARY KEY).
-        - Sequence numbers are monotonic (BIGSERIAL).
-        - SSL is required by default (configurable).
-        - Access to non-public records is logged (via access_log table).
-
-    Failure Behaviour:
-        - If the database is unreachable, raises psycopg2.OperationalError.
-        - If a write violates a unique constraint, raises psycopg2.IntegrityError.
-        - Callers should retry with exponential backoff for transient failures.
+    PostgreSQL owns the monotonic ``events.seq`` value through BIGSERIAL.
+    Callers provide canonical event content, never a process-local sequence
+    number that could restart across batches or workers.
     """
 
     def __init__(self, config: PostgresConfig) -> None:
@@ -175,7 +170,6 @@ class PostgresStorage:
 
     @contextmanager
     def transaction(self) -> Iterator[Any]:
-        """Context manager for explicit transaction control."""
         try:
             yield self._conn.cursor()
             self._conn.commit()
@@ -183,17 +177,18 @@ class PostgresStorage:
             self._conn.rollback()
             raise
 
-    def append_event(self, seq: int, event: dict[str, Any]) -> None:
+    def append_event(self, event: dict[str, Any]) -> int:
+        """Insert one event and return its database-assigned sequence."""
         with self._conn.cursor() as cur:
             cur.execute(
                 """
-                INSERT INTO events (event_id, seq, timestamp, action, event_hash, previous_event_hash, signing_key_id, payload)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s::jsonb)
+                INSERT INTO events (event_id, timestamp, action, event_hash, previous_event_hash, signing_key_id, payload)
+                VALUES (%s, %s, %s, %s, %s, %s, %s::jsonb)
                 ON CONFLICT (event_id) DO NOTHING
+                RETURNING seq
                 """,
                 (
                     event["event_id"],
-                    seq,
                     event["timestamp"],
                     event["action"],
                     event["event_hash"],
@@ -202,43 +197,49 @@ class PostgresStorage:
                     json.dumps(event, sort_keys=True),
                 ),
             )
+            row = cur.fetchone()
         self._conn.commit()
+        if row is None:
+            raise ValueError(f"event_id already exists: {event['event_id']}")
+        return int(row[0])
 
     def append_events_batch(self, events: list[dict[str, Any]]) -> int:
-        """Batch-insert multiple events in a single transaction.
-
-        Returns the number of events actually inserted (may be less than
-        len(events) if some event_ids already existed).
-        """
-        from psycopg2.extras import execute_values
+        """Batch-insert events using database-assigned global sequence values."""
+        if not events:
+            return 0
         rows = [
             (
-                e["event_id"], i, e["timestamp"], e["action"], e["event_hash"],
-                e.get("previous_event_hash"), e["signing_key_id"],
-                json.dumps(e, sort_keys=True),
+                event["event_id"],
+                event["timestamp"],
+                event["action"],
+                event["event_hash"],
+                event.get("previous_event_hash"),
+                event["signing_key_id"],
+                json.dumps(event, sort_keys=True),
             )
-            for i, e in enumerate(events)
+            for event in events
         ]
         with self._conn.cursor() as cur:
             execute_values(
                 cur,
                 """
-                INSERT INTO events (event_id, seq, timestamp, action, event_hash, previous_event_hash, signing_key_id, payload)
+                INSERT INTO events (event_id, timestamp, action, event_hash, previous_event_hash, signing_key_id, payload)
                 VALUES %s
                 ON CONFLICT (event_id) DO NOTHING
                 """,
                 rows,
+                template="(%s, %s, %s, %s, %s, %s, %s::jsonb)",
                 page_size=1000,
             )
             inserted = cur.rowcount
         self._conn.commit()
-        return inserted
+        return int(inserted)
 
     def get_event(self, event_id: str) -> dict[str, Any] | None:
         with self._conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute("SELECT payload FROM events WHERE event_id = %s", (event_id,))
             row = cur.fetchone()
-            return json.loads(row["payload"]) if row else None
+            return _payload_dict(row["payload"]) if row else None
 
     def list_events(self, limit: int = 1000, offset: int = 0) -> list[dict[str, Any]]:
         with self._conn.cursor(cursor_factory=RealDictCursor) as cur:
@@ -246,7 +247,7 @@ class PostgresStorage:
                 "SELECT payload FROM events ORDER BY seq LIMIT %s OFFSET %s",
                 (limit, offset),
             )
-            return [json.loads(r["payload"]) for r in cur.fetchall()]
+            return [_payload_dict(row["payload"]) for row in cur.fetchall()]
 
     def list_events_by_action(self, action: str, limit: int = 1000) -> list[dict[str, Any]]:
         with self._conn.cursor(cursor_factory=RealDictCursor) as cur:
@@ -254,7 +255,7 @@ class PostgresStorage:
                 "SELECT payload FROM events WHERE action = %s ORDER BY seq LIMIT %s",
                 (action, limit),
             )
-            return [json.loads(r["payload"]) for r in cur.fetchall()]
+            return [_payload_dict(row["payload"]) for row in cur.fetchall()]
 
     def list_events_by_signing_key(self, key_id: str, limit: int = 1000) -> list[dict[str, Any]]:
         with self._conn.cursor(cursor_factory=RealDictCursor) as cur:
@@ -262,12 +263,13 @@ class PostgresStorage:
                 "SELECT payload FROM events WHERE signing_key_id = %s ORDER BY seq LIMIT %s",
                 (key_id, limit),
             )
-            return [json.loads(r["payload"]) for r in cur.fetchall()]
+            return [_payload_dict(row["payload"]) for row in cur.fetchall()]
 
     def count_events(self) -> int:
         with self._conn.cursor() as cur:
             cur.execute("SELECT COUNT(*) FROM events")
-            return cur.fetchone()[0]
+            row = cur.fetchone()
+            return int(row[0])
 
     def upsert_registry(self, entity_id: str, entity_type: str, state: str, payload: dict[str, Any]) -> None:
         with self._conn.cursor() as cur:
@@ -289,12 +291,12 @@ class PostgresStorage:
         with self._conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute("SELECT payload FROM registry WHERE entity_id = %s", (entity_id,))
             row = cur.fetchone()
-            return json.loads(row["payload"]) if row else None
+            return _payload_dict(row["payload"]) if row else None
 
     def list_registry_by_type(self, entity_type: str) -> list[dict[str, Any]]:
         with self._conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute("SELECT payload FROM registry WHERE entity_type = %s", (entity_type,))
-            return [json.loads(r["payload"]) for r in cur.fetchall()]
+            return [_payload_dict(row["payload"]) for row in cur.fetchall()]
 
     def upsert_key(self, key_id: str, public_pem: str, state: str, bound_entity_id: str | None, payload: dict[str, Any]) -> None:
         with self._conn.cursor() as cur:
@@ -317,7 +319,7 @@ class PostgresStorage:
         with self._conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute("SELECT payload FROM keys WHERE key_id = %s", (key_id,))
             row = cur.fetchone()
-            return json.loads(row["payload"]) if row else None
+            return _payload_dict(row["payload"]) if row else None
 
     def record_merkle_anchor(self, root: str, event_count: int, first_event_id: str | None, last_event_id: str | None, signing_key_id: str) -> int:
         with self._conn.cursor() as cur:
@@ -330,15 +332,16 @@ class PostgresStorage:
             )
             anchor_id = cur.fetchone()[0]
         self._conn.commit()
-        return anchor_id
+        return int(anchor_id)
 
     def list_merkle_anchors(self, limit: int = 100) -> list[dict[str, Any]]:
         with self._conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute(
-                "SELECT anchor_id, root, event_count, first_event_id, last_event_id, anchored_at, signing_key_id FROM merkle_anchors ORDER BY anchor_id DESC LIMIT %s",
+                "SELECT anchor_id, root, event_count, first_event_id, last_event_id, anchored_at, signing_key_id "
+                "FROM merkle_anchors ORDER BY anchor_id DESC LIMIT %s",
                 (limit,),
             )
-            return [dict(r) for r in cur.fetchall()]
+            return [dict(row) for row in cur.fetchall()]
 
     def place_legal_hold(self, held_record_ids: list[str], hold_authority: str, hold_reason: str = "", hold_expires_at: str | None = None) -> int:
         with self._conn.cursor() as cur:
@@ -351,7 +354,7 @@ class PostgresStorage:
             )
             hold_id = cur.fetchone()[0]
         self._conn.commit()
-        return hold_id
+        return int(hold_id)
 
     def log_access(self, accessor_id: str, accessed_record_id: str, access_purpose: str = "") -> None:
         with self._conn.cursor() as cur:
@@ -376,7 +379,7 @@ class PostgresStorage:
                     "SELECT * FROM access_log ORDER BY accessed_at DESC LIMIT %s",
                     (limit,),
                 )
-            return [dict(r) for r in cur.fetchall()]
+            return [dict(row) for row in cur.fetchall()]
 
 
 __all__ = ["PostgresConfig", "PostgresStorage", "SCHEMA_SQL"]
