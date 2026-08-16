@@ -1,7 +1,7 @@
 # AI-IDP
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21769036.svg)](https://doi.org/10.5281/zenodo.21769036) / AegisTrace
 
-Last Material Revision: 2026-08-14
+Last Material Revision: 2026-08-16
 
 **A Universal Canadian Framework for Persistent AI Actor Identity, Permanent Traceability, Delegation, Quality Assurance, and Accountable AI Operation**
 
@@ -56,14 +56,17 @@ This is the **proposed** standard and legal objective. It is **not** current Can
 # 1. Install
 pip install -e .
 
-# 2. Run the demo
+# 2. Run the demo (creates ledger.jsonl + public_keys.json)
 python -m aegistrace.cli admin demo --out .aitrace-demo
 
 # 3. Run the test suite
 pytest tests/ -v
 
-# 4. Verify a ledger
-python -m aegistrace.cli verify --ledger .aitrace-demo\ledger.jsonl
+# 4. Fully verify a ledger: hash chain + Ed25519 signatures
+python -m aegistrace.cli verify --ledger .aitrace-demo\ledger.jsonl --keys .aitrace-demo\public_keys.json
+
+# Optional: integrity-only verification when public keys are intentionally unavailable
+python -m aegistrace.cli verify --ledger .aitrace-demo\ledger.jsonl --hash-only
 
 # 5. Compile the research paper
 Set-Location -LiteralPath 'paper'
@@ -161,7 +164,9 @@ pytest tests/ -v
 - Permanence tests (revocation, termination, key rotation, archive)
 - Conformance tests (schema, canonical vocabulary, invariants, append-only)
 
-**2026-08-14 CI note:** no new test or compilation run was performed during the documentation reconciliation. The latest GitHub Actions failure did not execute any workflow step because GitHub reported the account locked due to a billing issue; it is therefore not evidence of a code, test, or compilation failure.
+**Current reconciliation status:** the historical 113/113 result remains the last executed full validation. The `reconcile-2026-08-14` branch contains post-validation hardening changes identified through static code/specification review and therefore requires a fresh controlled validation pass before it can inherit the historical 113/113 status or be merged as a validated release.
+
+**GitHub CI note:** the latest observed GitHub Actions failure did not execute any workflow step because GitHub reported the account locked due to a billing issue; it is therefore not evidence of a code, test, or compilation failure.
 
 ---
 
@@ -244,8 +249,8 @@ LinkedIn: [linkedin.com/in/pierre-edward-procyk-223b75305](https://www.linkedin.
 
 See `project-control/PROJECT_STATUS.md`, `project-control/VALIDATION_STATUS.md`, `release/FINAL_COMPLETION_REPORT.md`, and `release/VALIDATION_REPORT.md` for the consolidated completion status, verified results, target capabilities, and limitations.
 
-**Project material date:** 2026-08-01  
-**Public reconciliation note:** 2026-08-14  
+**Project baseline:** v2.0.0 / 2026-08-01  
+**Reconciliation branch material:** 2026-08-16  
 **Version:** 2.0.0  
-**Tests:** 113/113 passing in the last recorded full validation (2026-08-02); not rerun during the 2026-08-14 reconciliation  
+**Tests:** 113/113 passing in the last recorded full validation (2026-08-02); branch changes not yet rerun  
 **Research paper:** Last recorded clean Tectonic compile passed on 2026-08-02; public archival record at https://doi.org/10.5281/zenodo.21769036
