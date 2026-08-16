@@ -6,7 +6,7 @@ File: src/aegistrace/cli/admin.py
 Purpose: admin CLI - administrative operations + demo scenario
 Classification: application
 Version: 2.0.0
-Last Material Revision: 2026-08-01
+Last Material Revision: 2026-08-16
 Licence Status: No licence selected unless approved in writing by Pierre-Edward Procyk.
 """
 from __future__ import annotations
@@ -37,7 +37,6 @@ def run_demo(out_dir: Path) -> int:
     policy = PolicyEngine(keys)
     delegations = DelegationBroker(keys)
 
-    # Register entities
     controller_id = str(make_identifier("controller", "org-001"))
     principal_id = str(make_identifier("principal", "user-012"))
     agent_id = str(make_identifier("agent", "research-agent", version="v3"))
@@ -52,15 +51,12 @@ def run_demo(out_dir: Path) -> int:
         etype = eid.split("/")[3].split("#")[0]
         registry.register(eid, etype)
 
-    # Create a controller-level signing key
     ctrl_key_id = str(make_identifier("key", "key-ctrl-001"))
     keys.create_key(ctrl_key_id, bound_entity_id=controller_id)
 
-    # Create an agent signing key
     agent_key_id = str(make_identifier("key", "key-agent-001"))
     keys.create_key(agent_key_id, bound_entity_id=agent_id)
 
-    # Issue authorization
     auth = policy.issue_authorization(
         principal_id=principal_id,
         controller_id=controller_id,
@@ -70,7 +66,8 @@ def run_demo(out_dir: Path) -> int:
         signing_key_id=ctrl_key_id,
     )
 
-    # Issue an approval for a MODIFY (which requires approval)
+    # The demo records a human approval for MODIFY as evidence even though the
+    # default policy does not classify every MODIFY action as approval-required.
     ap = policy.issue_approval(
         action="MODIFY",
         approver_id=principal_id,
@@ -78,7 +75,6 @@ def run_demo(out_dir: Path) -> int:
         signing_key_id=ctrl_key_id,
     )
 
-    # Create delegation to a child agent
     child_agent_id = str(make_identifier("agent", "literature-search-agent", version="v1"))
     registry.register(child_agent_id, "agent")
     dlg = delegations.create(
@@ -95,12 +91,10 @@ def run_demo(out_dir: Path) -> int:
         signing_key_id=agent_key_id,
     )
 
-    # Evaluate policy
     decision = policy.evaluate(action="MODIFY", authorization_id=auth.authorization_id, approval_id=ap.approval_id)
     assert decision.permitted, f"decision should be permitted, got: {decision.reason}"
     policy.use_approval(ap.approval_id)
 
-    # Record several events
     actor = Actor(controller_id=controller_id, principal_id=principal_id, agent_id=agent_id, agent_instance_id=agent_instance_id)
     ec = ExecutionContext(provider_id=provider_id, model_id=model_id, model_version_id=model_version_id, deployment_id=deployment_id)
 
@@ -132,28 +126,30 @@ def run_demo(out_dir: Path) -> int:
         delegation_id=dlg.delegation_id,
         authorization_id=auth.authorization_id,
     )
-    # Sanity check: all four actions were recorded before verification.
     assert {e1.action, e2.action, e3.action, e4.action} == {"SEARCH", "READ", "MODIFY", "DELEGATE"}
 
-    # Verify
     verifier = LedgerVerifier(keys)
     report = verifier.verify(ledger)
     assert report.ok, f"verification failed: {report.failures}"
 
-    # Compute Merkle root
     root = merkle_root(ledger.events())
 
-    # Persist
     ledger_path = out_dir / "ledger.jsonl"
+    keys_path = out_dir / "public_keys.json"
     ledger.save(ledger_path)
+    keys_path.write_text(
+        json.dumps(keys.export_public_registry(), indent=2, sort_keys=True),
+        encoding="utf-8",
+    )
 
-    # Summary
     summary = {
         "events": len(ledger),
         "event_ids": [e.event_id for e in ledger],
         "merkle_root": root,
         "verification": "OK",
+        "verified_signatures": report.verified_signature_count,
         "ledger_path": str(ledger_path),
+        "public_keys_path": str(keys_path),
         "controller_key_id": ctrl_key_id,
         "agent_key_id": agent_key_id,
         "authorization_id": auth.authorization_id,
