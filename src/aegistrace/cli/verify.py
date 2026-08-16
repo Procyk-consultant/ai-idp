@@ -3,26 +3,67 @@ Project: AI-IDP / AegisTrace
 Author and Intellectual Property Owner: Pierre-Edward Procyk
 Copyright: © 2026 Pierre-Edward Procyk. All rights reserved.
 File: src/aegistrace/cli/verify.py
-Purpose: verify CLI - verify ledger integrity
+Purpose: verify CLI - verify ledger integrity and signatures
 Classification: application
 Version: 2.0.0
-Last Material Revision: 2026-08-01
+Last Material Revision: 2026-08-16
 Licence Status: No licence selected unless approved in writing by Pierre-Edward Procyk.
 """
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
+from typing import Any
 
 from aegistrace.identity.keys import KeyService
 from aegistrace.ledger.append_only import AppendOnlyLedger, LedgerVerifier
 
 
+def _load_public_keys(path: Path) -> KeyService:
+    """Load a verify-only public-key registry exported by KeyService."""
+    data: Any = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(data, dict) or data.get("schema") != "aegistrace.public_keys.v1":
+        raise ValueError("unsupported public-key registry schema")
+    records = data.get("keys")
+    if not isinstance(records, list):
+        raise ValueError("public-key registry must contain a 'keys' list")
+
+    keys = KeyService()
+    for item in records:
+        if not isinstance(item, dict):
+            raise ValueError("public-key registry contains a non-object key record")
+        key_id = item.get("key_id")
+        public_pem = item.get("public_pem")
+        if not isinstance(key_id, str) or not isinstance(public_pem, str):
+            raise ValueError("key record requires string key_id and public_pem")
+        keys.register_public_key(
+            key_id=key_id,
+            public_pem=public_pem,
+            bound_entity_id=item.get("bound_entity_id"),
+            state=str(item.get("state", "active")),
+            created_at=str(item.get("created_at", "")),
+            rotated_at=item.get("rotated_at"),
+            revoked_at=item.get("revoked_at"),
+            terminated_at=item.get("terminated_at"),
+            successor_key_id=item.get("successor_key_id"),
+        )
+    return keys
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="aegistrace.verify", description="Verify an AegisTrace ledger")
     parser.add_argument("--ledger", required=True, help="Path to ledger.jsonl")
-    parser.add_argument("--keys", help="Path to keys.json (optional; keys loaded from event records otherwise)")
+    parser.add_argument(
+        "--keys",
+        help="Path to an AegisTrace verify-only public-key registry. Required for cryptographic signature verification.",
+    )
+    parser.add_argument(
+        "--hash-only",
+        action="store_true",
+        help="Verify only event hashes and the hash chain. Explicitly skips signature verification.",
+    )
     args = parser.parse_args(argv)
 
     ledger_path = Path(args.ledger)
@@ -30,27 +71,52 @@ def main(argv: list[str] | None = None) -> int:
         print(f"ledger not found: {ledger_path}", file=sys.stderr)
         return 2
 
-    ledger = AppendOnlyLedger.load(ledger_path)
+    if args.hash_only and args.keys:
+        print("choose either --keys for full verification or --hash-only; do not use both", file=sys.stderr)
+        return 2
+    if not args.hash_only and not args.keys:
+        print(
+            "full verification requires --keys. Use --hash-only only when signature verification is intentionally unavailable.",
+            file=sys.stderr,
+        )
+        return 2
+
+    try:
+        ledger = AppendOnlyLedger.load(ledger_path)
+    except Exception as exc:
+        print(f"ledger load failed: {exc}", file=sys.stderr)
+        return 1
+
     print(f"Loaded {len(ledger)} events from {ledger_path}")
 
-    # Build a KeyService from the events' signing keys
-    keys = KeyService()
-    seen_keys = {}
-    for e in ledger:
-        if e.signing_key_id not in seen_keys:
-            seen_keys[e.signing_key_id] = e.signing_key_id
-            # We don't have PEM here; for full verification, load keys from a keys file.
-    # For verification without keys file, we still check hash chain and event hashes.
-    verifier = LedgerVerifier(keys)
-    # Skip signature check if keys missing by patching the verifier
+    if args.hash_only:
+        keys = KeyService()
+        verifier = LedgerVerifier(keys, verify_signatures=False)
+    else:
+        keys_path = Path(args.keys)
+        if not keys_path.exists():
+            print(f"public-key registry not found: {keys_path}", file=sys.stderr)
+            return 2
+        try:
+            keys = _load_public_keys(keys_path)
+        except Exception as exc:
+            print(f"public-key registry load failed: {exc}", file=sys.stderr)
+            return 2
+        verifier = LedgerVerifier(keys, verify_signatures=True)
+
     report = verifier.verify(ledger)
     if report.ok:
-        print("Verification OK: hash chain and event hashes verified.")
-        print("(Signature verification requires --keys; not performed.)")
+        if args.hash_only:
+            print("Verification OK: event hashes and hash chain verified; signatures intentionally not verified.")
+        else:
+            print(
+                f"Verification OK: event hashes, hash chain, and {report.verified_signature_count} signatures verified."
+            )
         return 0
+
     print(f"Verification FAILED: {len(report.failures)} failures")
-    for f in report.failures[:20]:
-        print(f"  - {f}")
+    for failure in report.failures[:20]:
+        print(f"  - {failure}")
     return 1
 
 
