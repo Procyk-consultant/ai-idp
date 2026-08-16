@@ -57,12 +57,12 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--ledger", required=True, help="Path to ledger.jsonl")
     parser.add_argument(
         "--keys",
-        help="Path to an AegisTrace verify-only public-key registry. Required for cryptographic signature verification.",
+        help="Path to an AegisTrace verify-only public-key registry for full cryptographic verification.",
     )
     parser.add_argument(
         "--hash-only",
         action="store_true",
-        help="Verify only event hashes and the hash chain. Explicitly skips signature verification.",
+        help="Verify event hashes and the hash chain without cryptographic signature verification.",
     )
     args = parser.parse_args(argv)
 
@@ -74,12 +74,6 @@ def main(argv: list[str] | None = None) -> int:
     if args.hash_only and args.keys:
         print("choose either --keys for full verification or --hash-only; do not use both", file=sys.stderr)
         return 2
-    if not args.hash_only and not args.keys:
-        print(
-            "full verification requires --keys. Use --hash-only only when signature verification is intentionally unavailable.",
-            file=sys.stderr,
-        )
-        return 2
 
     try:
         ledger = AppendOnlyLedger.load(ledger_path)
@@ -89,10 +83,8 @@ def main(argv: list[str] | None = None) -> int:
 
     print(f"Loaded {len(ledger)} events from {ledger_path}")
 
-    if args.hash_only:
-        keys = KeyService()
-        verifier = LedgerVerifier(keys, verify_signatures=False)
-    else:
+    full_verification = bool(args.keys)
+    if full_verification:
         keys_path = Path(args.keys)
         if not keys_path.exists():
             print(f"public-key registry not found: {keys_path}", file=sys.stderr)
@@ -103,15 +95,24 @@ def main(argv: list[str] | None = None) -> int:
             print(f"public-key registry load failed: {exc}", file=sys.stderr)
             return 2
         verifier = LedgerVerifier(keys, verify_signatures=True)
+    else:
+        if not args.hash_only:
+            print(
+                "WARNING: no --keys registry supplied; running HASH-CHAIN-ONLY verification. "
+                "Use --keys for full cryptographic signature verification.",
+                file=sys.stderr,
+            )
+        keys = KeyService()
+        verifier = LedgerVerifier(keys, verify_signatures=False)
 
     report = verifier.verify(ledger)
     if report.ok:
-        if args.hash_only:
-            print("Verification OK: event hashes and hash chain verified; signatures intentionally not verified.")
-        else:
+        if full_verification:
             print(
                 f"Verification OK: event hashes, hash chain, and {report.verified_signature_count} signatures verified."
             )
+        else:
+            print("Verification OK (HASH-CHAIN-ONLY): event hashes and hash chain verified; signatures NOT verified.")
         return 0
 
     print(f"Verification FAILED: {len(report.failures)} failures")
