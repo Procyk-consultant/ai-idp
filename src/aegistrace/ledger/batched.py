@@ -3,33 +3,23 @@ Project: AI-IDP / AegisTrace
 Author and Intellectual Property Owner: Pierre-Edward Procyk
 Copyright: © 2026 Pierre-Edward Procyk. All rights reserved.
 File: src/aegistrace/ledger/batched.py
-Purpose: Higher-throughput batched ledger with write-ahead log (WAL)
+Purpose: Higher-throughput batched ledger with evidence-preserving write-ahead log
 Classification: infrastructure
 Security Classification: internal
 Version: 2.0.0
-Last Material Revision: 2026-08-01
+Last Material Revision: 2026-08-16
 Licence Status: No licence selected unless approved in writing by Pierre-Edward Procyk.
-
-The batched ledger improves throughput by:
-1. Buffering events in memory and flushing in batches.
-2. Using a write-ahead log (WAL) for durability without blocking on every event.
-3. Parallel signature verification during read.
-4. Optional async flush to PostgreSQL backend.
-
-Tradeoffs:
-- Higher throughput (10-50x improvement over single-event append).
-- Slightly higher latency for individual events (buffered).
-- WAL provides crash recovery; the WAL is fsync'd before the caller is notified.
-- Bounded memory usage (configurable buffer size).
 """
 from __future__ import annotations
 
 import json
 import os
+import shutil
 import threading
 import time
 from collections.abc import Callable, Iterator
 from dataclasses import dataclass
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import IO
 
@@ -40,32 +30,32 @@ from aegistrace.ledger.append_only import AppendOnlyLedger, LedgerVerifier, Veri
 
 @dataclass
 class BatchConfig:
-    """Configuration for the batched ledger.
+    """Configuration for the batched ledger."""
 
-    Defaults are tuned for moderate-throughput deployments (1k-10k events/sec).
-    Higher-throughput deployments (50k+ events/sec) should increase batch_size
-    and flush_interval_ms, and use a WAL on NVMe storage.
-    """
-    batch_size: int = 100  # flush after this many events
-    flush_interval_ms: int = 100  # flush after this many ms
-    wal_path: Path | None = None  # if set, fsync each event to WAL before returning
-    wal_fsync: bool = True  # fsync the WAL on each event
-    max_buffer_size: int = 100_000  # reject appends if buffer exceeds this
-    parallel_verify: bool = True  # use thread pool for signature verification
+    batch_size: int = 100
+    flush_interval_ms: int = 100
+    wal_path: Path | None = None
+    wal_fsync: bool = True
+    max_buffer_size: int = 100_000
+    parallel_verify: bool = True
+
+
+class WALRecoveryError(RuntimeError):
+    """Raised when a WAL cannot be recovered without losing evidence."""
+
+    def __init__(self, message: str, *, wal_path: Path, quarantine_path: Path | None = None) -> None:
+        super().__init__(message)
+        self.wal_path = wal_path
+        self.quarantine_path = quarantine_path
 
 
 class BatchedLedger:
-    """Higher-throughput batched ledger with optional WAL.
+    """Higher-throughput batched ledger with optional durable WAL.
 
-    Invariants (same as AppendOnlyLedger):
-        - Events are append-only.
-        - Each event's previous_event_hash matches the prior event's event_hash.
-        - Event hashes are SHA-256 of the canonical form.
-
-    Additional invariants:
-        - If WAL is enabled, every event is durably persisted before the caller is notified.
-        - If the process crashes, the WAL is replayed on restart to recover buffered events.
-        - The buffer is bounded; excess events are rejected with BackpressureError.
+    When a WAL is configured, each event is appended and optionally fsync'd
+    before the caller is notified. Recovery is fail-closed: malformed or
+    chain-invalid WAL content is preserved for investigation and startup
+    fails rather than silently discarding evidence.
     """
 
     def __init__(self, config: BatchConfig | None = None) -> None:
@@ -80,45 +70,63 @@ class BatchedLedger:
         self._on_flush: Callable[[list[Event]], None] | None = None
         self._background_thread: threading.Thread | None = None
         self._stop_event = threading.Event()
-        # The underlying canonical ledger
         self._canonical = AppendOnlyLedger()
-        # Initialize WAL if configured
         if self.config.wal_path is not None:
             self._init_wal(self.config.wal_path)
 
     def _init_wal(self, path: Path) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)
-        # Open in append+binary mode; create if not exists
+        if path.exists() and path.stat().st_size > 0:
+            self._replay_wal(path)
         self._wal_file = open(path, "ab", buffering=0)
-        # Replay existing WAL on startup
-        self._replay_wal(path)
+
+    def _quarantine_wal(self, path: Path) -> Path:
+        timestamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
+        quarantine = path.with_name(f"{path.name}.corrupt.{timestamp}")
+        shutil.copy2(path, quarantine)
+        return quarantine
 
     def _replay_wal(self, path: Path) -> None:
-        """Replay the WAL on startup to recover buffered events."""
-        if not path.exists():
-            return
-        with open(path, "rb") as f:
-            for line in f:
-                line = line.strip()
-                if not line:
-                    continue
-                try:
-                    event_dict = json.loads(line.decode("utf-8"))
-                    event = Event.from_dict(event_dict)
-                    self._canonical.append(event)
-                except Exception:
-                    # Skip corrupted WAL entries
-                    pass
-        # Truncate the WAL after successful replay
-        with open(path, "wb") as f:
-            pass
+        """Reconstruct the canonical ledger from the complete WAL.
+
+        The WAL is intentionally retained after successful recovery. It is
+        the durable recovery evidence for this in-process ledger unless an
+        external durable backend/checkpoint mechanism explicitly supersedes
+        it. Corruption never causes silent skipping or truncation.
+        """
+        recovered = AppendOnlyLedger()
+        try:
+            with open(path, "rb") as file_handle:
+                for line_number, raw_line in enumerate(file_handle, start=1):
+                    line = raw_line.strip()
+                    if not line:
+                        continue
+                    try:
+                        event_dict = json.loads(line.decode("utf-8"))
+                        recovered.append(Event.from_dict(event_dict))
+                    except Exception as exc:
+                        quarantine = self._quarantine_wal(path)
+                        raise WALRecoveryError(
+                            f"WAL recovery failed at line {line_number}: {exc}",
+                            wal_path=path,
+                            quarantine_path=quarantine,
+                        ) from exc
+        except WALRecoveryError:
+            raise
+        except Exception as exc:
+            quarantine = self._quarantine_wal(path) if path.exists() else None
+            raise WALRecoveryError(
+                f"WAL recovery failed: {exc}",
+                wal_path=path,
+                quarantine_path=quarantine,
+            ) from exc
+
+        self._canonical = recovered
 
     def set_on_flush(self, callback: Callable[[list[Event]], None]) -> None:
-        """Register a callback invoked after each batch is flushed to the canonical ledger."""
         self._on_flush = callback
 
     def start_background_flush(self) -> None:
-        """Start a background thread that flushes the buffer periodically."""
         if self._background_thread is not None:
             return
         self._background_thread = threading.Thread(target=self._background_flush_loop, daemon=True)
@@ -130,15 +138,11 @@ class BatchedLedger:
             try:
                 self.flush()
             except Exception:
-                # Log and continue
-                pass
+                # The background loop remains alive; callers must surface
+                # callback/storage errors through their deployment telemetry.
+                continue
 
     def append(self, event: Event) -> None:
-        """Append an event to the buffer.
-
-        If the buffer is full, raises BackpressureError.
-        If WAL is enabled, the event is fsync'd to the WAL before returning.
-        """
         if self._closed:
             raise RuntimeError("ledger is closed")
         with self._buffer_lock:
@@ -146,7 +150,7 @@ class BatchedLedger:
                 raise BackpressureError(f"buffer full: {len(self._buffer)} >= {self.config.max_buffer_size}")
             self._buffer.append(event)
             should_flush = len(self._buffer) >= self.config.batch_size
-        # WAL durability
+
         if self._wal_file is not None:
             with self._wal_lock:
                 line = json.dumps(event.to_dict(), sort_keys=True, ensure_ascii=False) + "\n"
@@ -157,30 +161,20 @@ class BatchedLedger:
             self.flush()
 
     def flush(self) -> int:
-        """Flush the buffer to the canonical ledger.
-
-        Returns the number of events flushed.
-        """
         with self._flush_lock:
             with self._buffer_lock:
                 if not self._buffer:
                     return 0
                 batch = self._buffer
                 self._buffer = []
-            # Append to canonical ledger
             for event in batch:
                 self._canonical.append(event)
-            # Invoke callback
             if self._on_flush is not None:
-                try:
-                    self._on_flush(batch)
-                except Exception:
-                    pass
+                self._on_flush(batch)
             self._last_flush = time.monotonic()
             return len(batch)
 
     def close(self) -> None:
-        """Flush remaining events and close the ledger."""
         if self._closed:
             return
         self._stop_event.set()
@@ -192,7 +186,6 @@ class BatchedLedger:
         self._closed = True
 
     def events(self) -> list[Event]:
-        """Return all events (flushes the buffer first)."""
         self.flush()
         return self._canonical.events()
 
@@ -203,26 +196,33 @@ class BatchedLedger:
         return len(self._canonical) + len(self._buffer)
 
     def last_event_hash(self) -> str | None:
-        """Return the last event hash (from canonical or buffer)."""
         if self._buffer:
             return self._buffer[-1].event_hash
         return self._canonical.last_event_hash()
 
     def verify(self, key_service: KeyService) -> VerificationReport:
-        """Verify the canonical ledger."""
+        """Verify the canonical ledger.
+
+        ``parallel_verify`` remains a target optimization flag; correctness
+        is currently delegated to the strict canonical LedgerVerifier.
+        """
         self.flush()
         verifier = LedgerVerifier(key_service)
         return verifier.verify(self._canonical)
 
     def get(self, event_id: str) -> Event | None:
-        """Get an event by ID (flushes the buffer first)."""
         self.flush()
         return self._canonical.get(event_id)
 
 
 class BackpressureError(RuntimeError):
     """Raised when the buffer is full and cannot accept more events."""
-    pass
 
 
-__all__ = ["BatchConfig", "BatchedLedger", "BackpressureError", "VerificationReport"]
+__all__ = [
+    "BatchConfig",
+    "BatchedLedger",
+    "BackpressureError",
+    "WALRecoveryError",
+    "VerificationReport",
+]
