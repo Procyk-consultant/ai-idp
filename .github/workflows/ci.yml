@@ -6,30 +6,52 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Install
+          cache: pip
+
+      - name: Install full validation dependencies
         run: |
-          pip install -e .[dev]
+          python -m pip install --upgrade pip
+          pip install -e '.[test-full]'
+
       - name: Lint
         run: ruff check src tests
+
       - name: Type check
-        run: mypy src/aegistrace || true
+        run: mypy src/aegistrace
+
       - name: Unit tests
         run: pytest tests/unit -v
+
       - name: Integration tests
         run: pytest tests/integration -v
+
       - name: Security tests
         run: pytest tests/security -v
+
       - name: Privacy tests
         run: pytest tests/privacy -v
+
       - name: Permanence tests
         run: pytest tests/permanence -v
+
       - name: Conformance tests
         run: pytest tests/conformance -v
