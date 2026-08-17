@@ -11,6 +11,7 @@ Licence Status: No licence selected unless approved in writing by Pierre-Edward 
 """
 from __future__ import annotations
 
+import copy
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Any
@@ -118,8 +119,10 @@ class Delegation:
         if self.state != "active":
             return False
         if self.expires_at:
-            now = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
-            if now > self.expires_at:
+            try:
+                if datetime.now(UTC) > _parse_timestamp(self.expires_at):
+                    return False
+            except ValueError:
                 return False
         return True
 
@@ -146,7 +149,11 @@ class Delegation:
 
 
 class DelegationBroker:
-    """Create, verify, revoke, and resolve bounded delegation chains."""
+    """Create, verify, revoke, and resolve bounded delegation chains.
+
+    Returned delegation objects are snapshots; canonical state is mutated only
+    through broker operations.
+    """
 
     def __init__(self, key_service: KeyService) -> None:
         self._keys = key_service
@@ -201,6 +208,8 @@ class DelegationBroker:
     ) -> Delegation:
         if parent_agent_id == child_agent_id:
             raise ValueError("an agent cannot delegate to itself")
+        if expires_at is not None:
+            _parse_timestamp(expires_at)
         if not self._keys.is_active(signing_key_id):
             raise PermissionError(f"signing key not active: {signing_key_id}")
         if not self._signing_key_is_authorized(
@@ -209,7 +218,9 @@ class DelegationBroker:
             principal_id=principal_id,
             controller_id=controller_id,
         ):
-            raise PermissionError("delegation signing key is not bound to the parent agent, principal, or controller")
+            raise PermissionError(
+                "delegation signing key is not bound to the parent agent, principal, or controller"
+            )
 
         if parent_delegation_id is not None:
             parent = self._delegations.get(parent_delegation_id)
@@ -223,17 +234,12 @@ class DelegationBroker:
             child_scope = scope.to_dict()
             try:
                 child_decision = evaluate_child_scope(parent_scope, child_scope)
-                delegate_decision = evaluate_scope(
-                    parent_scope,
-                    action="DELEGATE",
-                    context=ScopeContext(requested_delegation_depth=scope.delegation_depth),
-                )
             except (TypeError, ValueError) as exc:
                 raise PermissionError(f"parent delegation scope is malformed: {exc}") from exc
             if not child_decision.allowed:
                 raise PermissionError(child_decision.reason)
-            if not delegate_decision.allowed:
-                raise PermissionError(delegate_decision.reason)
+            if parent.scope.action_classes and "DELEGATE" not in parent.scope.action_classes:
+                raise PermissionError("parent delegation does not permit DELEGATE")
 
         delegation = Delegation(
             delegation_id=str(make_identifier("delegation", make_slug("dlg"))),
@@ -242,7 +248,7 @@ class DelegationBroker:
             child_agent_id=child_agent_id,
             principal_id=principal_id,
             controller_id=controller_id,
-            scope=scope,
+            scope=copy.deepcopy(scope),
             expires_at=expires_at,
             revocable=revocable,
             created_at=datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -252,11 +258,12 @@ class DelegationBroker:
         delegation.signature = self._keys.get_signing_key(signing_key_id).sign(
             canonicalize(self._signed_record(delegation))
         )
-        self._delegations[delegation.delegation_id] = delegation
-        return delegation
+        self._delegations[delegation.delegation_id] = copy.deepcopy(delegation)
+        return copy.deepcopy(delegation)
 
     def get(self, delegation_id: str) -> Delegation | None:
-        return self._delegations.get(delegation_id)
+        delegation = self._delegations.get(delegation_id)
+        return copy.deepcopy(delegation) if delegation is not None else None
 
     def verify(self, delegation_id: str) -> bool:
         return self._verify_structural(delegation_id, visited=set())
@@ -277,7 +284,10 @@ class DelegationBroker:
             return False
         try:
             record = self._keys.get_record(delegation.signing_key_id)
-            public_key = SigningKey.from_public_pem(delegation.signing_key_id, record.public_pem).public_key
+            public_key = SigningKey.from_public_pem(
+                delegation.signing_key_id,
+                record.public_pem,
+            ).public_key
             if not SigningKey.verify(
                 public_key,
                 canonicalize(self._signed_record(delegation)),
@@ -296,11 +306,11 @@ class DelegationBroker:
             return False
         if parent.principal_id != delegation.principal_id or parent.controller_id != delegation.controller_id:
             return False
+        if parent.scope.action_classes and "DELEGATE" not in parent.scope.action_classes:
+            return False
         if not parent.scope.contains_child_scope(delegation.scope):
             return False
-        if not self._verify_structural(delegation.parent_delegation_id, visited=visited):
-            return False
-        return True
+        return self._verify_structural(delegation.parent_delegation_id, visited=visited)
 
     def verify_action(
         self,
@@ -312,7 +322,6 @@ class DelegationBroker:
         action: str,
         context: ScopeContext | None = None,
     ) -> bool:
-        """Verify the complete delegation lineage for a proposed child action."""
         delegation = self._delegations.get(delegation_id)
         if delegation is None or not self.verify(delegation_id):
             return False
@@ -325,7 +334,6 @@ class DelegationBroker:
                 return False
         except (TypeError, ValueError):
             return False
-
         if delegation.parent_delegation_id is None:
             return True
         return self.verify_action(
@@ -338,7 +346,6 @@ class DelegationBroker:
         )
 
     def delegation_chain(self, delegation_id: str) -> list[str]:
-        """Return a verified root-to-leaf delegation chain."""
         if not self.verify(delegation_id):
             raise PermissionError(f"delegation chain is invalid: {delegation_id}")
         chain: list[str] = []
@@ -363,7 +370,15 @@ class DelegationBroker:
         delegation.state = "revoked"
 
     def all_delegations(self) -> dict[str, Delegation]:
-        return dict(self._delegations)
+        return copy.deepcopy(self._delegations)
+
+
+def _parse_timestamp(value: str) -> datetime:
+    normalized = value[:-1] + "+00:00" if value.endswith("Z") else value
+    parsed = datetime.fromisoformat(normalized)
+    if parsed.tzinfo is None:
+        raise ValueError("timestamp must include a timezone")
+    return parsed.astimezone(UTC)
 
 
 __all__ = ["DelegationScope", "Delegation", "DelegationBroker"]
