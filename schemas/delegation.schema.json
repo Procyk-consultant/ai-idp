@@ -12,120 +12,55 @@
     "licence_status": "No licence selected unless approved in writing by Pierre-Edward Procyk.",
     "file": "schemas/delegation.schema.json",
     "version": "2.0.0",
-    "last_material_revision": "2026-08-01"
+    "last_material_revision": "2026-08-17"
   },
   "properties": {
-    "delegation_id": {
-      "$ref": "#/$defs/identifier"
-    },
-    "parent_agent_id": {
-      "$ref": "#/$defs/identifier"
-    },
-    "parent_instance_id": {
-      "$ref": "#/$defs/identifier"
-    },
-    "child_agent_id": {
-      "$ref": "#/$defs/identifier"
-    },
-    "principal_id": {
-      "$ref": "#/$defs/identifier"
-    },
-    "controller_id": {
-      "$ref": "#/$defs/identifier"
-    },
+    "delegation_id": {"$ref": "#/$defs/identifier"},
+    "parent_delegation_id": {"$ref": "#/$defs/identifier"},
+    "parent_agent_id": {"$ref": "#/$defs/identifier"},
+    "parent_instance_id": {"$ref": "#/$defs/identifier"},
+    "child_agent_id": {"$ref": "#/$defs/identifier"},
+    "principal_id": {"$ref": "#/$defs/identifier"},
+    "controller_id": {"$ref": "#/$defs/identifier"},
     "scope": {
       "type": "object",
       "properties": {
-        "task_classes": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "resource_classes": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "action_classes": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
+        "task_classes": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "resource_classes": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "action_classes": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
         "time_bounds": {
           "type": "object",
           "properties": {
-            "not_before": {
-              "$ref": "#/$defs/iso8601_timestamp"
-            },
-            "not_after": {
-              "$ref": "#/$defs/iso8601_timestamp"
-            }
-          }
+            "not_before": {"$ref": "#/$defs/iso8601_timestamp"},
+            "not_after": {"$ref": "#/$defs/iso8601_timestamp"}
+          },
+          "additionalProperties": false
         },
-        "geography": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "tool_classes": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "model_classes": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "provider_classes": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "delegation_depth": {
-          "type": "integer",
-          "minimum": 0
-        }
-      }
+        "geography": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "tool_classes": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "model_classes": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "provider_classes": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "delegation_depth": {"type": "integer", "minimum": 0}
+      },
+      "required": ["delegation_depth"],
+      "additionalProperties": false
     },
-    "expires_at": {
-      "$ref": "#/$defs/iso8601_timestamp"
-    },
-    "revocable": {
-      "type": "boolean"
-    },
-    "state": {
-      "type": "string",
-      "enum": [
-        "active",
-        "revoked",
-        "expired"
-      ]
-    },
-    "created_at": {
-      "$ref": "#/$defs/iso8601_timestamp"
-    },
-    "signature": {
-      "$ref": "#/$defs/ed25519_signature"
-    },
-    "signing_key_id": {
-      "$ref": "#/$defs/identifier"
-    }
+    "expires_at": {"$ref": "#/$defs/iso8601_timestamp"},
+    "revocable": {"type": "boolean"},
+    "state": {"type": "string", "enum": ["active", "revoked", "expired"]},
+    "created_at": {"$ref": "#/$defs/iso8601_timestamp"},
+    "signature": {"$ref": "#/$defs/ed25519_signature"},
+    "signing_key_id": {"$ref": "#/$defs/identifier"}
   },
   "required": [
     "delegation_id",
     "parent_agent_id",
+    "parent_instance_id",
     "child_agent_id",
     "principal_id",
     "controller_id",
     "scope",
+    "revocable",
     "state",
     "created_at",
     "signature",
@@ -138,57 +73,18 @@
       "pattern": "^aitrace://ca/[a-z-]+/[a-zA-Z0-9._-]+(#[a-zA-Z0-9._-]+)?$",
       "description": "AI-IDP identifier URI"
     },
-    "sha256": {
-      "type": "string",
-      "pattern": "^sha256:[0-9a-f]{64}$"
-    },
+    "sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
     "iso8601_timestamp": {
       "type": "string",
       "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|[+-]\\d{2}:\\d{2})$",
       "description": "ISO 8601 UTC timestamp"
     },
-    "ed25519_signature": {
-      "type": "string",
-      "pattern": "^Ed25519:[0-9A-Za-z+/=]+$"
-    },
-    "visibility_tier": {
-      "type": "string",
-      "enum": [
-        "PUBLIC",
-        "CONTROLLED",
-        "ORGANIZATION_PRIVATE",
-        "SEALED"
-      ]
-    },
-    "entity_state": {
-      "type": "string",
-      "enum": [
-        "proposed",
-        "active",
-        "suspended",
-        "revoked",
-        "terminated",
-        "archived"
-      ]
-    },
+    "ed25519_signature": {"type": "string", "pattern": "^Ed25519:[0-9A-Za-z+/=]+$"},
+    "visibility_tier": {"type": "string", "enum": ["PUBLIC", "CONTROLLED", "ORGANIZATION_PRIVATE", "SEALED"]},
+    "entity_state": {"type": "string", "enum": ["proposed", "active", "suspended", "revoked", "terminated", "archived"]},
     "jurisdiction": {
       "type": "string",
-      "enum": [
-        "ca",
-        "ca-qc",
-        "ca-on",
-        "ca-bc",
-        "ca-ab",
-        "ca-mb",
-        "ca-sk",
-        "ca-ns",
-        "ca-nb",
-        "ca-nl",
-        "ca-pe",
-        "ca-nt",
-        "ca-nu",
-        "ca-yt"
-      ]
+      "enum": ["ca", "ca-qc", "ca-on", "ca-bc", "ca-ab", "ca-mb", "ca-sk", "ca-ns", "ca-nb", "ca-nl", "ca-pe", "ca-nt", "ca-nu", "ca-yt"]
     }
   }
 }
