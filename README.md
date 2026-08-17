@@ -1,7 +1,7 @@
 # AI-IDP
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21769036.svg)](https://doi.org/10.5281/zenodo.21769036) / AegisTrace
 
-Last Material Revision: 2026-08-16
+Last Material Revision: 2026-08-17
 
 **A Universal Canadian Framework for Persistent AI Actor Identity, Permanent Traceability, Delegation, Quality Assurance, and Accountable AI Operation**
 
@@ -46,7 +46,7 @@ The intended Canadian normative principle is:
 
 This is the **proposed** standard and legal objective. It is **not** current Canadian law. The project intentionally states the full target standard and expected end-state so that implementation, regulatory review, conformity assessment, and future adoption can be measured against a clear destination.
 
-**AegisTrace** is the reference implementation: a functional Python software system that demonstrates the standard end-to-end.
+**AegisTrace** is the reference implementation: a functional Python software system designed to implement and demonstrate the standard end-to-end.
 
 ---
 
@@ -56,7 +56,7 @@ This is the **proposed** standard and legal objective. It is **not** current Can
 # 1. Install
 pip install -e .
 
-# 2. Run the demo (creates ledger.jsonl + public_keys.json)
+# 2. Run the governed demo (creates ledger.jsonl + public_keys.json)
 python -m aegistrace.cli admin demo --out .aitrace-demo
 
 # 3. Run the test suite
@@ -90,7 +90,7 @@ ai-idp-aegistrace/
 ├── administration/                    ← Administrative implementation
 ├── impact/                            ← Business, HR, societal impact reports
 ├── spec/                              ← Formal technical specifications (25 documents)
-├── schemas/                           ← JSON Schemas (14 schemas)
+├── schemas/                           ← JSON Schemas (15 current schemas)
 ├── src/aegistrace/                    ← Functional reference implementation
 ├── src/aegistrace/adapters/           ← External adapters
 ├── tests/                             ← Unit, integration, security, privacy, permanence, conformance
@@ -127,26 +127,31 @@ ai-idp-aegistrace/
 
 ## Technical Stack
 
-- **Python 3.12** with strict static typing
-- **Ed25519 signatures** (RFC 8032) via the `cryptography` library
+- **Python 3.12**
+- **Ed25519 signatures** via `cryptography`
 - **SHA-256** for content digests and event hashes
 - **JSONL** append-only ledger with hash chaining
-- **Merkle trees** for public verification anchoring
-- **FastAPI** for the HTTP API
-- **SQLite** for local storage; **PostgreSQL** for production*
-- **pytest** for testing (113/113 passed in the last recorded full validation on 2026-08-02)
-- **Tectonic** for LaTeX compilation (last recorded clean compile: 2026-08-02)
+- **Merkle trees** for verification anchoring
+- **FastAPI** governed HTTP boundary with request proof-of-possession and anti-replay controls
+- **SQLite** for local storage; **PostgreSQL*** for production persistence
+- **liboqs*** for ML-DSA-65 and SLH-DSA SHA2-128s signing/verification
+- **pytest** for executable engineering/conformance evidence
+- **Tectonic** for LaTeX compilation
 
-### Production Hardening (v2.0.0+)
+### Production / High-Assurance Implementation
 
-- **PostgreSQL storage backend*** with JSONB, BIGSERIAL, SSL-by-default
-- **HSM-backed key management*** (PKCS#11, AWS KMS, Azure Key Vault, GCP KMS)
-- **Batched high-throughput ledger** with write-ahead log (WAL)
+- **PostgreSQL storage backend*** with JSONB, BIGSERIAL and SSL-by-default
+- **PKCS#11 Ed25519 HSM signing*** using token-generated non-extractable private keys
+- **AWS KMS signing*** with provider-side asymmetric keys, including Ed25519 by default and configurable key specs
+- **Azure Key Vault signing*** using EC signing keys
+- **Google Cloud KMS signing*** using asymmetric signing keys and optional HSM protection
+- **Batched high-throughput ledger** with fail-closed write-ahead-log recovery
+- **Parallel ledger verification** while preserving deterministic report ordering
 - **OpenTelemetry runtime exporter*** for observability
-- **Post-quantum signature migration*** (ML-DSA per FIPS 204, SLH-DSA per FIPS 205)
-- **Live GitHub remote integration*** for Merkle anchor pushing
+- **Post-quantum signatures***: ML-DSA-65 and SLH-DSA SHA2-128s live code paths through liboqs
+- **Live GitHub remote integration*** for Merkle anchor/status/evidence publication paths
 
-> * **Capability-status note:** starred production capabilities are part of the intended high-assurance implementation and their interfaces/modules were included in the 2026-08-02 validated 113-test corpus. Live activation still depends on the corresponding external service, credential, hardware, runtime library, or endpoint. This notation preserves the intended end-state without presenting an external integration as already activated in production.
+> * **Capability-status note:** starred capabilities are implemented source paths whose live operation depends on an external service, credential, hardware/token, runtime library or endpoint. The historical 2026-08-02 validation corpus exercised the earlier v2.0.0 production-hardening interfaces; the additional 2026-08-17 backend implementations and hardening changes have **not yet been rerun** and therefore are not being represented as newly validated production activations.
 
 ---
 
@@ -156,17 +161,23 @@ ai-idp-aegistrace/
 pytest tests/ -v
 ```
 
-**Last recorded full validation: 113/113 tests passed on 2026-08-02** across:
-- Unit tests (identity, ledger, signing, delegation, authorization, production hardening)
-- Integration tests (complete lifecycle, model/provider switch, filesystem adapter, GitHub adapter, CLI)
-- Security tests (forgery, key compromise, event tampering, deletion, reordering, replay)
-- Privacy tests (pseudonymization, sealed records, no contact data leakage)
-- Permanence tests (revocation, termination, key rotation, archive)
-- Conformance tests (schema, canonical vocabulary, invariants, append-only)
+**Last recorded full validation: 113/113 tests passed on 2026-08-02** across the then-current v2.0.0 corpus.
 
-**Current reconciliation status:** the historical 113/113 result remains the last executed full validation. The `reconcile-2026-08-14` branch contains post-validation hardening changes identified through static code/specification review and therefore requires a fresh controlled validation pass before it can inherit the historical 113/113 status or be merged as a validated release.
+The reconciliation branch adds substantially stronger source tests for:
 
-**GitHub CI note:** the latest observed GitHub Actions failure did not execute any workflow step because GitHub reported the account locked due to a billing issue; it is therefore not evidence of a code, test, or compilation failure.
+- governed execution boundaries;
+- authorization and exact-action approval integrity;
+- delegation scope/lineage enforcement;
+- API proof-of-possession and replay resistance;
+- public-disclosure leakage prevention;
+- canonical-state isolation;
+- WAL recovery and ledger hardening;
+- production cryptographic backend behavior;
+- live liboqs ML-DSA / SLH-DSA round trips when the PQC runtime is installed.
+
+**Current reconciliation status:** source implementation/hardening has moved beyond the historical validated baseline. A fresh controlled validation pass is still required before this branch can inherit a new test count or be represented as the next validated release.
+
+**GitHub CI note:** the latest observed GitHub Actions failure on the historical public baseline did not execute workflow steps because GitHub reported the account locked due to a billing issue; it is therefore not evidence of a code, test or compilation failure.
 
 ---
 
@@ -174,29 +185,30 @@ pytest tests/ -v
 
 AI-IDP defines four conformance levels (L1–L4) as the target implementation and regulatory standard:
 
-- **L1 (Baseline):** Persistent identifiers, signed events, local ledger. For small developers and open-source.
+- **L1 (Baseline):** Persistent identifiers, signed events, local ledger.
 - **L2 (Standard):** L1 + public verification, private evidence, delegation, authorization, approval, resource manifests.
-- **L3 (High Assurance):** L2 + independent archival replication, federation, database/CI-CD adapters, annual audit. For regulated sectors.
-- **L4 (Maximum Assurance):** L3 + dual approval, regulator-controlled vault, real-time transparency log, PQC readiness. For critical infrastructure.
+- **L3 (High Assurance):** L2 + independent archival replication, federation, database/CI-CD adapters, annual audit.
+- **L4 (Maximum Assurance):** L3 + dual approval, regulator-controlled vault, real-time transparency log, PQC readiness.
 
-These levels define the intended conformity destination of the standard; adoption or legal enforceability depends on the applicable standards, administrative, contractual, procurement, or legislative route.
+These levels define the intended conformity destination of the standard; adoption or legal enforceability depends on the applicable standards, administrative, contractual, procurement or legislative route.
 
 ---
 
 ## Privacy Safeguards
 
 - **Pseudonymous identifiers** by default (`aitrace://ca/principal/user-XXX`)
-- **Sealed records** for sensitive information (judicial/regulator-controlled access)
-- **Content separation** (permanent minimal metadata + cryptographic commitments, not plaintext)
-- **Access logging** for all non-public record access
-- **Recourse mechanism** for affected persons
+- **Sealed records** for sensitive information
+- **Content separation** between durable evidence metadata and sensitive payloads
+- **Allow-listed public projections** rather than raw event disclosure
+- **Access logging** for non-public record access paths
+- **Recourse mechanisms** for affected persons
 
 ---
 
 ## Indigenous Data Governance
 
 The framework recognizes Indigenous data sovereignty as an important design objective where Indigenous rights, data, communities, or governance contexts are materially involved:
-- **OCAP® principles** (Ownership, Control, Access, Possession) — First Nations Information Governance Centre
+- **OCAP® principles** — First Nations Information Governance Centre
 - **Distinctions-based approach** — First Nations, Inuit, and Métis
 - **TRC Calls to Action** alignment as a policy/design objective where relevant
 - **Community-controlled access** for Indigenous community data where applicable
@@ -247,10 +259,9 @@ LinkedIn: [linkedin.com/in/pierre-edward-procyk-223b75305](https://www.linkedin.
 
 ## Status
 
-See `project-control/PROJECT_STATUS.md`, `project-control/VALIDATION_STATUS.md`, `release/FINAL_COMPLETION_REPORT.md`, and `release/VALIDATION_REPORT.md` for the consolidated completion status, verified results, target capabilities, and limitations.
+See `project-control/PROJECT_STATUS.md`, `project-control/VALIDATION_STATUS.md`, `project-control/SOURCE_HARDENING_COMPLETION_2026-08-17.md`, `project-control/CRYPTO_BACKEND_COMPLETION_2026-08-17.md`, `release/RECONCILIATION_VALIDATION_STATUS_2026-08-17.md`, and `release/VALIDATION_REPORT.md`.
 
-**Project baseline:** v2.0.0 / 2026-08-01  
-**Reconciliation branch material:** 2026-08-16  
+**Historical validated baseline:** v2.0.0 / 2026-08-02 — 113/113 tests recorded  
+**Current reconciliation source material:** 2026-08-17 — implementation/hardening complete, fresh runtime validation pending  
 **Version:** 2.0.0  
-**Tests:** 113/113 passing in the last recorded full validation (2026-08-02); branch changes not yet rerun  
-**Research paper:** Last recorded clean Tectonic compile passed on 2026-08-02; public archival record at https://doi.org/10.5281/zenodo.21769036
+**Research paper:** last recorded clean Tectonic compile passed on 2026-08-02; public archival record at https://doi.org/10.5281/zenodo.21769036
