@@ -17,6 +17,7 @@ import sys
 from pathlib import Path
 
 from aegistrace.authorization.engine import PolicyEngine
+from aegistrace.authorization.intent import ActionIntent
 from aegistrace.delegation.broker import DelegationBroker, DelegationScope
 from aegistrace.events.collector import EventCollector
 from aegistrace.events.models import Actor, ExecutionContext
@@ -65,11 +66,24 @@ def run_demo(out_dir: Path) -> int:
     registry.register(task_id, "task")
 
     controller_key_id = str(make_identifier("key", "key-ctrl-001"))
-    keys.create_key(controller_key_id, bound_entity_id=controller_id)
     principal_key_id = str(make_identifier("key", "key-principal-001"))
-    keys.create_key(principal_key_id, bound_entity_id=principal_id)
     agent_key_id = str(make_identifier("key", "key-agent-001"))
+    keys.create_key(controller_key_id, bound_entity_id=controller_id)
+    keys.create_key(principal_key_id, bound_entity_id=principal_id)
     keys.create_key(agent_key_id, bound_entity_id=agent_id)
+
+    actor = Actor(
+        controller_id=controller_id,
+        principal_id=principal_id,
+        agent_id=agent_id,
+        agent_instance_id=agent_instance_id,
+    )
+    execution_context = ExecutionContext(
+        provider_id=provider_id,
+        model_id=model_id,
+        model_version_id=model_version_id,
+        deployment_id=deployment_id,
+    )
 
     authorization = policy.issue_authorization(
         principal_id=principal_id,
@@ -79,8 +93,25 @@ def run_demo(out_dir: Path) -> int:
         scope={"action_classes": ["SEARCH", "READ", "PUBLISH", "DELEGATE"]},
         signing_key_id=controller_key_id,
     )
+    publish_resource = "urn:artifact:research-summary"
+    publish_intent = ActionIntent(
+        controller_id=controller_id,
+        principal_id=principal_id,
+        agent_id=agent_id,
+        agent_instance_id=agent_instance_id,
+        provider_id=provider_id,
+        model_id=model_id,
+        model_version_id=model_version_id,
+        deployment_id=deployment_id,
+        task_id=task_id,
+        action="PUBLISH",
+        visibility="ORGANIZATION_PRIVATE",
+        jurisdiction_id="ca",
+        resource_id=publish_resource,
+    )
     publish_approval = policy.issue_approval(
         action="PUBLISH",
+        action_digest=publish_intent.digest(),
         approver_id=principal_id,
         authorization_id=authorization.authorization_id,
         signing_key_id=principal_key_id,
@@ -102,19 +133,6 @@ def run_demo(out_dir: Path) -> int:
         signing_key_id=agent_key_id,
     )
     registry.update(child_agent_id, {"parent_delegation_id": delegation.delegation_id})
-
-    actor = Actor(
-        controller_id=controller_id,
-        principal_id=principal_id,
-        agent_id=agent_id,
-        agent_instance_id=agent_instance_id,
-    )
-    execution_context = ExecutionContext(
-        provider_id=provider_id,
-        model_id=model_id,
-        model_version_id=model_version_id,
-        deployment_id=deployment_id,
-    )
 
     event_1 = governed.record(
         actor=actor,
@@ -145,7 +163,7 @@ def run_demo(out_dir: Path) -> int:
         signing_key_id=agent_key_id,
         authorization_id=authorization.authorization_id,
         approval_id=publish_approval.approval_id,
-        resource_id="urn:artifact:research-summary",
+        resource_id=publish_resource,
     )
     event_4 = governed.record(
         actor=actor,
@@ -163,6 +181,7 @@ def run_demo(out_dir: Path) -> int:
         "PUBLISH",
         "DELEGATE",
     }
+    assert event_3.action_intent_digest == publish_intent.digest()
     assert all(event.governance_mode == "GOVERNED" for event in ledger.events())
     approval_record = policy.get_approval(publish_approval.approval_id)
     assert approval_record is not None and approval_record.used
@@ -193,6 +212,7 @@ def run_demo(out_dir: Path) -> int:
         "agent_key_id": agent_key_id,
         "authorization_id": authorization.authorization_id,
         "approval_id": publish_approval.approval_id,
+        "publish_action_intent_digest": publish_intent.digest(),
         "delegation_id": delegation.delegation_id,
     }
     (out_dir / "demo_summary.json").write_text(
