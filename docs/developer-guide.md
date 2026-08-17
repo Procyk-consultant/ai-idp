@@ -301,21 +301,29 @@ Hash-only mode is intentionally labelled as integrity-only and must not be prese
 
 ## 11. Signed Federation
 
+The reference implementation requires two real authority signatures over the same canonical agreement bytes. The local authority signs with a key bound to the local registry authority; the remote authority independently signs the same bytes with its own authority-bound key. The completed agreement is then registered with the gateway.
+
+A self-contained two-authority development/test example is:
+
 ```python
 from dataclasses import replace
 from aegistrace import FederationAgreement, FederationGateway
 
 local_authority_id = str(make_identifier("registry-authority", "local"))
 remote_authority_id = str(make_identifier("registry-authority", "remote"))
+local_key_id = str(make_identifier("key", "federation-local"))
+remote_key_id = str(make_identifier("key", "federation-remote"))
 
-# Local and remote public verification keys must already be registered/bound.
+keys.create_key(local_key_id, bound_entity_id=local_authority_id)
+keys.create_key(remote_key_id, bound_entity_id=remote_authority_id)
+
 unsigned = FederationAgreement(
     agreement_id=str(make_identifier("federation-agreement", "agreement-001")),
     local_authority_id=local_authority_id,
     remote_authority_id=remote_authority_id,
     effective_at="2026-08-17T00:00:00Z",
-    local_signing_key_id="aitrace://ca/key/federation-local",
-    remote_signing_key_id="aitrace://ca/key/federation-remote",
+    local_signing_key_id=local_key_id,
+    remote_signing_key_id=remote_key_id,
     local_signature="",
     remote_signature="",
 )
@@ -323,11 +331,15 @@ unsigned = FederationAgreement(
 message = unsigned.signable_bytes()
 agreement = replace(
     unsigned,
-    local_signature=keys.get_signing_key(unsigned.local_signing_key_id).sign(message),
-    # A real remote authority supplies this second signature.
-    remote_signature="Ed25519:<REMOTE_SIGNATURE>",
+    local_signature=keys.get_signing_key(local_key_id).sign(message),
+    remote_signature=keys.get_signing_key(remote_key_id).sign(message),
 )
+
+gateway = FederationGateway(local_authority_id, keys)
+assert gateway.verify_agreement(agreement)
 ```
+
+In a real federation, the second signature is produced by the independently operated remote authority and only its public verification material is shared with the local verifier.
 
 `FederationGateway.register_authority()` verifies both authority/key bindings and signatures before trusting a remote client. Public responses are allow-listed and cached for a bounded TTL. Remote failures are recorded as federation breaks.
 
