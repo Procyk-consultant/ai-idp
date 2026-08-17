@@ -4,213 +4,198 @@ Project: AI-IDP / AegisTrace
 Author: Pierre-Edward Procyk
 Role: Founder / CEO
 Copyright: © 2026 Pierre-Edward Procyk. All rights reserved.
-Contact: p.procyk.media@gmail.com
-Secondary Contact: p.1o9.cognitive@outlook.com
-Telephone: 
 Location: Saguenay, Québec, Canada
 File: spec/AI-IDP-CORE.md
 Title: AI-IDP Core Specification
-Purpose: Define the core concepts, invariants, and requirements of the AI-IDP standard
+Purpose: Define core concepts, invariants, and requirements of the proposed AI-IDP standard
 Audience: Architects, implementers, legal reviewers, regulators
 Document Classification: Public
 Classification: documentation
 Version: 2.0.0
-Status: Submission-ready
-Last Material Revision: 2026-08-01
-Dependencies: Master Execution Prompt; ACTOR_MODEL.md; IDENTITY_PROTOCOL.md; EVENT_PROTOCOL.md
+Status: Submission-ready / reconciliation clarified
+Last Material Revision: 2026-08-17
+Dependencies: ACTOR_MODEL.md; IDENTITY_PROTOCOL.md; EVENT_PROTOCOL.md; AUTHORIZATION_PROTOCOL.md; DELEGATION_PROTOCOL.md; APPROVAL_PROTOCOL.md; DISCLOSURE_PROTOCOL.md
 Source Basis: Master Execution Prompt; Canadian public-record legal materials; international technical standards
-Invariants: All invariants in Section 18 of the Master Prompt hold
-Failure Behaviour: Invariant violations are reportable incidents
-Trace Policy: This specification defines the trace policy
+Failure Behaviour: Invariant violations are non-conformant and reportable according to applicable incident policy
+Trace Policy: This specification defines the core trace policy
 Licence Status: No licence selected unless approved in writing by Pierre-Edward Procyk
 ---
 
 # AI-IDP Core Specification
 
-## 1. Purpose
+## 1. Purpose and status
 
-This specification defines the core concepts, invariants, and requirements of the **AI-IDP** standard — Universal AI Identity, Delegation, Provenance, Traceability, Quality, Accountability, and Permanent Audit. AI-IDP is a proposed Canadian legal and technical standard applicable to all AI agents operating in Canada or materially affecting persons in Canada. The reference implementation is **AegisTrace**.
+AI-IDP — Universal AI Identity, Delegation, Provenance, Traceability, Quality, Accountability, and Permanent Audit — is a **proposed Canadian legal and technical standard**. It is not current Canadian law, an adopted national standard, or a certification regime currently conferred on this repository.
 
-## 2. Normative Status
+**AegisTrace** is the reference implementation used to make the proposed mechanisms concrete, inspectable, testable, and auditable.
 
-AI-IDP is a **proposed** standard. It is **not** current Canadian law. The specification distinguishes:
+AI-IDP distinguishes current law/regulation/policy/guidance from proposed future AI-IDP requirements. Existing legal obligations remain governed by the actual instruments and authorities that issue them.
 
-- Current law (e.g., PIPEDA, Privacy Act, provincial privacy statutes)
-- Current regulation, directive, policy, guidance, voluntary codes, standards
-- Proposed legislation (e.g., AIDA under Bill C-27)
-- Pending legislation
-- Proposed AI-IDP requirements
-- Proposed future legal obligations
+## 2. Core actor model
 
-Where AI-IDP references an existing instrument, the reference is to the public-record text published by the issuing authority.
+The standard distinguishes:
 
-## 3. Conceptual Model
+- jurisdiction and registry authority;
+- identity issuer;
+- provider and provider service;
+- organization and accountable controller;
+- human/service principal and user;
+- model family/model/model version/model artifact;
+- deployment/endpoint;
+- orchestrator;
+- persistent agent and runtime agent instance;
+- parent/child agent and swarm;
+- tool, connector, execution environment, device, session;
+- task, delegation, authorization, approval, policy;
+- action, event, resource, repository/database/artifact;
+- quality evidence, incident, audit, certification, correction, revocation, legal hold.
 
-AI-IDP distinguishes the following first-class concepts (formal definitions in `TERMINOLOGY.md`):
+## 3. Canonical principles
 
-- **Jurisdiction** — the legal authority under which the standard operates (Canada, with sub-authority for provinces and territories).
-- **Registry authority** — the body authorized to issue and maintain AI Actor identifiers.
-- **Identity issuer** — the operational component that mints identifiers under a registry authority.
-- **Provider** — the organization that supplies or operates a model or service.
-- **Provider service** — a specific service offering of a provider.
-- **Organization** — any legal person or entity.
-- **Accountable controller** — the organization legally accountable for an agent's operation.
-- **Human principal** — the human who authorizes an agent's action.
-- **Service principal** — a non-human principal (e.g., another service) that authorizes an agent's action.
-- **User** — the end-user on whose behalf an agent acts.
-- **Model family / model / model version / model artifact** — the execution component hierarchy.
-- **Deployment / endpoint** — where a model is hosted or invoked.
-- **Orchestrator** — the system that coordinates agent execution.
-- **Persistent agent** — the identifiable logical software actor.
-- **Agent version / agent configuration** — versioning of a persistent agent.
-- **Runtime agent instance** — a specific execution of an agent.
-- **Parent agent / child agent / swarm** — delegation hierarchy.
-- **Tool / connector / execution environment / device / session** — execution context.
-- **Task / delegation / authorization / approval / policy** — governance records.
-- **Action / event / resource / directory / repository / branch / commit / database / transaction / artifact** — execution records.
-- **Test run / build / release / attestation** — quality records.
-- **Incident / audit / certification / revocation / correction / legal hold** — accountability records.
+1. **Persistent agent identity precedes autonomous action.** The logical software actor has a persistent identifier that survives runtime/provider/model changes.
+2. **Runtime instance is distinct from persistent identity.** Each execution instance is separately identifiable.
+3. **Models/providers are execution components, not the persistent actor.** Switching them does not silently change agent identity.
+4. **Every governed action resolves to authority.** Principal/controller/authorization and, where applicable, delegation/approval chains are reconstructable.
+5. **High-impact approval applies to an exact action intent.** An approval is not a reusable permission for an action verb; material action facts are committed by a canonical digest.
+6. **Canonical event evidence is signed and hash-chained.** Missing, reordered, duplicated, or modified history is detectable.
+7. **Evidence collection and governance enforcement are distinguishable.** A trace collector cannot be represented as proof that authorization was enforced unless the action actually crossed the governed boundary.
+8. **Public verification is not raw-public disclosure.** Public interfaces use reviewed projections that preserve verification while minimizing sensitive context.
+9. **Corrections append; they do not silently rewrite history.**
+10. **Implementation, validation, certification, adoption, and law are separate states.**
 
-## 4. Canonical Principles
+## 4. Required invariants
 
-1. **The persistent agent is the identifiable logical software actor.** A persistent agent has a permanent identifier that survives termination, revocation, provider change, model change, deployment change, and organizational restructuring.
-2. **The agent instance is a specific execution of that agent.** A runtime instance has a unique identifier tied to a specific execution context (provider, model, deployment, session).
-3. **The model is an execution component.** Models are not agents; they are components used by agents. Switching models does not change the agent's identity.
-4. **The provider supplies or operates a model or service.** Switching providers does not change the agent's identity.
-5. **The principal grants authority.** Every agent action resolves to a principal (human or service).
-6. **The controller remains legally accountable.** Every agent resolves to an accountable controller.
-7. **The event record connects all of them.** Every material action produces a signed, hash-chained event that resolves the full chain.
-
-## 5. Required Invariants
-
-The following invariants are normative. An implementation that violates any invariant is non-conformant.
+An implementation claiming AI-IDP conformance must preserve at least the following invariants:
 
 1. Every agent instance resolves to one persistent agent.
 2. Every persistent agent resolves to an accountable controller.
-3. Every action resolves to an agent instance.
-4. Every action resolves to a task.
-5. Every task resolves to an authority chain.
-6. Every child agent resolves to a parent delegation.
+3. Every governed action resolves to an active agent instance.
+4. Every governed action resolves to a task.
+5. Every governed task/action resolves to a verifiable authority chain.
+6. Every delegated child action resolves through an unbroken parent-delegation chain.
 7. Every model-execution span identifies provider, model, version, and deployment.
-8. Model switching preserves agent identity.
-9. Provider switching preserves agent identity.
-10. Revocation preserves historical records.
-11. Termination preserves historical records.
-12. Resource deletion preserves the action record.
-13. Corrections append; they do not overwrite.
-14. Every event is cryptographically linked.
-15. Every quality claim resolves to evidence.
-16. Public verification does not expose raw private content.
-17. Canonical history is independently verifiable.
-18. Missing or reordered records are detectable.
-19. An agent cannot silently alter its canonical history.
-20. An administrator cannot silently erase canonical history.
-21. A provider cannot silently substitute a model without a trace event.
-22. A user cannot silently assign an action to a different agent.
-23. An agent cannot silently assign an action to a different user.
+8. Model switching preserves persistent agent identity.
+9. Provider switching preserves persistent agent identity.
+10. Revocation preserves historical evidence.
+11. Termination preserves historical evidence.
+12. Resource deletion does not erase the action record.
+13. Corrections append rather than overwrite canonical history.
+14. Every canonical event is cryptographically linked.
+15. Every quality claim resolves to evidence appropriate to that claim.
+16. Public verification does not require disclosure of raw private content.
+17. Canonical history is independently verifiable with appropriate public verification material.
+18. Missing, reordered, duplicated, or modified records are detectable.
+19. An agent cannot silently alter canonical history through supported interfaces.
+20. An administrator cannot silently erase canonical history through conformant interfaces.
+21. A provider/model substitution relevant to execution is traceable.
+22. An action cannot be silently reassigned to another agent or principal.
+23. A restricted authority/scope dimension fails closed when the required context cannot be established.
+24. Approval-gated actions match the exact approved action-intent digest.
+25. Public event disclosure is allow-list based rather than automatic raw serialization.
+26. Remote possession of an identifier alone is not authentication for a governed write boundary.
 
-## 6. Required Coverage
+## 5. Action coverage
 
-AI-IDP applies to every AI agent used, created, deployed, distributed, controlled, executed, or made available in Canada or materially affecting persons in Canada, including but not limited to: commercial, enterprise, public-sector, consumer, personal, professional coding, vibe-coding, no-code, low-code, desktop, research, administrative, operational, customer-service, business-process, financial, healthcare-support, educational, local, offline, open-source, embedded, temporary, persistent, autonomous, semi-autonomous, swarm, delegated sub-agent, multi-model, multi-provider, MCP-enabled, terminal-enabled, database-enabled, deployment, CI/CD, and infrastructure agents.
+The canonical vocabulary includes discovery/read/search/query operations; create/generate/modify/delete/restore operations; execute/build/test/debug operations; install/configuration/connect/authentication/authorization operations; transmit/import/export/publication/deployment/release/version-control operations; sign/verify/approve/reject/decide/recommend operations; delegation/agent-creation/model-provider-tool-policy changes; revoke/pause/terminate/rollback; destructive/key/secret/credential/API/database/infrastructure/production/external-effect operations.
 
-## 7. Required Action Coverage
+`RESOURCE_TRACE_PROTOCOL.md` and related protocols define trace granularity and high-impact controls. Organizational/deployment policies may be stricter than the reference defaults but must not weaken core invariants.
 
-AI-IDP requires trace records for at least the actions enumerated in Master Prompt §6 (DISCOVER, ENUMERATE, OPEN, READ, SEARCH, QUERY, CREATE, GENERATE, MODIFY, REWRITE, PATCH, MOVE, RENAME, COPY, DELETE, RESTORE, EXECUTE, RUN, COMPILE, BUILD, TEST, DEBUG, INSTALL, CONFIGURE, CONNECT, AUTHENTICATE, AUTHORIZE, DENY, TRANSMIT, RECEIVE, UPLOAD, DOWNLOAD, EXPORT, IMPORT, PUBLISH, DEPLOY, RELEASE, MERGE, COMMIT, BRANCH, TAG, SIGN, VERIFY, APPROVE, REJECT, RECOMMEND, DECIDE, DELEGATE, CREATE_AGENT, CREATE_SUB_AGENT, CHANGE_MODEL, CHANGE_PROVIDER, CHANGE_TOOL, CHANGE_PERMISSION, CHANGE_POLICY, REVOKE, PAUSE, TERMINATE, ROLLBACK, DESTROY_RESOURCE, DESTROY_KEY, ACCESS_SECRET, USE_CREDENTIAL, CALL_API, WRITE_DATABASE, DELETE_DATABASE_RECORD, ALTER_DATABASE_SCHEMA, MODIFY_INFRASTRUCTURE, MODIFY_PRODUCTION, TRIGGER_EXTERNAL_EFFECT).
+## 6. Governed operational boundary
 
-For each action class, the specification determines (in `RESOURCE_TRACE_PROTOCOL.md`): which actions require individual records; whether low-risk reads may be aggregated; which actions require human approval; which actions require dual approval; which actions require regulator-visible evidence; which actions must fail closed; which actions may operate in offline mode; and which actions require stronger runtime attestation.
+A governed action is accepted only after the applicable implementation establishes:
 
-## 8. Required Trace Structure
+1. authenticated submitting actor/request at remote boundaries;
+2. active identity/controller/instance/execution-context relationships;
+3. valid signed authorization and exact actor/task/controller/principal binding;
+4. fail-closed scope evaluation;
+5. complete delegation lineage when applicable;
+6. canonical exact action-intent digest;
+7. required single/dual approval set for that digest;
+8. signed/hash-chained canonical event evidence.
 
-Every protected directory or equivalent resource scope contains or resolves to a trace manifest (`.aitrace/`):
+A denied action remains denied even if denial evidence cannot itself be recorded.
 
-```
-.aitrace/
-├── README.md
-├── AUDIT.md
-├── ledger.jsonl
-├── registry_refs.json
-├── policies.json
-├── resource_manifest.json
-├── verification.json
-└── evidence/
-```
+## 7. Trace structure and permanence
 
-Supported modes: embedded, sidecar, central organizational ledger, GitHub private evidence, public verification, federated registry, offline, independent archival.
+Protected resources may contain or resolve to `.aitrace/` manifests/ledgers/evidence, or equivalent sidecar/central/federated storage. Canonical trace evidence is append-oriented, sequence-aware, tamper-evident, and designed for independent verification and archival replication appropriate to the assurance level.
 
-## 9. Permanent Identity and Traceability
+AegisTrace's reference in-memory ledger isolates canonical records from caller mutation; production storage must provide equivalent backend-appropriate guarantees.*
 
-AI Actor Identifiers are permanently unique, never reassigned, never reused, and remain resolvable after termination, revocation, provider closure, model retirement, repository transfer, and organizational restructuring. Material events are append-only, cryptographically protected, sequence-aware, tamper-evident, independently verifiable, and survive agent termination, account deletion, provider withdrawal, Git history rewriting (via independent replication), and repository deletion. Corrections, revocations, disputes, and redactions are new signed events; legal access restrictions do not destroy the underlying integrity proof.
+## 8. Authorization, delegation, and approval
 
-## 10. Quality Evidence
+Authorization is signed and bounded. Restricted task/resource/geography/tool/model/provider/time/depth dimensions are fail-closed.
 
-Every quality claim (tested, verified, secure, compliant, production-ready) resolves to evidence: test runs, builds, releases, attestations, audits, certifications. The completion language (Master Prompt §37) is normative: "tested" only after tests were executed; "verified" only after direct inspection and cross-checking; "implemented" only when functional code exists; "validated" only when a defined validation procedure was executed; "reproducible" only after a clean rerun; "publication-ready" only after all paper gates pass; "audit-ready" only after independent audit evidence exists; "complete" only when every required artifact and gate passes.
+Delegation cannot widen parent authority. Nested delegation preserves controller/principal lineage, consumes delegation depth, verifies signatures, and rejects cycles/revoked/expired chains.
 
-## 11. Registry Tiers
+Approval-gated actions use a SHA-256 `action_digest` over deterministic action facts, including applicable actor/runtime/execution context, task, action, **visibility**, jurisdiction, delegation, resource, before/after digests, and evaluated scope context. Changing a bound fact requires a new approval.
 
-AI-IDP defines four registry tiers:
+## 9. Verification and public disclosure
 
-- **Public** — public provider identities, public model identities, public agent identities or classes, registry authorities, public verification keys, protocol versions, schema versions, revocation status, certification status, conformity status, signed ledger roots, Merkle roots, release attestations, public schemas, public specifications.
-- **Controlled** — accessible to authorized regulators, auditors, and certification bodies.
-- **Organization-private** — accessible to the controlling organization.
-- **Sealed** — accessible only under judicial or regulator-controlled disclosure.
+Full verification checks chain integrity, event hashes, and signatures against available public verification keys. A separate explicitly labelled hash-only mode may verify integrity without claiming signature verification.
 
-## 12. Conformance Levels
+Public event disclosure is a strict reviewed projection. Sensitive actor, authority, resource, delegation, approval, exact-intent, and denial context remains non-public unless separately authorized by the disclosure protocol.
 
-AI-IDP defines four conformance levels (L1–L4) in `CONFORMANCE_LEVELS.md`. L1 is the minimum baseline; L4 is the highest assurance. Small developers and open-source projects may target L1–L2; regulated sectors (finance, healthcare, public sector) target L3–L4.
+Public verification-key export must not expose private key material and should not expose private entity bindings by default.
 
-## 13. Federation
+## 10. Quality evidence
 
-AI-IDP supports federation between registry authorities (e.g., federal regulator, sectoral regulators, provincial regulators). The federation protocol is defined in `FEDERATION_PROTOCOL.md`. Federation preserves the invariants: a federated event is verifiable in any federated registry; a cross-jurisdiction delegation preserves the authority chain.
+Completion language is evidence-bound. `tested`, `verified`, `validated`, `reproducible`, `audit-ready`, `certified`, and `complete` must not be used beyond the evidence actually produced.
 
-## 14. Offline Operation
+A historical passing test result applies to the source/corpus that was executed; material later source changes require a new validation gate before inheriting that claim.
 
-AI-IDP supports offline operation: agents may operate without network connectivity, buffering events locally and reconciling with the canonical ledger when connectivity is restored. The offline protocol is defined in `OFFLINE_PROTOCOL.md`. Offline operation does not weaken the invariants; the buffer is itself an append-only, hash-chained local ledger that merges into the canonical ledger on reconciliation.
+## 11. Registry/disclosure tiers
 
-## 15. Disclosure
+AI-IDP retains four disclosure/registry tiers:
 
-AI-IDP defines disclosure rules in `DISCLOSURE_PROTOCOL.md`: what may be disclosed publicly; what is controlled; what is organization-private; what is sealed; how sealed records are accessed under judicial or regulator authority; how redactions are authorized and recorded; how access is logged and audited.
+- PUBLIC;
+- CONTROLLED;
+- ORGANIZATION_PRIVATE;
+- SEALED.
 
-## 16. Revocation, Correction, Incident
+Resolution within a private registry is not equivalent to public disclosure. Public registry fields require an explicit reviewed projection.
 
-AI-IDP defines:
+## 12. Conformance levels
 
-- `REVOCATION_PROTOCOL.md` — how identifiers, keys, agents, and authorizations are revoked.
-- `CORRECTION_PROTOCOL.md` — how errors are corrected by appending new signed events (not by erasing history).
-- `INCIDENT_PROTOCOL.md` — how incidents are reported, investigated, reconstructed, and resolved.
-- `AUDIT_PROTOCOL.md` — how audits are performed, what evidence is required, and how audit reports are signed.
-- `CERTIFICATION_PROTOCOL.md` — how conformity is certified, by whom, and with what evidence.
+AI-IDP defines cumulative L1-L4 target assurance levels in `CONFORMANCE_LEVELS.md`. They describe the proposed standard's destination, not automatic certification of the reference repository.
 
-## 17. Versioning
+The AegisTrace reference implementation remains non-certified. External certification, accreditation, government adoption, standards-body adoption, procurement acceptance, or legislative enactment requires the applicable external process.*
 
-AI-IDP follows semantic versioning. The versioning policy is defined in `VERSIONING_POLICY.md`. Schema versions, protocol versions, and specification versions are tracked independently. Backward-incompatible changes require a major version bump and a documented migration path.
+## 13. Federation and high-assurance infrastructure*
 
-## 18. Extension
+AI-IDP retains federation, independent archival replication, regulator-visible evidence, regulator-controlled/sealed infrastructure, production database/HSM/KMS, transparency anchoring, and cryptographic-migration requirements at the applicable assurance levels.
 
-AI-IDP may be extended for sectoral, provincial, or organizational needs. The extension policy is defined in `EXTENSION_POLICY.md`. Extensions must not weaken the invariants. Extensions are versioned and identified.
+The reference repository may contain implementation/interface paths for such capabilities without representing the external institutional/hardware/service environment as live.
 
-## 19. Relationship to Existing Standards
+## 14. Offline operation
 
-AI-IDP interoperates with: SPIFFE/SPIRE (workload identity), W3C PROV (provenance interchange), W3C DID and Verifiable Credentials (where applicable), in-toto (supply chain attestation), SLSA (supply chain levels), Sigstore/Rekor/Fulcio (transparency logs and signing), OpenTelemetry (observability), SPDX/CycloneDX (SBOM), ISO/IEC 27001/27017/27018/27701 (security and privacy), NIST SP 800-53/800-63/800-218 (security and SSDF). The standards crosswalk is in `research/synthesis/STANDARDS_CROSSWALK.md`.
+AI-IDP supports controlled offline operation using append-only local evidence and later reconciliation. Offline mode must not silently weaken identity, scope, integrity, or conflict-detection invariants.
 
-## 20. Normative References
+## 15. Privacy and correction
 
-- Constitution Acts 1867 and 1982 (Canada)
-- Personal Information Protection and Electronic Documents Act (PIPEDA), S.C. 2000, c. 5
-- Privacy Act, R.S.C. 1985, c. P-21
-- Treasury Board of Canada Secretariat, Directive on Automated Decision-Making
-- Office of the Privacy Commissioner of Canada, guidance
-- Canadian Centre for Cyber Security, guidance
-- W3C PROV, DID Core, Verifiable Credentials
-- IETF RFC 8032 (Ed25519)
-- NIST FIPS 180-4 (SHA-2), FIPS 202 (SHA-3), IR 8413 (PQC status)
-- ISO/IEC 27001, 27017, 27018, 27701
+Permanent accountability evidence is balanced against privacy through minimization, content separation, cryptographic commitments, protected identity resolution, tiered disclosure, controlled/sealed evidence, and append-only correction/revocation records.
 
-## 21. Informative References
+Context-specific legal retention/access requirements remain governed by applicable law and policy.
 
-See `paper/references.bib` for the full bibliography.
+## 16. Indigenous data governance
 
-## 22. Conformance Statement
+Where Indigenous rights, community data, governance authority, or services are materially implicated, meaningful distinctions-based rights-holder engagement and appropriate Indigenous data-governance requirements are part of responsible implementation. Public-framework analysis is not a substitute for engagement in those cases.
 
-An implementation conforms to AI-IDP at level L{n} if it satisfies all invariants in Section 5, all required coverage in Section 6, all required action coverage in Section 7, all required trace structure in Section 8, all permanent identity and traceability requirements in Section 9, all quality evidence requirements in Section 10, and the conformance level requirements in `CONFORMANCE_LEVELS.md` for level L{n}.
+This is not a universal gate for unrelated deployments with no material Indigenous nexus.
 
-Conformance is certified by an authorized certification body per `CERTIFICATION_PROTOCOL.md`. The AegisTrace reference implementation is a non-certified reference; certification requires a separate authorization process.
+## 17. Versioning and extension
+
+Protocol/schema/specification versions are tracked. Backward-incompatible changes require appropriate versioning/migration. Extensions may strengthen sectoral/provincial/organizational requirements but must not weaken core invariants.
+
+## 18. Relationship to existing standards
+
+AI-IDP is designed to interoperate conceptually/technically with relevant identity, provenance, software-supply-chain, observability, SBOM, security/privacy, and assurance standards such as SPIFFE/SPIRE, W3C PROV/DID/VC where applicable, in-toto/SLSA/Sigstore, OpenTelemetry, SPDX/CycloneDX, ISO/IEC 27001-family controls, NIST security/identity/SSDF guidance, and Ed25519/SHA standards.
+
+Interoperability claims must be limited to what is actually mapped/implemented/validated in the corresponding project evidence.
+
+## 19. Normative conformance statement
+
+An implementation may claim AI-IDP conformance only when the requirements of the claimed level, the core invariants, applicable protocols/schemas, and the certification requirements in `CERTIFICATION_PROTOCOL.md` are satisfied by appropriate evidence.
+
+Self-assessment, reference implementation status, or passing internal tests are not by themselves certified conformance.
+
+> `*` Starred capabilities/assurance requirements depend on the applicable external infrastructure, service, hardware, deployment topology, regulator/institutional authority, or independent certification process. This notation preserves the normative target while accurately describing activation status.
