@@ -66,6 +66,8 @@ def run_demo(out_dir: Path) -> int:
 
     controller_key_id = str(make_identifier("key", "key-ctrl-001"))
     keys.create_key(controller_key_id, bound_entity_id=controller_id)
+    principal_key_id = str(make_identifier("key", "key-principal-001"))
+    keys.create_key(principal_key_id, bound_entity_id=principal_id)
     agent_key_id = str(make_identifier("key", "key-agent-001"))
     keys.create_key(agent_key_id, bound_entity_id=agent_id)
 
@@ -81,7 +83,7 @@ def run_demo(out_dir: Path) -> int:
         action="PUBLISH",
         approver_id=principal_id,
         authorization_id=authorization.authorization_id,
-        signing_key_id=controller_key_id,
+        signing_key_id=principal_key_id,
     )
 
     child_agent_id = str(make_identifier("agent", "literature-search-agent", version="v1"))
@@ -162,7 +164,8 @@ def run_demo(out_dir: Path) -> int:
         "DELEGATE",
     }
     assert all(event.governance_mode == "GOVERNED" for event in ledger.events())
-    assert policy.get_approval(publish_approval.approval_id).used is True  # type: ignore[union-attr]
+    approval_record = policy.get_approval(publish_approval.approval_id)
+    assert approval_record is not None and approval_record.used
 
     report = LedgerVerifier(keys).verify(ledger)
     assert report.ok, f"verification failed: {report.failures}"
@@ -186,6 +189,7 @@ def run_demo(out_dir: Path) -> int:
         "ledger_path": str(ledger_path),
         "public_keys_path": str(keys_path),
         "controller_key_id": controller_key_id,
+        "principal_key_id": principal_key_id,
         "agent_key_id": agent_key_id,
         "authorization_id": authorization.authorization_id,
         "approval_id": publish_approval.approval_id,
