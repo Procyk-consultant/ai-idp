@@ -12,6 +12,7 @@ Licence Status: No licence selected unless approved in writing by Pierre-Edward 
 """
 from __future__ import annotations
 
+import copy
 import json
 import os
 import shutil
@@ -67,9 +68,8 @@ class BackgroundFlushError(RuntimeError):
 class BatchedLedger:
     """Batched append-only ledger with fail-closed durable WAL recovery.
 
-    WAL persistence occurs before an event is acknowledged into the in-memory
-    buffer. Chain/hash/duplicate validation occurs before WAL persistence, so a
-    malformed event cannot become durable recovery evidence through this API.
+    Validated events are deep-copied before WAL persistence and buffering so a
+    caller cannot mutate acknowledged-but-unflushed canonical candidates.
     """
 
     def __init__(self, config: BatchConfig | None = None) -> None:
@@ -183,14 +183,19 @@ class BatchedLedger:
                     f"buffer full: {len(self._buffer)} >= {self.config.max_buffer_size}"
                 )
             self._validate_candidate(event)
+            canonical_candidate = copy.deepcopy(event)
             if self._wal_file is not None:
                 with self._wal_lock:
-                    line = json.dumps(event.to_dict(), sort_keys=True, ensure_ascii=False) + "\n"
+                    line = json.dumps(
+                        canonical_candidate.to_dict(),
+                        sort_keys=True,
+                        ensure_ascii=False,
+                    ) + "\n"
                     self._wal_file.write(line.encode("utf-8"))
                     if self.config.wal_fsync:
                         os.fsync(self._wal_file.fileno())
-            self._buffer.append(event)
-            self._event_ids.add(event.event_id)
+            self._buffer.append(canonical_candidate)
+            self._event_ids.add(canonical_candidate.event_id)
             should_flush = len(self._buffer) >= self.config.batch_size
 
         if should_flush:
@@ -207,7 +212,7 @@ class BatchedLedger:
             for event in batch:
                 self._canonical.append(event)
             if self._on_flush is not None:
-                self._on_flush(list(batch))
+                self._on_flush(copy.deepcopy(batch))
             self._last_flush = time.monotonic()
             return len(batch)
 
