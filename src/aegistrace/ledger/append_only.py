@@ -11,6 +11,7 @@ Licence Status: No licence selected unless approved in writing by Pierre-Edward 
 """
 from __future__ import annotations
 
+import copy
 import json
 from collections.abc import Iterator
 from concurrent.futures import ThreadPoolExecutor
@@ -24,7 +25,12 @@ from aegistrace.signing.ed25519 import SigningKey, sha256_hex
 
 
 class AppendOnlyLedger:
-    """Append-only, hash-chained event ledger."""
+    """Append-only, hash-chained event ledger.
+
+    Canonical records are isolated from caller-owned objects. Appended events
+    are deep-copied into internal storage and every public read returns a
+    snapshot, so callers cannot mutate canonical history through object aliases.
+    """
 
     def __init__(self) -> None:
         self._events: list[Event] = []
@@ -42,17 +48,18 @@ class AppendOnlyLedger:
         recomputed = sha256_hex(canonicalize_for_hash(event.to_dict()))
         if recomputed != event.event_hash:
             raise ValueError(f"event_hash mismatch: expected {recomputed}, got {event.event_hash}")
-        self._events.append(event)
-        self._event_ids.add(event.event_id)
+        canonical_event = copy.deepcopy(event)
+        self._events.append(canonical_event)
+        self._event_ids.add(canonical_event.event_id)
 
     def last_event_hash(self) -> str | None:
         return self._events[-1].event_hash if self._events else None
 
     def events(self) -> list[Event]:
-        return list(self._events)
+        return copy.deepcopy(self._events)
 
     def __iter__(self) -> Iterator[Event]:
-        return iter(self._events)
+        return iter(self.events())
 
     def __len__(self) -> int:
         return len(self._events)
@@ -60,7 +67,7 @@ class AppendOnlyLedger:
     def get(self, event_id: str) -> Event | None:
         for event in self._events:
             if event.event_id == event_id:
-                return event
+                return copy.deepcopy(event)
         return None
 
     def to_jsonl(self) -> str:
