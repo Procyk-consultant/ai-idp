@@ -6,7 +6,7 @@ File: src/aegistrace/__init__.py
 Purpose: Top-level package
 Classification: domain
 Version: 2.0.0
-Last Material Revision: 2026-08-01
+Last Material Revision: 2026-08-17
 Licence Status: No licence selected unless approved in writing by Pierre-Edward Procyk.
 """
 from __future__ import annotations
@@ -19,27 +19,35 @@ from aegistrace.adapters.git import GitAdapter
 from aegistrace.adapters.github import CommitAttestation, GitHubEvidenceAdapter
 from aegistrace.adapters.mcp import MCPAdapter, MCPCall
 from aegistrace.authorization.engine import Approval, Authorization, PolicyDecision, PolicyEngine
+from aegistrace.authorization.scope import ScopeContext, ScopeDecision, evaluate_child_scope, evaluate_scope
 from aegistrace.delegation.broker import Delegation, DelegationBroker, DelegationScope
+from aegistrace.disclosure.public import PublicEventProjector, PublicProjectionError
 from aegistrace.events.collector import EventCollector
-from aegistrace.events.models import ACTIONS, VISIBILITY_TIERS, Actor, Event, ExecutionContext
+from aegistrace.events.models import ACTIONS, GOVERNANCE_MODES, VISIBILITY_TIERS, Actor, Event, ExecutionContext
+from aegistrace.governance.service import GovernanceDenied, GovernedEventService
 from aegistrace.identity.ids import Identifier, make_event_id, make_identifier
 from aegistrace.identity.keys import KeyRecord, KeyService, SigningKey
 from aegistrace.identity.lifecycle import EntityRecord, Registry
 from aegistrace.ledger.append_only import AppendOnlyLedger, LedgerVerifier, VerificationReport
+from aegistrace.ledger.batched import (
+    BackgroundFlushError,
+    BackpressureError,
+    BatchConfig,
+    BatchedLedger,
+    WALRecoveryError,
+)
 from aegistrace.ledger.merkle import merkle_proof, merkle_root
 from aegistrace.manifests.resource import ResourceManifest, compute_directory_digest, write_aitrace_directory
 from aegistrace.signing.canonical import canonicalize, canonicalize_for_hash, canonicalize_for_signature
 from aegistrace.signing.ed25519 import blake2b_hex, sha256_hex, sha256_raw
 from aegistrace.storage.sqlite import SQLiteStorage
 
-# Production hardening modules (v2.0.0)
 try:
     from aegistrace.storage.postgres import PostgresConfig, PostgresStorage
 except ImportError:
     PostgresConfig = None  # type: ignore
     PostgresStorage = None  # type: ignore
 
-from aegistrace.ledger.batched import BackpressureError, BatchConfig, BatchedLedger
 from aegistrace.signing.hsm import (
     CloudKMSKeyBackend,
     HSMKeyHandle,
@@ -66,6 +74,7 @@ except ImportError:
     OTelConfig = None  # type: ignore
     OTelExporter = None  # type: ignore
     OTelEventHook = None  # type: ignore
+
 try:
     from aegistrace.adapters.github_remote import (
         GitHubConfig,
@@ -81,7 +90,7 @@ except ImportError:
 
 __all__ = [
     "__version__",
-    "Event", "Actor", "ExecutionContext", "ACTIONS", "VISIBILITY_TIERS",
+    "Event", "Actor", "ExecutionContext", "ACTIONS", "VISIBILITY_TIERS", "GOVERNANCE_MODES",
     "Identifier", "make_identifier", "make_event_id",
     "KeyService", "KeyRecord", "SigningKey",
     "Registry", "EntityRecord",
@@ -90,6 +99,9 @@ __all__ = [
     "EventCollector",
     "Delegation", "DelegationBroker", "DelegationScope",
     "Authorization", "Approval", "PolicyEngine", "PolicyDecision",
+    "ScopeContext", "ScopeDecision", "evaluate_scope", "evaluate_child_scope",
+    "GovernanceDenied", "GovernedEventService",
+    "PublicEventProjector", "PublicProjectionError",
     "sha256_hex", "sha256_raw", "blake2b_hex",
     "canonicalize", "canonicalize_for_hash", "canonicalize_for_signature",
     "ResourceManifest", "compute_directory_digest", "write_aitrace_directory",
@@ -99,11 +111,10 @@ __all__ = [
     "DatabaseAdapter", "DatabaseOperation",
     "MCPAdapter", "MCPCall",
     "SQLiteStorage",
-    # Production hardening (v2.0.0)
     "PostgresConfig", "PostgresStorage",
     "HSMKeyHandle", "KeyBackend", "InMemoryKeyBackend", "PKCS11KeyBackend",
     "CloudKMSKeyBackend", "HSMKeyService",
-    "BatchConfig", "BatchedLedger", "BackpressureError",
+    "BatchConfig", "BatchedLedger", "BackpressureError", "BackgroundFlushError", "WALRecoveryError",
     "SignatureScheme", "KeyPair", "Ed25519Scheme", "MLDSA65Scheme",
     "SLHDSA128sScheme", "SchemeRegistry", "SchemeMigrationRecord",
     "MigrationService", "default_registry",
