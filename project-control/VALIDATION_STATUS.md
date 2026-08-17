@@ -7,9 +7,9 @@ Copyright: © 2026 Pierre-Edward Procyk. All rights reserved.
 Location: Saguenay, Québec, Canada
 File: project-control/VALIDATION_STATUS.md
 Title: Validation Status
-Purpose: Separate executed validation evidence from current source-hardening state
+Purpose: Separate executed validation evidence from current source implementation state
 Version: 2.0.0-reconciliation
-Status: Source Hardening Complete / Runtime Revalidation Pending
+Status: Source Implementation Complete / Runtime Revalidation Pending
 Last Material Revision: 2026-08-17
 Branch: reconcile-2026-08-14
 Historical Baseline: b13e51baa51c9e2bb0a5bff4f3911a6902b51206
@@ -57,32 +57,38 @@ Working branch:
 
 `reconcile-2026-08-14`
 
-The branch contains material post-baseline changes in runtime code, schemas, tests, specifications, security/privacy enforcement, CI definition, and public documentation.
+The branch contains material post-baseline changes in runtime code, schemas, tests, specifications, security/privacy enforcement, cryptographic backends, CI definition, and public documentation.
 
-### Current source-hardening status
+### Current source-implementation status
 
-| Area | Source status | Fresh runtime validation |
+| Area | Source status | Fresh runtime/live validation |
 |---|---|---|
-| Independent signature verification / verify-only public keys | Hardened | Pending |
-| Duplicate event detection | Hardened | Pending |
-| Canonical event/registry/key/authority state isolation | Hardened | Pending |
-| Fail-closed authorization scope | Hardened | Pending |
-| Exact action-intent approval digest | Hardened | Pending |
-| Single-use / dual approval enforcement | Hardened | Pending |
-| Recursive bounded delegation lineage | Hardened | Pending |
-| Governed operational-event boundary | Hardened | Pending |
-| Denial evidence | Hardened | Pending |
-| API agent proof-of-possession | Hardened | Pending |
-| Timestamp / nonce replay resistance | Hardened | Pending |
-| Strict public event projection | Hardened | Pending |
-| Scoped public verification-key export | Hardened | Pending |
-| Public registry attribute projection | Hardened | Pending |
-| WAL fail-closed recovery / corruption quarantine | Hardened | Pending |
-| Parallel signature verification path | Hardened | Pending |
-| PostgreSQL sequence / JSONB handling* | Hardened | Pending live integration |
+| Independent signature verification / verify-only public keys | Implemented + hardened | Pending |
+| Duplicate event detection | Implemented + hardened | Pending |
+| Canonical event/registry/key/authority state isolation | Implemented + hardened | Pending |
+| Fail-closed authorization scope | Implemented + hardened | Pending |
+| Exact action-intent approval digest | Implemented + hardened | Pending |
+| Single-use / dual approval enforcement | Implemented + hardened | Pending |
+| Recursive bounded delegation lineage | Implemented + hardened | Pending |
+| Governed operational-event boundary | Implemented + hardened | Pending |
+| Denial evidence | Implemented + hardened | Pending |
+| API agent proof-of-possession | Implemented + hardened | Pending |
+| Timestamp / nonce replay resistance | Implemented + hardened | Pending |
+| Strict public event projection | Implemented + hardened | Pending |
+| Scoped public verification-key export | Implemented + hardened | Pending |
+| Public registry attribute projection | Implemented + hardened | Pending |
+| WAL fail-closed recovery / corruption quarantine | Implemented + hardened | Pending |
+| Parallel signature verification path | Implemented + hardened | Pending |
+| PostgreSQL sequence / JSONB handling* | Implemented + hardened | Pending live integration |
+| PKCS#11 Ed25519 HSM generation/signing* | Implemented | Pending token/device validation |
+| AWS KMS asymmetric signing* | Implemented | Pending credentialed validation |
+| Azure Key Vault EC signing* | Implemented | Pending credentialed validation |
+| Google Cloud KMS EC signing* | Implemented | Pending credentialed validation |
+| ML-DSA-65 via liboqs* | Implemented | Pending fresh runtime validation |
+| SLH-DSA SHA2-128s via liboqs* | Implemented | Pending fresh runtime validation |
 | CI definition (Ruff/MyPy/tests as real gates) | Hardened | Not rerun |
 
-`Hardened` in this table means source-level implementation/reconciliation was completed. It does **not** mean the current branch has passed a fresh execution gate.
+`Implemented`/`Hardened` means the source-level implementation/reconciliation is present. It does **not** mean the current branch has passed a fresh execution gate.
 
 ## 4. Current schema inventory
 
@@ -90,7 +96,7 @@ Historical executed baseline: **14 schemas**.
 
 Current reconciliation branch: **15 schemas**.
 
-The branch adds an explicit `schemas/approval.schema.json` and hardens authorization, delegation, and event schemas to reflect the current exact-action approval, bounded-scope, governance, and disclosure model.
+The branch adds `schemas/approval.schema.json` and hardens authorization, delegation, and event schemas to reflect exact-action approvals, bounded scopes, governed execution and disclosure controls.
 
 No new schema-validation pass count is claimed until the branch tests are executed.
 
@@ -107,20 +113,34 @@ The reconciliation branch adds or materially strengthens source tests covering:
 - public projection/non-enumeration/key-scope/privacy controls;
 - adversarial tampering/deletion/reordering/duplicate-ID cases;
 - canonical object-alias isolation;
-- WAL validation-before-write, corruption quarantine, and recovery;
+- WAL validation-before-write, corruption quarantine and recovery;
 - parallel signature verification;
-- authorization and approval JSON-schema conformance.
+- authorization and approval JSON-schema conformance;
+- credential-free managed-KMS contract behavior;
+- ML-DSA-65 and SLH-DSA live round-trip behavior when liboqs is present.
 
 These tests are **present in source but unexecuted in the current reconciliation session**. Therefore there is no new total passing-test count.
 
-## 6. Validation gates
+## 6. Cryptographic backend completion
+
+The former source-level placeholder gap for production cryptographic signing has been closed in the branch:
+
+- PKCS#11 now generates token-resident non-extractable Ed25519 private keys and signs through `CKM_EDDSA`;
+- AWS KMS now creates/uses asymmetric signing keys, retrieves public keys, signs, verifies and disables keys;
+- Azure Key Vault now creates EC signing keys and performs remote ES256 sign/verify;
+- Google Cloud KMS now creates asymmetric signing keys, retrieves public keys, signs and disables key versions;
+- ML-DSA-65 and SLH-DSA SHA2-128s now call liboqs for actual key generation, signing and verification instead of raising `NotImplementedError`.
+
+See `project-control/CRYPTO_BACKEND_COMPLETION_2026-08-17.md`.
+
+## 7. Validation gates
 
 | Gate | Historical 2026-08-02 evidence | Current branch state |
 |---|---|---|
 | Initial comprehension / project inventory | Passed historically | No new execution required for source reconciliation |
 | Research protocol / evidence registers | Passed/partial as documented historically | Historical evidence retained; time-sensitive claims require refresh before consequential use |
-| Formal architecture / specification corpus | Passed historically | Materially updated; static reconciliation complete, runtime/schema gate pending |
-| Functional implementation | Passed for baseline | Source hardening complete; fresh execution pending |
+| Formal architecture / specification corpus | Passed historically | Materially updated; static/source reconciliation complete, runtime/schema gate pending |
+| Functional implementation | Passed for baseline | Source implementation/hardening complete; fresh execution pending |
 | Engineering verification | **113/113 passed historically** | **Not rerun** |
 | Security/privacy/permanence/conformance suites | Passed as part of historical corpus | Strengthened source tests added; not rerun |
 | Scientific evaluation | Partial historically | No new empirical deployment evidence created |
@@ -128,7 +148,7 @@ These tests are **present in source but unexecuted in the current reconciliation
 | External/independent validation | Partial/pending historically | Still pending |
 | Release/archive/checksum generation | Passed for historical release | Must be regenerated only after a new successful validation/release gate |
 
-## 7. GitHub Actions state
+## 8. GitHub Actions state
 
 The previously observed GitHub Actions failure for the baseline commit was reported by GitHub as a job that **did not start because the account was locked due to a billing issue**. The recorded job had no executed workflow steps.
 
@@ -138,14 +158,14 @@ Classification:
 
 No CI rerun was initiated during the current reconciliation.
 
-## 8. External/live capability status
+## 9. External/live capability status
 
 The following remain high-assurance target/deployment capabilities and are not removed from the project:
 
 - PostgreSQL production deployment*;
-- HSM / PKCS#11 / cloud-KMS signing*;
+- HSM / PKCS#11 / cloud-KMS live activation*;
 - OpenTelemetry collector export*;
-- live ML-DSA / SLH-DSA PQC operations*;
+- credentialed liboqs deployment and cryptographic-runtime assurance*;
 - credentialed GitHub remote anchoring/publication*;
 - shared durable API anti-replay state*;
 - distributed transactional approval consumption*;
@@ -153,9 +173,9 @@ The following remain high-assurance target/deployment capabilities and are not r
 - federation / independent archival / regulator-controlled infrastructure*;
 - external peer review, accreditation, certification, government/standards adoption*.
 
-The asterisk means live activation or external assurance depends on the applicable runtime, service, hardware, credential, topology, authority, or institution. It does not weaken the intended AI-IDP requirement.
+The asterisk now denotes **live activation, target-environment evidence or external assurance**, not a placeholder source implementation for HSM/KMS/PQC.
 
-## 9. Required validation before a new verified baseline
+## 10. Required validation before a new verified baseline
 
 Before this branch can be described as a new validated release/baseline, execute and record at minimum:
 
@@ -174,12 +194,14 @@ Before this branch can be described as a new validated release/baseline, execute
 13. stale/replayed/tampered API-request tests;
 14. wrong exact-action digest / approval-retargeting tests;
 15. corrupted WAL / duplicate-event / delegation-widening / public-leakage tests;
-16. configured optional/live integrations where an appropriate environment exists;
-17. paper/release build only when producing the next release artifact;
-18. new validation report and new checksums without overwriting historical evidence.
+16. ML-DSA-65 and SLH-DSA live round trips with the pinned liboqs validation profile;
+17. configured HSM/KMS integration tests where appropriate target infrastructure/credentials exist;
+18. configured optional/live integrations where an appropriate environment exists;
+19. paper/release build only when producing the next release artifact;
+20. new validation report and new checksums without overwriting historical evidence.
 
-## 10. Current conclusion
+## 11. Current conclusion
 
-**Source-level reconciliation and hardening are complete on `reconcile-2026-08-14`. Runtime revalidation is pending.**
+**Source implementation and hardening are complete on `reconcile-2026-08-14`. Runtime and target-environment revalidation are pending.**
 
-`main` remains the historical public baseline. No merge, release, certification, or new passing-test claim is authorized or implied by this status file.
+`main` remains the historical public baseline. No merge, release, certification, or new passing-test claim is implied by this status file.
