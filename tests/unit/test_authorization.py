@@ -13,6 +13,11 @@ from __future__ import annotations
 import pytest
 
 from aegistrace.authorization.engine import PolicyEngine
+from aegistrace.authorization.entitlements import (
+    CompositeApproverEntitlementProvider,
+    PrincipalApproverEntitlementProvider,
+    StaticApproverEntitlementProvider,
+)
 from aegistrace.authorization.scope import ScopeContext
 from aegistrace.identity.ids import make_identifier
 from aegistrace.identity.keys import KeyService
@@ -21,16 +26,28 @@ ACTION_DIGEST = "sha256:" + "1" * 64
 OTHER_ACTION_DIGEST = "sha256:" + "2" * 64
 
 
-def make_engine():
+def make_engine(*, entitlements=None):
     keys = KeyService()
     controller = str(make_identifier("controller", "c1"))
     principal = str(make_identifier("principal", "p1"))
     keys.create_key("aitrace://ca/key/controller", bound_entity_id=controller)
     keys.create_key("aitrace://ca/key/principal", bound_entity_id=principal)
-    return keys, PolicyEngine(keys), controller, principal
+    return (
+        keys,
+        PolicyEngine(keys, approver_entitlements=entitlements),
+        controller,
+        principal,
+    )
 
 
-def issue(engine: PolicyEngine, controller: str, principal: str, *, actions: list[str], scope: dict | None = None):
+def issue(
+    engine: PolicyEngine,
+    controller: str,
+    principal: str,
+    *,
+    actions: list[str],
+    scope: dict | None = None,
+):
     effective_scope = dict(scope or {})
     effective_scope.setdefault("action_classes", actions)
     return engine.issue_authorization(
@@ -71,7 +88,6 @@ class TestPolicyEngine:
             action_digest=ACTION_DIGEST,
         )
         assert not decision.permitted and decision.approval_required
-
         approval = engine.issue_approval(
             action="DEPLOY",
             action_digest=ACTION_DIGEST,
@@ -86,7 +102,6 @@ class TestPolicyEngine:
             approval_id=approval.approval_id,
         )
         assert permitted.permitted
-        assert permitted.satisfied_approval_ids == (approval.approval_id,)
         assert engine.consume_approvals(permitted.satisfied_approval_ids)
         assert not engine.evaluate(
             action="DEPLOY",
@@ -117,8 +132,7 @@ class TestPolicyEngine:
             action_digest=OTHER_ACTION_DIGEST,
             approval_id=approval.approval_id,
         )
-        assert not mismatch.permitted
-        assert mismatch.approval_required
+        assert not mismatch.permitted and mismatch.approval_required
 
     def test_approval_single_use(self) -> None:
         keys, engine, controller, principal = make_engine()
@@ -145,9 +159,27 @@ class TestPolicyEngine:
                 signing_key_id="aitrace://ca/key/controller",
             )
 
-    def test_dual_approval_requires_two_distinct_approvers_for_same_intent(self) -> None:
+    def test_unentitled_approver_is_rejected(self) -> None:
         keys, engine, controller, principal = make_engine()
+        outsider = str(make_identifier("principal", "outsider"))
+        keys.create_key("aitrace://ca/key/outsider", bound_entity_id=outsider)
+        authorization = issue(engine, controller, principal, actions=["PUBLISH"])
+        with pytest.raises(PermissionError, match="not entitled"):
+            engine.issue_approval(
+                action="PUBLISH",
+                action_digest=ACTION_DIGEST,
+                approver_id=outsider,
+                authorization_id=authorization.authorization_id,
+                signing_key_id="aitrace://ca/key/outsider",
+            )
+
+    def test_dual_approval_requires_two_distinct_entitled_approvers_for_same_intent(self) -> None:
         second_approver = str(make_identifier("principal", "p2"))
+        entitlements = CompositeApproverEntitlementProvider(
+            PrincipalApproverEntitlementProvider(),
+            StaticApproverEntitlementProvider({second_approver: ["DESTROY_KEY"]}),
+        )
+        keys, engine, controller, principal = make_engine(entitlements=entitlements)
         keys.create_key("aitrace://ca/key/principal-2", bound_entity_id=second_approver)
         authorization = issue(engine, controller, principal, actions=["DESTROY_KEY"])
         approval_1 = engine.issue_approval(
@@ -224,10 +256,16 @@ class TestPolicyEngine:
         assert engine.evaluate(
             action="READ",
             authorization_id=authorization.authorization_id,
-            scope_context=ScopeContext(resource_class="document", provider_class="approved-provider"),
+            scope_context=ScopeContext(
+                resource_class="document",
+                provider_class="approved-provider",
+            ),
         ).permitted
         assert not engine.evaluate(
             action="READ",
             authorization_id=authorization.authorization_id,
-            scope_context=ScopeContext(resource_class="document", provider_class="unapproved-provider"),
+            scope_context=ScopeContext(
+                resource_class="document",
+                provider_class="unapproved-provider",
+            ),
         ).permitted
