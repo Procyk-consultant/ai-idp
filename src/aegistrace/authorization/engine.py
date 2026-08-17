@@ -103,12 +103,7 @@ class PolicyDecision:
 
 
 class PolicyEngine:
-    """Evaluate signed authorizations and approvals against policy.
-
-    The engine fails closed for invalid signatures, stale policy versions,
-    inactive records, scope violations, missing approvals, malformed scope
-    context, and inconclusive high-risk decisions.
-    """
+    """Evaluate signed authorizations and approvals against policy."""
 
     def __init__(self, key_service: KeyService, policy_version: str = "1.0.0") -> None:
         self._keys = key_service
@@ -119,26 +114,26 @@ class PolicyEngine:
 
     def _key_is_bound_to(self, signing_key_id: str, allowed_entity_ids: set[str]) -> bool:
         try:
-            rec = self._keys.get_record(signing_key_id)
+            record = self._keys.get_record(signing_key_id)
         except KeyError:
             return False
-        return rec.bound_entity_id in allowed_entity_ids
+        return record.bound_entity_id in allowed_entity_ids
 
-    def _authorization_record(self, auth: Authorization) -> dict[str, Any]:
+    def _authorization_record(self, authorization: Authorization) -> dict[str, Any]:
         record: dict[str, Any] = {
-            "authorization_id": auth.authorization_id,
-            "principal_id": auth.principal_id,
-            "controller_id": auth.controller_id,
-            "agent_id": auth.agent_id,
-            "task_id": auth.task_id,
-            "scope": auth.scope,
-            "policy_version": auth.policy_version,
-            "issued_at": auth.issued_at,
+            "authorization_id": authorization.authorization_id,
+            "principal_id": authorization.principal_id,
+            "controller_id": authorization.controller_id,
+            "agent_id": authorization.agent_id,
+            "task_id": authorization.task_id,
+            "scope": authorization.scope,
+            "policy_version": authorization.policy_version,
+            "issued_at": authorization.issued_at,
         }
-        if auth.expires_at:
-            record["expires_at"] = auth.expires_at
-        if auth.delegation_id:
-            record["delegation_id"] = auth.delegation_id
+        if authorization.expires_at:
+            record["expires_at"] = authorization.expires_at
+        if authorization.delegation_id:
+            record["delegation_id"] = authorization.delegation_id
         return record
 
     def _approval_record(self, approval: Approval) -> dict[str, Any]:
@@ -155,17 +150,27 @@ class PolicyEngine:
         return record
 
     def verify_authorization(self, authorization_id: str) -> bool:
-        auth = self._authorizations.get(authorization_id)
-        if auth is None or not auth.is_active():
+        authorization = self._authorizations.get(authorization_id)
+        if authorization is None or not authorization.is_active():
             return False
-        if auth.policy_version != self.policy_version:
+        if authorization.policy_version != self.policy_version:
             return False
-        if not self._key_is_bound_to(auth.signing_key_id, {auth.principal_id, auth.controller_id}):
+        if not self._key_is_bound_to(
+            authorization.signing_key_id,
+            {authorization.principal_id, authorization.controller_id},
+        ):
             return False
         try:
-            rec = self._keys.get_record(auth.signing_key_id)
-            public_key = SigningKey.from_public_pem(auth.signing_key_id, rec.public_pem).public_key
-            return SigningKey.verify(public_key, canonicalize(self._authorization_record(auth)), auth.signature)
+            record = self._keys.get_record(authorization.signing_key_id)
+            public_key = SigningKey.from_public_pem(
+                authorization.signing_key_id,
+                record.public_pem,
+            ).public_key
+            return SigningKey.verify(
+                public_key,
+                canonicalize(self._authorization_record(authorization)),
+                authorization.signature,
+            )
         except Exception:
             return False
 
@@ -175,15 +180,22 @@ class PolicyEngine:
             return False
         if approval.policy_version != self.policy_version:
             return False
-        auth = self._authorizations.get(approval.authorization_id)
-        if auth is None or not self.verify_authorization(auth.authorization_id):
+        authorization = self._authorizations.get(approval.authorization_id)
+        if authorization is None or not self.verify_authorization(authorization.authorization_id):
             return False
-        if not self._key_is_bound_to(approval.signing_key_id, {approval.approver_id, auth.controller_id}):
+        if not self._key_is_bound_to(approval.signing_key_id, {approval.approver_id}):
             return False
         try:
-            rec = self._keys.get_record(approval.signing_key_id)
-            public_key = SigningKey.from_public_pem(approval.signing_key_id, rec.public_pem).public_key
-            return SigningKey.verify(public_key, canonicalize(self._approval_record(approval)), approval.signature)
+            record = self._keys.get_record(approval.signing_key_id)
+            public_key = SigningKey.from_public_pem(
+                approval.signing_key_id,
+                record.public_pem,
+            ).public_key
+            return SigningKey.verify(
+                public_key,
+                canonicalize(self._approval_record(approval)),
+                approval.signature,
+            )
         except Exception:
             return False
 
@@ -204,7 +216,7 @@ class PolicyEngine:
         if not self._key_is_bound_to(signing_key_id, {principal_id, controller_id}):
             raise PermissionError("authorization signing key is not bound to the principal or accountable controller")
 
-        auth = Authorization(
+        authorization = Authorization(
             authorization_id=str(make_identifier("authorization", make_slug("auth"))),
             principal_id=principal_id,
             controller_id=controller_id,
@@ -217,12 +229,12 @@ class PolicyEngine:
             delegation_id=delegation_id,
             signing_key_id=signing_key_id,
         )
-        auth.signature = self._keys.get_signing_key(signing_key_id).sign(
-            canonicalize(self._authorization_record(auth))
+        authorization.signature = self._keys.get_signing_key(signing_key_id).sign(
+            canonicalize(self._authorization_record(authorization))
         )
         with self._lock:
-            self._authorizations[auth.authorization_id] = auth
-        return auth
+            self._authorizations[authorization.authorization_id] = authorization
+        return authorization
 
     def get_authorization(self, authorization_id: str) -> Authorization | None:
         return self._authorizations.get(authorization_id)
@@ -248,15 +260,15 @@ class PolicyEngine:
     ) -> Approval:
         if action not in ACTIONS:
             raise ValueError(f"invalid action: {action}")
-        auth = self._authorizations.get(authorization_id)
-        if auth is None:
+        authorization = self._authorizations.get(authorization_id)
+        if authorization is None:
             raise KeyError(f"authorization not found: {authorization_id}")
         if not self.verify_authorization(authorization_id):
             raise PermissionError("authorization is not valid")
         if not self._keys.is_active(signing_key_id):
             raise PermissionError(f"signing key not active: {signing_key_id}")
-        if not self._key_is_bound_to(signing_key_id, {approver_id, auth.controller_id}):
-            raise PermissionError("approval signing key is not bound to the approver or accountable controller")
+        if not self._key_is_bound_to(signing_key_id, {approver_id}):
+            raise PermissionError("approval signing key is not bound to the approver")
 
         approval = Approval(
             approval_id=str(make_identifier("approval", make_slug("apr"))),
@@ -294,14 +306,21 @@ class PolicyEngine:
         if action not in ACTIONS:
             return PolicyDecision(deny=True, reason=f"invalid action: {action}")
 
-        auth = self._authorizations.get(authorization_id)
-        if auth is None:
+        authorization = self._authorizations.get(authorization_id)
+        if authorization is None:
             return PolicyDecision(deny=True, reason="authorization not found")
         if not self.verify_authorization(authorization_id):
-            return PolicyDecision(deny=True, reason="authorization invalid, inactive, stale, or signature verification failed")
+            return PolicyDecision(
+                deny=True,
+                reason="authorization invalid, inactive, stale, or signature verification failed",
+            )
 
         try:
-            scope_decision = evaluate_scope(auth.scope, action=action, context=scope_context)
+            scope_decision = evaluate_scope(
+                authorization.scope,
+                action=action,
+                context=scope_context,
+            )
         except (TypeError, ValueError) as exc:
             return PolicyDecision(deny=True, reason=f"authorization scope is malformed: {exc}")
         if not scope_decision.allowed:
@@ -352,7 +371,6 @@ class PolicyEngine:
         )
 
     def consume_approvals(self, approval_ids: list[str] | tuple[str, ...]) -> bool:
-        """Atomically consume a set of approvals if all remain valid."""
         unique_ids = tuple(dict.fromkeys(approval_ids))
         if not unique_ids:
             return True
