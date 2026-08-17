@@ -10,7 +10,7 @@ Telephone:
 Location: Saguenay, Québec, Canada
 File: spec/APPROVAL_PROTOCOL.md
 Title: Approval Protocol
-Purpose: Define exact-action, signed, single-use approvals
+Purpose: Define exact-action, signed, entitled, single-use approvals
 Audience: Architects, implementers
 Document Classification: Public
 Classification: documentation
@@ -19,9 +19,9 @@ Status: Submission-ready / reconciliation hardening
 Last Material Revision: 2026-08-17
 Dependencies: AUTHORIZATION_PROTOCOL.md; EVENT_PROTOCOL.md
 Source Basis: Master Execution Prompt; Canadian public-record legal materials; international technical standards
-Invariants: Approvals are exact-action, signed, bounded, and single-use
-Failure Behaviour: Missing, mismatched, expired, replayed, or unverifiable approvals are rejected
-Trace Policy: Approval identity and consumption evidence are traceable
+Invariants: Approvals are exact-action, signed, bounded, entitled, and single-use
+Failure Behaviour: Missing, mismatched, expired, replayed, unentitled, or unverifiable approvals are rejected
+Trace Policy: Approval identity, intent, entitlement, and consumption evidence are traceable
 Licence Status: No licence selected unless approved in writing by Pierre-Edward Procyk
 ---
 
@@ -31,7 +31,7 @@ Licence Status: No licence selected unless approved in writing by Pierre-Edward 
 
 Some authorized action classes require a separate approval before execution. An authorization grants bounded authority; an approval confirms a **specific proposed action intent** within that authority.
 
-An approval is therefore not a reusable permission for an action verb such as `PUBLISH` or `DESTROY_KEY`. It is a signed, single-use record bound to the canonical digest of the action actually proposed.
+An approval is not a reusable permission for an action verb such as `PUBLISH` or `DESTROY_KEY`. It is a signed, single-use record bound to the canonical digest of the exact action proposed and issued only by an entitled approver.
 
 ## 2. Approval Record
 
@@ -63,94 +63,124 @@ The normative JSON representation is defined by `schemas/approval.schema.json`.
 - provider, model, model version, and deployment;
 - task;
 - action class;
-- disclosure/visibility tier;
+- **disclosure/visibility tier**;
 - jurisdiction;
 - delegation reference;
 - resource target;
 - before/after digests;
 - relevant evaluated scope context.
 
-The digest prevents retargeting. For example, approval to publish resource `A` does not authorize publishing resource `B`; approval for organization-private evidence does not silently authorize changing the same operation to `PUBLIC` visibility.
+The digest prevents retargeting. Approval to publish resource `A` does not authorize resource `B`; approval for `ORGANIZATION_PRIVATE` evidence does not authorize changing the same material action to `PUBLIC` visibility.
 
-## 4. Operations
+The reference implementation is `authorization/intent.py`.
 
-### 4.1 Request
+## 4. Approver Entitlement
+
+Cryptographic possession of a principal-bound key is necessary but is not sufficient to become an approver.
+
+Before an approval can be issued or verified, policy must establish that `approver_id` is entitled to approve the action class under the applicable authorization context.
+
+AegisTrace provides a pluggable `ApproverEntitlementProvider` contract:
+
+- **fail-closed default:** only the authorization principal is entitled;
+- **static explicit grants:** reference/test deployments can bind named approvers to action classes;
+- **composite policy:** multiple approved entitlement sources can be combined;
+- **external IAM/directory adapter:** production organizations may implement the same contract against their approved identity/role system.*
+
+An unentitled approver is rejected even if its signature and signing key are otherwise cryptographically valid.
+
+## 5. Operations
+
+### 5.1 Request
 
 When policy identifies an approval-gated action:
 
 1. assemble the complete proposed action intent;
 2. canonicalize it deterministically;
 3. calculate `action_digest`;
-4. present the proposed action and its material context to the approver.
+4. present the action and material context to an entitled approver.
 
-### 4.2 Issue
+### 5.2 Issue
 
-1. The approver reviews the exact proposed intent.
-2. The approval service verifies the underlying authorization.
-3. The approval service verifies that the signing key is active and bound to `approver_id`.
-4. The approval record is created with the exact `action_digest`.
-5. The approver's signature is verified/stored.
-6. The approval is retained as canonical authority evidence.
+1. Verify the underlying authorization.
+2. Verify approver entitlement for the action.
+3. Verify that the signing key is active and bound to `approver_id`.
+4. Create the approval with the exact `action_digest`.
+5. Sign the canonical approval record.
+6. Retain the approval as authority evidence.
 
-A controller-bound key cannot masquerade as a different human approver merely because the controller issued the underlying authorization.
+A controller-bound key cannot masquerade as a different approver merely because the controller issued the authorization.
 
-### 4.3 Verify
+### 5.3 Verify
 
 An approval is usable only if:
 
 1. the record exists;
 2. the underlying authorization remains valid;
 3. the approval is unused and unexpired;
-4. policy version is current;
-5. action class matches;
-6. `action_digest` exactly matches the currently proposed action intent;
-7. authorization ID matches;
-8. signing key is bound to the approver;
-9. signature verifies.
+4. the shared consumption store reports it available;
+5. policy version is current;
+6. action class matches;
+7. `action_digest` exactly matches the proposed action intent;
+8. authorization ID matches;
+9. the principal remains entitled to approve the action;
+10. signing key is bound to the approver;
+11. signature verifies.
 
-Any mismatch is a denial.
+Any mismatch or unavailable authoritative security state is a denial.
 
-### 4.4 Consume
+### 5.4 Consume
 
 On successful governed acceptance:
 
-1. the accepted event records the approval identifier(s) and action-intent digest;
-2. selected approvals are marked `used=true`;
+1. the accepted event records approval identifier(s) and `action_intent_digest`;
+2. all selected approvals are consumed atomically or none are consumed;
 3. `used_at` is recorded;
 4. reuse is rejected.
 
-The AegisTrace reference boundary serializes selection, event append, and consumption in-process. A distributed high-assurance deployment must preserve equivalent transactional semantics across replicas/storage.*
+AegisTrace provides an `ApprovalConsumptionStore` contract with:
 
-### 4.5 Revoke
+- process-local reference implementation;
+- durable SQLite implementation;
+- shared PostgreSQL implementation using database uniqueness/transactions for all-or-none consumption across clients.
 
-A future approval-lifecycle extension may model explicit pre-use revocation as signed append-only evidence. Until such a lifecycle is active in the reference implementation, revocation claims must not be inferred from absence or local deletion.
+The PostgreSQL path supplies the source mechanism required for shared single-use approval consumption in multi-process deployments. A complete distributed deployment must also use appropriately shared authoritative authorization/registry/delegation state and deployment-level transaction boundaries.*
 
-## 5. Dual Approval
+### 5.5 Revoke
 
-Policy-designated actions require two valid approvals from **distinct approvers**. Both approvals must:
+Explicit pre-use approval revocation remains a future lifecycle extension unless represented as an authorized signed state transition. Absence or local deletion must never be treated as evidence of revocation.
+
+## 6. Dual Approval
+
+Policy-designated actions require two valid approvals from **distinct entitled approvers**. Both approvals must:
 
 - reference the same authorization;
 - reference the same action class;
 - carry the same exact `action_digest`;
 - remain unused and valid;
+- pass entitlement policy independently;
 - have independently valid approver-bound signatures.
 
-The current reference dual-approval set includes designated high-impact classes such as cryptographic-key destruction, production modification, and database-schema alteration. The normative policy may impose stricter requirements by context or conformance level.
+The current reference dual-approval set includes designated high-impact classes such as cryptographic-key destruction, production modification, and database-schema alteration. Normative policy may impose stricter requirements by context or conformance level.
 
-## 6. Approver Authorization
+## 7. Replay and Concurrency
 
-Organizational policy determines which principals may approve which action classes. The reference implementation verifies cryptographic identity and exact-action binding; production deployments must additionally configure the organization's approver-role/entitlement source where required.*
+Approval single-use is an authorization invariant, not a UI hint. High-assurance deployments must prevent two concurrent requests from consuming the same approval successfully.
 
-## 7. Invariants
+The reference PostgreSQL consumption store uses a unique approval identifier and a single transaction so a conflicting second consumption fails rather than silently succeeding.
+
+## 8. Invariants
 
 - Approvals are bound to exact action intents.
+- Visibility is part of the exact action intent.
 - A change in a bound action fact requires a different digest and a new approval.
+- Approvers must be entitled by policy.
 - Approvals are single-use.
-- Approval reuse is rejected.
+- Concurrent/replayed approval consumption is rejected.
 - Expired approvals are rejected.
 - Approver signatures are verified.
 - Approval signing keys are bound to the actual approver.
-- Dual approval requires two distinct approvers of the same exact intent.
+- Dual approval requires two distinct entitled approvers of the same exact intent.
 - Approval evidence remains reconstructable after use.
 
-> `*` Distributed transaction coordination and external organizational entitlement/identity systems are high-assurance deployment dependencies, not a reduction of the AI-IDP normative requirement.
+> `*` External organizational IAM, shared multi-service state deployment, institutional role governance, and target-environment validation remain deployment dependencies. The AegisTrace source provides the entitlement and atomic-consumption contracts without claiming a particular organization has configured those external systems.
