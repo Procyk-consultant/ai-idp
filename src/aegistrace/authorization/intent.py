@@ -15,13 +15,14 @@ from dataclasses import dataclass
 from typing import Any
 
 from aegistrace.authorization.scope import ScopeContext
+from aegistrace.events.models import VISIBILITY_TIERS
 from aegistrace.signing.canonical import canonicalize
 from aegistrace.signing.ed25519 import sha256_hex
 
 
 @dataclass(frozen=True)
 class ActionIntent:
-    """Exact action facts that a single-use approval authorizes."""
+    """Exact material action facts that a single-use approval authorizes."""
 
     controller_id: str
     principal_id: str
@@ -33,12 +34,17 @@ class ActionIntent:
     deployment_id: str
     task_id: str
     action: str
+    visibility: str
     jurisdiction_id: str = "ca"
     delegation_id: str | None = None
     resource_id: str | None = None
     before_digest: str | None = None
     after_digest: str | None = None
     scope_context: ScopeContext | None = None
+
+    def __post_init__(self) -> None:
+        if self.visibility not in VISIBILITY_TIERS:
+            raise ValueError(f"invalid visibility: {self.visibility!r}")
 
     def to_dict(self) -> dict[str, Any]:
         result: dict[str, Any] = {
@@ -52,6 +58,7 @@ class ActionIntent:
             "deployment_id": self.deployment_id,
             "task_id": self.task_id,
             "action": self.action,
+            "visibility": self.visibility,
             "jurisdiction_id": self.jurisdiction_id,
         }
         if self.delegation_id is not None:
