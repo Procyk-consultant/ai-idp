@@ -3,7 +3,7 @@ Project: AI-IDP / AegisTrace
 Author and Intellectual Property Owner: Pierre-Edward Procyk
 Copyright: © 2026 Pierre-Edward Procyk. All rights reserved.
 File: tests/unit/test_authorization.py
-Purpose: Unit tests for authorization and approval policy enforcement
+Purpose: Unit tests for authorization and exact-action approval policy enforcement
 Version: 2.0.0
 Last Material Revision: 2026-08-17
 Licence Status: No licence selected unless approved in writing by Pierre-Edward Procyk.
@@ -16,6 +16,9 @@ from aegistrace.authorization.engine import PolicyEngine
 from aegistrace.authorization.scope import ScopeContext
 from aegistrace.identity.ids import make_identifier
 from aegistrace.identity.keys import KeyService
+
+ACTION_DIGEST = "sha256:" + "1" * 64
+OTHER_ACTION_DIGEST = "sha256:" + "2" * 64
 
 
 def make_engine():
@@ -57,19 +60,21 @@ class TestPolicyEngine:
         keys, engine, controller, principal = make_engine()
         authorization = issue(engine, controller, principal, actions=["SEARCH"])
         engine.revoke_authorization(authorization.authorization_id)
-        assert not engine.evaluate(
-            action="SEARCH",
-            authorization_id=authorization.authorization_id,
-        ).permitted
+        assert not engine.evaluate(action="SEARCH", authorization_id=authorization.authorization_id).permitted
 
     def test_approval_required_consumed_and_not_reusable(self) -> None:
         keys, engine, controller, principal = make_engine()
         authorization = issue(engine, controller, principal, actions=["DEPLOY"])
-        decision = engine.evaluate(action="DEPLOY", authorization_id=authorization.authorization_id)
+        decision = engine.evaluate(
+            action="DEPLOY",
+            authorization_id=authorization.authorization_id,
+            action_digest=ACTION_DIGEST,
+        )
         assert not decision.permitted and decision.approval_required
 
         approval = engine.issue_approval(
             action="DEPLOY",
+            action_digest=ACTION_DIGEST,
             approver_id=principal,
             authorization_id=authorization.authorization_id,
             signing_key_id="aitrace://ca/key/principal",
@@ -77,6 +82,7 @@ class TestPolicyEngine:
         permitted = engine.evaluate(
             action="DEPLOY",
             authorization_id=authorization.authorization_id,
+            action_digest=ACTION_DIGEST,
             approval_id=approval.approval_id,
         )
         assert permitted.permitted
@@ -85,14 +91,41 @@ class TestPolicyEngine:
         assert not engine.evaluate(
             action="DEPLOY",
             authorization_id=authorization.authorization_id,
+            action_digest=ACTION_DIGEST,
             approval_id=approval.approval_id,
         ).permitted
+
+    def test_approval_cannot_be_retargeted_to_different_action_intent(self) -> None:
+        keys, engine, controller, principal = make_engine()
+        authorization = issue(engine, controller, principal, actions=["PUBLISH"])
+        approval = engine.issue_approval(
+            action="PUBLISH",
+            action_digest=ACTION_DIGEST,
+            approver_id=principal,
+            authorization_id=authorization.authorization_id,
+            signing_key_id="aitrace://ca/key/principal",
+        )
+        assert engine.evaluate(
+            action="PUBLISH",
+            authorization_id=authorization.authorization_id,
+            action_digest=ACTION_DIGEST,
+            approval_id=approval.approval_id,
+        ).permitted
+        mismatch = engine.evaluate(
+            action="PUBLISH",
+            authorization_id=authorization.authorization_id,
+            action_digest=OTHER_ACTION_DIGEST,
+            approval_id=approval.approval_id,
+        )
+        assert not mismatch.permitted
+        assert mismatch.approval_required
 
     def test_approval_single_use(self) -> None:
         keys, engine, controller, principal = make_engine()
         authorization = issue(engine, controller, principal, actions=["DESTROY_RESOURCE"])
         approval = engine.issue_approval(
             action="DESTROY_RESOURCE",
+            action_digest=ACTION_DIGEST,
             approver_id=principal,
             authorization_id=authorization.authorization_id,
             signing_key_id="aitrace://ca/key/principal",
@@ -106,24 +139,27 @@ class TestPolicyEngine:
         with pytest.raises(PermissionError):
             engine.issue_approval(
                 action="PUBLISH",
+                action_digest=ACTION_DIGEST,
                 approver_id=principal,
                 authorization_id=authorization.authorization_id,
                 signing_key_id="aitrace://ca/key/controller",
             )
 
-    def test_dual_approval_requires_two_distinct_approvers(self) -> None:
+    def test_dual_approval_requires_two_distinct_approvers_for_same_intent(self) -> None:
         keys, engine, controller, principal = make_engine()
         second_approver = str(make_identifier("principal", "p2"))
         keys.create_key("aitrace://ca/key/principal-2", bound_entity_id=second_approver)
         authorization = issue(engine, controller, principal, actions=["DESTROY_KEY"])
         approval_1 = engine.issue_approval(
             action="DESTROY_KEY",
+            action_digest=ACTION_DIGEST,
             approver_id=principal,
             authorization_id=authorization.authorization_id,
             signing_key_id="aitrace://ca/key/principal",
         )
         approval_2 = engine.issue_approval(
             action="DESTROY_KEY",
+            action_digest=ACTION_DIGEST,
             approver_id=second_approver,
             authorization_id=authorization.authorization_id,
             signing_key_id="aitrace://ca/key/principal-2",
@@ -131,11 +167,13 @@ class TestPolicyEngine:
         assert not engine.evaluate(
             action="DESTROY_KEY",
             authorization_id=authorization.authorization_id,
+            action_digest=ACTION_DIGEST,
             approval_ids=[approval_1.approval_id],
         ).permitted
         permitted = engine.evaluate(
             action="DESTROY_KEY",
             authorization_id=authorization.authorization_id,
+            action_digest=ACTION_DIGEST,
             approval_ids=[approval_1.approval_id, approval_2.approval_id],
         )
         assert permitted.permitted
@@ -150,27 +188,24 @@ class TestPolicyEngine:
         authorization.signature = "Ed25519:" + "A" * 88
         authorization.scope["action_classes"] = ["DELETE"]
         assert engine.verify_authorization(authorization.authorization_id)
-        assert engine.evaluate(
-            action="SEARCH",
-            authorization_id=authorization.authorization_id,
-        ).permitted
-        assert not engine.evaluate(
-            action="DELETE",
-            authorization_id=authorization.authorization_id,
-        ).permitted
+        assert engine.evaluate(action="SEARCH", authorization_id=authorization.authorization_id).permitted
+        assert not engine.evaluate(action="DELETE", authorization_id=authorization.authorization_id).permitted
 
     def test_returned_approval_is_snapshot_not_mutable_canonical_state(self) -> None:
         keys, engine, controller, principal = make_engine()
         authorization = issue(engine, controller, principal, actions=["PUBLISH"])
         approval = engine.issue_approval(
             action="PUBLISH",
+            action_digest=ACTION_DIGEST,
             approver_id=principal,
             authorization_id=authorization.authorization_id,
             signing_key_id="aitrace://ca/key/principal",
         )
         approval.used = True
+        approval.action_digest = OTHER_ACTION_DIGEST
         stored = engine.get_approval(approval.approval_id)
         assert stored is not None and stored.used is False
+        assert stored.action_digest == ACTION_DIGEST
         assert engine.verify_approval(approval.approval_id)
 
     def test_scope_dimensions_fail_closed(self) -> None:
@@ -185,23 +220,14 @@ class TestPolicyEngine:
                 "provider_classes": ["approved-provider"],
             },
         )
-        assert not engine.evaluate(
-            action="READ",
-            authorization_id=authorization.authorization_id,
-        ).permitted
+        assert not engine.evaluate(action="READ", authorization_id=authorization.authorization_id).permitted
         assert engine.evaluate(
             action="READ",
             authorization_id=authorization.authorization_id,
-            scope_context=ScopeContext(
-                resource_class="document",
-                provider_class="approved-provider",
-            ),
+            scope_context=ScopeContext(resource_class="document", provider_class="approved-provider"),
         ).permitted
         assert not engine.evaluate(
             action="READ",
             authorization_id=authorization.authorization_id,
-            scope_context=ScopeContext(
-                resource_class="document",
-                provider_class="unapproved-provider",
-            ),
+            scope_context=ScopeContext(resource_class="document", provider_class="unapproved-provider"),
         ).permitted
