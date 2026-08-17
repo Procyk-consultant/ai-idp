@@ -17,23 +17,18 @@ from typing import Any
 from aegistrace.authorization.scope import ScopeContext
 
 ACTIONS: list[str] = [
-    "DISCOVER", "ENUMERATE", "OPEN", "READ", "SEARCH", "QUERY",
-    "CREATE", "GENERATE", "MODIFY", "REWRITE", "PATCH", "MOVE",
-    "RENAME", "COPY", "DELETE", "RESTORE", "EXECUTE", "RUN",
-    "COMPILE", "BUILD", "TEST", "DEBUG", "INSTALL", "CONFIGURE",
-    "CONNECT", "AUTHENTICATE", "AUTHORIZE", "DENY", "TRANSMIT",
-    "RECEIVE", "UPLOAD", "DOWNLOAD", "EXPORT", "IMPORT", "PUBLISH",
-    "DEPLOY", "RELEASE", "MERGE", "COMMIT", "BRANCH", "TAG",
-    "SIGN", "VERIFY", "APPROVE", "REJECT", "RECOMMEND", "DECIDE",
-    "DELEGATE", "CREATE_AGENT", "CREATE_SUB_AGENT", "CHANGE_MODEL",
-    "CHANGE_PROVIDER", "CHANGE_TOOL", "CHANGE_PERMISSION",
-    "CHANGE_POLICY", "REVOKE", "PAUSE", "TERMINATE", "ROLLBACK",
-    "DESTROY_RESOURCE", "DESTROY_KEY", "ACCESS_SECRET", "USE_CREDENTIAL",
-    "CALL_API", "WRITE_DATABASE", "DELETE_DATABASE_RECORD",
-    "ALTER_DATABASE_SCHEMA", "MODIFY_INFRASTRUCTURE", "MODIFY_PRODUCTION",
-    "TRIGGER_EXTERNAL_EFFECT",
+    "DISCOVER", "ENUMERATE", "OPEN", "READ", "SEARCH", "QUERY", "CREATE", "GENERATE",
+    "MODIFY", "REWRITE", "PATCH", "MOVE", "RENAME", "COPY", "DELETE", "RESTORE",
+    "EXECUTE", "RUN", "COMPILE", "BUILD", "TEST", "DEBUG", "INSTALL", "CONFIGURE",
+    "CONNECT", "AUTHENTICATE", "AUTHORIZE", "DENY", "TRANSMIT", "RECEIVE", "UPLOAD",
+    "DOWNLOAD", "EXPORT", "IMPORT", "PUBLISH", "DEPLOY", "RELEASE", "MERGE", "COMMIT",
+    "BRANCH", "TAG", "SIGN", "VERIFY", "APPROVE", "REJECT", "RECOMMEND", "DECIDE",
+    "DELEGATE", "CREATE_AGENT", "CREATE_SUB_AGENT", "CHANGE_MODEL", "CHANGE_PROVIDER",
+    "CHANGE_TOOL", "CHANGE_PERMISSION", "CHANGE_POLICY", "REVOKE", "PAUSE", "TERMINATE",
+    "ROLLBACK", "DESTROY_RESOURCE", "DESTROY_KEY", "ACCESS_SECRET", "USE_CREDENTIAL",
+    "CALL_API", "WRITE_DATABASE", "DELETE_DATABASE_RECORD", "ALTER_DATABASE_SCHEMA",
+    "MODIFY_INFRASTRUCTURE", "MODIFY_PRODUCTION", "TRIGGER_EXTERNAL_EFFECT",
 ]
-
 VISIBILITY_TIERS = ("PUBLIC", "CONTROLLED", "ORGANIZATION_PRIVATE", "SEALED")
 GOVERNANCE_MODES = ("GOVERNED", "EVIDENCE_ONLY", "DENIAL")
 SCHEMA_VERSION = "2.0.0"
@@ -73,12 +68,7 @@ class ExecutionContext:
 
 @dataclass
 class Event:
-    """A signed, hash-chained event record.
-
-    Optional governance fields are additive. Legacy v2.0.0 records that do
-    not contain them remain byte-semantically verifiable because absent fields
-    are not synthesized during serialization.
-    """
+    """A signed, hash-chained event record with optional governance evidence."""
 
     schema_version: str
     event_id: str
@@ -99,6 +89,7 @@ class Event:
     approval_ids: list[str] = field(default_factory=list)
     delegation_chain: list[str] = field(default_factory=list)
     scope_context: ScopeContext | None = None
+    action_intent_digest: str | None = None
     governance_mode: str | None = None
     decision_reason: str | None = None
     resource_id: str | None = None
@@ -123,12 +114,20 @@ class Event:
             "signing_key_id": self.signing_key_id,
             "policy_version": self.policy_version,
         }
-        if self.delegation_id is not None:
-            result["delegation_id"] = self.delegation_id
-        if self.authorization_id is not None:
-            result["authorization_id"] = self.authorization_id
-        if self.approval_id is not None:
-            result["approval_id"] = self.approval_id
+        optional = {
+            "delegation_id": self.delegation_id,
+            "authorization_id": self.authorization_id,
+            "approval_id": self.approval_id,
+            "action_intent_digest": self.action_intent_digest,
+            "governance_mode": self.governance_mode,
+            "decision_reason": self.decision_reason,
+            "resource_id": self.resource_id,
+            "before_digest": self.before_digest,
+            "after_digest": self.after_digest,
+        }
+        for key, value in optional.items():
+            if value is not None:
+                result[key] = value
         if self.approval_ids:
             result["approval_ids"] = list(self.approval_ids)
         if self.delegation_chain:
@@ -137,39 +136,17 @@ class Event:
             scope_dict = self.scope_context.to_dict()
             if scope_dict:
                 result["scope_context"] = scope_dict
-        if self.governance_mode is not None:
-            result["governance_mode"] = self.governance_mode
-        if self.decision_reason is not None:
-            result["decision_reason"] = self.decision_reason
-        if self.resource_id is not None:
-            result["resource_id"] = self.resource_id
-        if self.before_digest is not None:
-            result["before_digest"] = self.before_digest
-        if self.after_digest is not None:
-            result["after_digest"] = self.after_digest
         return result
 
     @classmethod
     def from_dict(cls, value: dict[str, Any]) -> Event:
-        actor = Actor(
-            controller_id=value["actor"]["controller_id"],
-            principal_id=value["actor"]["principal_id"],
-            agent_id=value["actor"]["agent_id"],
-            agent_instance_id=value["actor"]["agent_instance_id"],
-        )
-        execution_context = ExecutionContext(
-            provider_id=value["execution_context"]["provider_id"],
-            model_id=value["execution_context"]["model_id"],
-            model_version_id=value["execution_context"]["model_version_id"],
-            deployment_id=value["execution_context"]["deployment_id"],
-        )
         return cls(
             schema_version=value["schema_version"],
             event_id=value["event_id"],
             timestamp=value["timestamp"],
             jurisdiction_id=value["jurisdiction_id"],
-            actor=actor,
-            execution_context=execution_context,
+            actor=Actor(**value["actor"]),
+            execution_context=ExecutionContext(**value["execution_context"]),
             task_id=value["task_id"],
             action=value["action"],
             visibility=value["visibility"],
@@ -183,6 +160,7 @@ class Event:
             approval_ids=list(value.get("approval_ids", [])),
             delegation_chain=list(value.get("delegation_chain", [])),
             scope_context=ScopeContext.from_dict(value.get("scope_context")) if value.get("scope_context") else None,
+            action_intent_digest=value.get("action_intent_digest"),
             governance_mode=value.get("governance_mode"),
             decision_reason=value.get("decision_reason"),
             resource_id=value.get("resource_id"),
@@ -193,11 +171,6 @@ class Event:
 
 
 __all__ = [
-    "ACTIONS",
-    "VISIBILITY_TIERS",
-    "GOVERNANCE_MODES",
-    "SCHEMA_VERSION",
-    "Actor",
-    "ExecutionContext",
-    "Event",
+    "ACTIONS", "VISIBILITY_TIERS", "GOVERNANCE_MODES", "SCHEMA_VERSION",
+    "Actor", "ExecutionContext", "Event",
 ]
