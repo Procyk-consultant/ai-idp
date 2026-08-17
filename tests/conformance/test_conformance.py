@@ -3,9 +3,9 @@ Project: AI-IDP / AegisTrace
 Author and Intellectual Property Owner: Pierre-Edward Procyk
 Copyright: © 2026 Pierre-Edward Procyk. All rights reserved.
 File: tests/conformance/test_conformance.py
-Purpose: Conformance tests for AI-IDP invariants
+Purpose: Executable conformance assertions for selected AI-IDP invariants
 Version: 2.0.0
-Last Material Revision: 2026-08-01
+Last Material Revision: 2026-08-17
 Licence Status: No licence selected unless approved in writing by Pierre-Edward Procyk.
 """
 from __future__ import annotations
@@ -16,9 +16,10 @@ from pathlib import Path
 import jsonschema
 import pytest
 
+from aegistrace.disclosure.public import SENSITIVE_EVENT_FIELDS, PublicEventProjector
 from aegistrace.events.collector import EventCollector
 from aegistrace.events.models import VISIBILITY_TIERS, Actor, ExecutionContext
-from aegistrace.identity.ids import make_identifier
+from aegistrace.identity.ids import Identifier, make_identifier
 from aegistrace.identity.keys import KeyService
 from aegistrace.ledger.append_only import AppendOnlyLedger, LedgerVerifier
 
@@ -34,117 +35,129 @@ def stack():
     ledger = AppendOnlyLedger()
     keys = KeyService()
     collector = EventCollector(ledger, keys)
-    controller = str(make_identifier("controller", "org-001"))
-    principal = str(make_identifier("principal", "p1"))
-    agent = str(make_identifier("agent", "a1"))
-    instance = str(make_identifier("agent-instance", "a1", version="r1"))
-    keys.create_key("aitrace://ca/key/k1", bound_entity_id=agent)
-    actor = Actor(controller_id=controller, principal_id=principal, agent_id=agent, agent_instance_id=instance)
-    ec = ExecutionContext(
+    actor = Actor(
+        controller_id=str(make_identifier("controller", "org-001")),
+        principal_id=str(make_identifier("principal", "p1")),
+        agent_id=str(make_identifier("agent", "a1")),
+        agent_instance_id=str(make_identifier("agent-instance", "a1", version="r1")),
+    )
+    execution_context = ExecutionContext(
         provider_id=str(make_identifier("provider", "p1")),
         model_id=str(make_identifier("model", "m1")),
         model_version_id=str(make_identifier("model", "m1", version="v1")),
         deployment_id=str(make_identifier("deployment", "d1")),
     )
-    return {"ledger": ledger, "keys": keys, "collector": collector, "actor": actor, "ec": ec}
+    key_id = str(make_identifier("key", "k1"))
+    keys.create_key(key_id, bound_entity_id=actor.agent_id)
+    return {
+        "ledger": ledger,
+        "keys": keys,
+        "collector": collector,
+        "actor": actor,
+        "ec": execution_context,
+        "key_id": key_id,
+    }
+
+
+def _record(stack, *, action: str = "SEARCH", visibility: str = "ORGANIZATION_PRIVATE", task: str = "t1"):
+    return stack["collector"].record(
+        actor=stack["actor"],
+        execution_context=stack["ec"],
+        task_id=str(make_identifier("task", task)),
+        action=action,
+        visibility=visibility,
+        signing_key_id=stack["key_id"],
+        resource_id=f"urn:resource:{task}",
+    )
 
 
 class TestConformance:
-    def test_event_conforms_to_schema(self, stack) -> None:
-        """Every recorded event conforms to schemas/event.schema.json."""
-        stack["collector"].record(
-            actor=stack["actor"], execution_context=stack["ec"], task_id=str(make_identifier("task", "t1")),
-            action="SEARCH", visibility="ORGANIZATION_PRIVATE",
-            signing_key_id="aitrace://ca/key/k1",
-            resource_id="urn:web:1",
-        )
-        schema = load_schema("event")
-        for e in stack["ledger"].events():
-            # The event's to_dict() should match the schema (note: _metadata in schema is not enforced)
-            instance = {k: v for k, v in e.to_dict().items() if k in schema["properties"]}
-            # jsonschema.validate raises on failure
-            jsonschema.validate(instance=instance, schema=schema)
+    def test_event_conforms_to_normative_schema(self, stack) -> None:
+        event = _record(stack)
+        jsonschema.validate(instance=event.to_dict(), schema=load_schema("event"))
 
-    def test_all_actions_in_vocabulary(self, stack) -> None:
-        """Every action verb in the implementation is in the canonical ACTIONS list."""
-        # Try to record each action; only canonical ones should succeed
-        non_canonical = ["HACK", "BYPASS", "FORGE", "TAMPER"]
-        for action in non_canonical:
+    def test_noncanonical_actions_are_rejected(self, stack) -> None:
+        for action in ("HACK", "BYPASS", "FORGE", "TAMPER"):
             with pytest.raises(ValueError):
-                stack["collector"].record(
-                    actor=stack["actor"], execution_context=stack["ec"], task_id=str(make_identifier("task", "t1")),
-                    action=action, visibility="ORGANIZATION_PRIVATE",
-                    signing_key_id="aitrace://ca/key/k1",
-                    resource_id="urn:web:1",
-                )
+                _record(stack, action=action)
 
-    def test_visibility_tiers_canonical(self) -> None:
-        assert set(VISIBILITY_TIERS) == {"PUBLIC", "CONTROLLED", "ORGANIZATION_PRIVATE", "SEALED"}
+    def test_visibility_tiers_are_exactly_canonical(self) -> None:
+        assert set(VISIBILITY_TIERS) == {
+            "PUBLIC",
+            "CONTROLLED",
+            "ORGANIZATION_PRIVATE",
+            "SEALED",
+        }
 
-    def test_required_invariants_hold(self, stack) -> None:
-        """Required invariants from spec/AI-IDP-CORE.md Section 5."""
-        # Invariant 1: every agent instance resolves to one persistent agent
-        # Invariant 3: every action resolves to an agent instance
-        # Invariant 4: every action resolves to a task
-        # Invariant 14: every event is cryptographically linked
-        # Invariant 15: every quality claim resolves to evidence (out of scope for unit test)
-        for _ in range(3):
-            stack["collector"].record(
-                actor=stack["actor"], execution_context=stack["ec"], task_id=str(make_identifier("task", "t1")),
-                action="SEARCH", visibility="ORGANIZATION_PRIVATE",
-                signing_key_id="aitrace://ca/key/k1",
-                resource_id="urn:web:1",
-            )
+    def test_selected_core_identity_and_chain_invariants_are_executable(self, stack) -> None:
+        for index in range(3):
+            _record(stack, task=f"t{index}")
         events = stack["ledger"].events()
-        for e in events:
-            assert e.actor.agent_id  # not empty
-            assert e.actor.agent_instance_id
-            assert e.task_id
-            assert e.event_hash.startswith("sha256:")
-            assert e.signature.startswith("Ed25519:")
-            assert e.previous_event_hash is None or e.previous_event_hash.startswith("sha256:")
-        # Hash chain
-        for i in range(1, len(events)):
-            assert events[i].previous_event_hash == events[i - 1].event_hash
+        for event in events:
+            assert Identifier.parse(event.actor.agent_id).entity_type == "agent"
+            assert Identifier.parse(event.actor.agent_instance_id).entity_type == "agent-instance"
+            assert Identifier.parse(event.task_id).entity_type == "task"
+            assert event.event_hash.startswith("sha256:")
+            assert event.signature.startswith("Ed25519:")
+        for index in range(1, len(events)):
+            assert events[index].previous_event_hash == events[index - 1].event_hash
 
-    def test_no_silent_history_modification(self, stack) -> None:
-        """The ledger is append-only: no event can be modified or removed."""
-        stack["collector"].record(
-            actor=stack["actor"], execution_context=stack["ec"], task_id=str(make_identifier("task", "t1")),
-            action="SEARCH", visibility="ORGANIZATION_PRIVATE",
-            signing_key_id="aitrace://ca/key/k1",
-            resource_id="urn:web:1",
+    def test_canonical_history_cannot_be_modified_through_returned_event_alias(self, stack) -> None:
+        returned = _record(stack)
+        canonical_hash = returned.event_hash
+        returned.action = "DELETE"
+        returned.resource_id = "urn:attacker:modified"
+        stored = stack["ledger"].get(returned.event_id)
+        assert stored is not None
+        assert stored.action == "SEARCH"
+        assert stored.resource_id == "urn:resource:t1"
+        assert stored.event_hash == canonical_hash
+
+        snapshots = stack["ledger"].events()
+        snapshots[0].action = "DELETE"
+        stored_again = stack["ledger"].get(returned.event_id)
+        assert stored_again is not None and stored_again.action == "SEARCH"
+
+    def test_public_projection_does_not_expose_raw_event_fields(self, stack) -> None:
+        event = stack["collector"].record(
+            actor=stack["actor"],
+            execution_context=stack["ec"],
+            task_id=str(make_identifier("task", "public-task")),
+            action="SEARCH",
+            visibility="PUBLIC",
+            signing_key_id=stack["key_id"],
+            authorization_id=str(make_identifier("authorization", "internal-auth")),
+            resource_id="urn:private:resource",
         )
-        # The internal _events list is not exposed for modification; we test that the public API has no mutation methods.
-        ledger = stack["ledger"]
-        assert not hasattr(ledger, "modify_event")
-        assert not hasattr(ledger, "delete_event")
-        assert not hasattr(ledger, "remove_event")
-        assert not hasattr(ledger, "update_event")
+        raw = event.to_dict()
+        assert "actor" in raw and "authorization_id" in raw and "resource_id" in raw
+        public = PublicEventProjector().project(event)
+        assert not SENSITIVE_EVENT_FIELDS.intersection(public)
+        serialized = json.dumps(public)
+        assert stack["actor"].principal_id not in serialized
+        assert "internal-auth" not in serialized
+        assert "private:resource" not in serialized
 
-    def test_public_tier_excludes_sensitive_fields(self, stack) -> None:
-        """PUBLIC-tier events do not expose delegation_id, approval_id, before/after digests."""
-        # The visibility tier is recorded; downstream filtering enforces non-exposure.
-        stack["collector"].record(
-            actor=stack["actor"], execution_context=stack["ec"], task_id=str(make_identifier("task", "t1")),
-            action="SEARCH", visibility="PUBLIC",
-            signing_key_id="aitrace://ca/key/k1",
-            resource_id="urn:web:1",
-        )
-        e = stack["ledger"].events()[0]
-        assert e.visibility == "PUBLIC"
-        # A public-tier projection would omit sensitive fields; the implementation records visibility for downstream filtering.
-
-    def test_ledger_integrity_after_multiple_appends(self, stack) -> None:
-        """The ledger remains verifiable after many appends."""
-        for i in range(50):
-            stack["collector"].record(
-                actor=stack["actor"], execution_context=stack["ec"], task_id=str(make_identifier("task", f"t{i}")),
-                action="SEARCH", visibility="ORGANIZATION_PRIVATE",
-                signing_key_id="aitrace://ca/key/k1",
-                resource_id=f"urn:web:{i}",
-            )
-        verifier = LedgerVerifier(stack["keys"])
-        report = verifier.verify(stack["ledger"])
+    def test_full_signature_verification_requires_available_public_keys(self, stack) -> None:
+        _record(stack)
+        report = LedgerVerifier(stack["keys"]).verify(stack["ledger"])
         assert report.ok
-        assert len(stack["ledger"]) == 50
+        assert report.verified_signature_count == 1
+
+        missing_keys = LedgerVerifier(KeyService()).verify(stack["ledger"])
+        assert not missing_keys.ok
+        assert any("verification key unavailable" in failure for failure in missing_keys.failures)
+
+    def test_parallel_signature_verification_preserves_deterministic_result(self, stack) -> None:
+        for index in range(50):
+            _record(stack, task=f"parallel-{index}")
+        sequential = LedgerVerifier(stack["keys"]).verify(stack["ledger"])
+        parallel = LedgerVerifier(
+            stack["keys"],
+            parallel_signatures=True,
+            max_workers=4,
+        ).verify(stack["ledger"])
+        assert sequential.ok and parallel.ok
+        assert sequential.verified_signature_count == 50
+        assert parallel.verified_signature_count == 50
+        assert parallel.verification_mode == "hash-chain+parallel-signatures"
