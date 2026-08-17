@@ -21,7 +21,8 @@ from urllib.parse import quote
 
 import requests
 
-from aegistrace.signing.canonical import canonicalize_for_hash, canonicalize_for_signature
+from aegistrace.identity.keys import KeyService
+from aegistrace.signing.canonical import canonicalize, canonicalize_for_hash, canonicalize_for_signature
 from aegistrace.signing.ed25519 import SigningKey, sha256_hex
 
 _PUBLIC_ENTITY_FIELDS = frozenset(
@@ -52,26 +53,46 @@ class FederatedRegistryClient(Protocol):
     """Client contract for one remote AI-IDP registry authority."""
 
     def health(self) -> bool: ...
-
     def resolve_public_entity(self, entity_id: str) -> dict[str, Any] | None: ...
-
     def get_public_event(self, event_id: str) -> dict[str, Any] | None: ...
-
     def get_public_verification_keys(self) -> dict[str, Any]: ...
 
 
 @dataclass(frozen=True)
 class FederationAgreement:
-    """Locally configured recognition contract for a remote registry authority."""
+    """Bilateral signed recognition contract for two registry authorities."""
 
     agreement_id: str
     local_authority_id: str
     remote_authority_id: str
     effective_at: str
+    local_signing_key_id: str
+    remote_signing_key_id: str
+    local_signature: str
+    remote_signature: str
     expires_at: str | None = None
     allowed_visibility_tiers: tuple[str, ...] = ("PUBLIC",)
     state: str = "active"
     metadata: dict[str, Any] = field(default_factory=dict)
+
+    def signable_dict(self) -> dict[str, Any]:
+        result: dict[str, Any] = {
+            "agreement_id": self.agreement_id,
+            "local_authority_id": self.local_authority_id,
+            "remote_authority_id": self.remote_authority_id,
+            "effective_at": self.effective_at,
+            "local_signing_key_id": self.local_signing_key_id,
+            "remote_signing_key_id": self.remote_signing_key_id,
+            "allowed_visibility_tiers": list(self.allowed_visibility_tiers),
+            "state": self.state,
+            "metadata": copy.deepcopy(self.metadata),
+        }
+        if self.expires_at is not None:
+            result["expires_at"] = self.expires_at
+        return result
+
+    def signable_bytes(self) -> bytes:
+        return canonicalize(self.signable_dict())
 
     def is_active(self, *, at: datetime | None = None) -> bool:
         if self.state != "active":
@@ -102,12 +123,7 @@ class _CacheEntry:
 
 
 class HTTPFederatedRegistryClient:
-    """HTTP client for the public AegisTrace federation surface.
-
-    This client intentionally uses only public endpoints. Controlled/sealed
-    federation requires an organization-specific authenticated client that
-    implements ``FederatedRegistryClient`` or an extended internal contract.
-    """
+    """HTTP client for the public AegisTrace federation surface."""
 
     def __init__(
         self,
@@ -127,18 +143,14 @@ class HTTPFederatedRegistryClient:
 
     def health(self) -> bool:
         try:
-            response = self._session.get(
-                f"{self._base_url}/health",
-                timeout=self._timeout,
-            )
+            response = self._session.get(f"{self._base_url}/health", timeout=self._timeout)
             return response.status_code == 200 and response.json().get("status") == "ok"
         except Exception:
             return False
 
     def resolve_public_entity(self, entity_id: str) -> dict[str, Any] | None:
-        encoded = quote(entity_id, safe="")
         response = self._session.get(
-            f"{self._base_url}/registry/{encoded}",
+            f"{self._base_url}/registry/{quote(entity_id, safe='')}",
             timeout=self._timeout,
         )
         if response.status_code == 404:
@@ -175,17 +187,12 @@ class HTTPFederatedRegistryClient:
 
 
 class FederationGateway:
-    """Fail-closed reference gateway for recognized registry authorities.
-
-    A remote authority is usable only while an explicit local federation
-    agreement is active. Public resolutions are cached with a bounded TTL.
-    Remote failures are recorded as federation-break evidence in memory and are
-    surfaced to the caller rather than silently treated as authoritative data.
-    """
+    """Fail-closed reference gateway for cryptographically recognized registries."""
 
     def __init__(
         self,
         local_authority_id: str,
+        key_service: KeyService,
         *,
         cache_ttl_seconds: int = 300,
     ) -> None:
@@ -194,6 +201,7 @@ class FederationGateway:
         if cache_ttl_seconds <= 0:
             raise ValueError("cache_ttl_seconds must be positive")
         self.local_authority_id = local_authority_id
+        self._keys = key_service
         self._cache_ttl = cache_ttl_seconds
         self._agreements: dict[str, FederationAgreement] = {}
         self._authority_agreement: dict[str, str] = {}
@@ -202,19 +210,45 @@ class FederationGateway:
         self._breaks: list[FederationBreak] = []
         self._lock = RLock()
 
+    def verify_agreement(self, agreement: FederationAgreement) -> bool:
+        if agreement.local_authority_id != self.local_authority_id:
+            return False
+        if agreement.remote_authority_id == self.local_authority_id:
+            return False
+        if not agreement.is_active() or "PUBLIC" not in agreement.allowed_visibility_tiers:
+            return False
+        message = agreement.signable_bytes()
+        bindings = (
+            (
+                agreement.local_signing_key_id,
+                agreement.local_authority_id,
+                agreement.local_signature,
+            ),
+            (
+                agreement.remote_signing_key_id,
+                agreement.remote_authority_id,
+                agreement.remote_signature,
+            ),
+        )
+        for key_id, expected_authority, signature in bindings:
+            try:
+                record = self._keys.get_record(key_id)
+                if record.bound_entity_id != expected_authority:
+                    return False
+                public_key = SigningKey.from_public_pem(key_id, record.public_pem).public_key
+                if not SigningKey.verify(public_key, message, signature):
+                    return False
+            except Exception:
+                return False
+        return True
+
     def register_authority(
         self,
         agreement: FederationAgreement,
         client: FederatedRegistryClient,
     ) -> None:
-        if agreement.local_authority_id != self.local_authority_id:
-            raise ValueError("federation agreement local authority does not match this gateway")
-        if agreement.remote_authority_id == self.local_authority_id:
-            raise ValueError("a federation agreement cannot target the local authority itself")
-        if "PUBLIC" not in agreement.allowed_visibility_tiers:
-            raise ValueError("reference public federation requires PUBLIC visibility permission")
-        if not agreement.is_active():
-            raise ValueError("federation agreement is not currently active")
+        if not self.verify_agreement(agreement):
+            raise PermissionError("federation agreement signatures/bindings are invalid")
         with self._lock:
             existing = self._authority_agreement.get(agreement.remote_authority_id)
             if existing is not None and existing != agreement.agreement_id:
@@ -236,6 +270,10 @@ class FederationGateway:
                 local_authority_id=agreement.local_authority_id,
                 remote_authority_id=agreement.remote_authority_id,
                 effective_at=agreement.effective_at,
+                local_signing_key_id=agreement.local_signing_key_id,
+                remote_signing_key_id=agreement.remote_signing_key_id,
+                local_signature=agreement.local_signature,
+                remote_signature=agreement.remote_signature,
                 expires_at=agreement.expires_at,
                 allowed_visibility_tiers=agreement.allowed_visibility_tiers,
                 state="revoked",
@@ -328,21 +366,11 @@ class FederationGateway:
             return list(self._breaks)
 
     @staticmethod
-    def verify_disclosed_event(
-        event: dict[str, Any],
-        *,
-        public_pem: str,
-    ) -> bool:
-        """Verify hash and Ed25519 signature of a fully disclosed event record.
-
-        This method intentionally requires the complete event record. A public
-        redacted projection is an integrity reference, not enough data to
-        recompute the private canonical event hash/signature.
-        """
+    def verify_disclosed_event(event: dict[str, Any], *, public_pem: str) -> bool:
+        """Verify hash and Ed25519 signature of a fully disclosed event record."""
         try:
             key_id = event["signing_key_id"]
-            expected_hash = event["event_hash"]
-            if sha256_hex(canonicalize_for_hash(event)) != expected_hash:
+            if sha256_hex(canonicalize_for_hash(event)) != event["event_hash"]:
                 return False
             public_key = SigningKey.from_public_pem(key_id, public_pem).public_key
             return SigningKey.verify(
@@ -352,6 +380,32 @@ class FederationGateway:
             )
         except Exception:
             return False
+
+    @classmethod
+    def verify_disclosed_chain(
+        cls,
+        events: list[dict[str, Any]],
+        *,
+        public_keys: dict[str, str],
+        expected_previous_hash: str | None = None,
+    ) -> bool:
+        """Verify a contiguous disclosed chain segment and every signature."""
+        previous_hash = expected_previous_hash
+        seen_ids: set[str] = set()
+        for event in events:
+            event_id = event.get("event_id")
+            key_id = event.get("signing_key_id")
+            if not isinstance(event_id, str) or event_id in seen_ids:
+                return False
+            if not isinstance(key_id, str) or key_id not in public_keys:
+                return False
+            if event.get("previous_event_hash") != previous_hash:
+                return False
+            if not cls.verify_disclosed_event(event, public_pem=public_keys[key_id]):
+                return False
+            seen_ids.add(event_id)
+            previous_hash = event.get("event_hash")
+        return True
 
     def _authorized_client(
         self,
@@ -365,9 +419,9 @@ class FederationGateway:
             raise FederationResolutionError(
                 f"remote authority is not recognized: {remote_authority_id}"
             )
-        if not agreement.is_active():
+        if not self.verify_agreement(agreement):
             raise FederationResolutionError(
-                f"federation agreement is inactive or expired: {agreement.agreement_id}"
+                f"federation agreement is invalid, inactive, expired, or no longer verifiable: {agreement.agreement_id}"
             )
         return client, agreement
 
@@ -420,8 +474,7 @@ class FederationGateway:
             raise FederationResolutionError("remote registry returned a different entity identifier")
         if not isinstance(payload.get("entity_type"), str) or not isinstance(payload.get("state"), str):
             raise FederationResolutionError("remote public entity lacks required identity/state fields")
-        attributes = payload.get("attributes", {})
-        if not isinstance(attributes, dict):
+        if not isinstance(payload.get("attributes", {}), dict):
             raise FederationResolutionError("remote public entity attributes are malformed")
         return copy.deepcopy(payload)
 
