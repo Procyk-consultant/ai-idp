@@ -43,6 +43,7 @@ SENSITIVE_EVENT_FIELDS = frozenset(
         "approval_id",
         "approval_ids",
         "scope_context",
+        "action_intent_digest",
         "governance_mode",
         "decision_reason",
         "resource_id",
