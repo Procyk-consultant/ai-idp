@@ -11,18 +11,13 @@ Licence Status: No licence selected unless approved in writing by Pierre-Edward 
 """
 from __future__ import annotations
 
+import re
 from datetime import UTC, datetime
 from typing import Any
 
 from aegistrace.authorization.scope import ScopeContext
 from aegistrace.events.models import (
-    ACTIONS,
-    GOVERNANCE_MODES,
-    SCHEMA_VERSION,
-    VISIBILITY_TIERS,
-    Actor,
-    Event,
-    ExecutionContext,
+    ACTIONS, GOVERNANCE_MODES, SCHEMA_VERSION, VISIBILITY_TIERS, Actor, Event, ExecutionContext,
 )
 from aegistrace.identity.ids import VALID_JURISDICTIONS, make_event_id, require_identifier_type
 from aegistrace.identity.keys import KeyService
@@ -30,14 +25,15 @@ from aegistrace.ledger.append_only import AppendOnlyLedger
 from aegistrace.signing.canonical import canonicalize_for_hash, canonicalize_for_signature
 from aegistrace.signing.ed25519 import sha256_hex
 
+_DIGEST_PATTERN = re.compile(r"^sha256:[0-9a-f]{64}$")
+
 
 class EventCollector:
     """Build, sign, and append cryptographic evidence events.
 
-    This is the low-level evidence boundary. It validates event structure,
-    identifier classes, signing-key binding, and chain integrity. It does not
-    by itself decide whether an action is authorized; governed execution uses
-    ``GovernedEventService`` before calling this collector.
+    This low-level evidence boundary validates structure, identifiers, digests,
+    key binding, and chain integrity. Operational authorization is enforced by
+    ``GovernedEventService`` before it invokes this collector.
     """
 
     def __init__(self, ledger: AppendOnlyLedger, key_service: KeyService) -> None:
@@ -60,6 +56,7 @@ class EventCollector:
         approval_ids: list[str] | tuple[str, ...] | None = None,
         delegation_chain: list[str] | tuple[str, ...] | None = None,
         scope_context: ScopeContext | None = None,
+        action_intent_digest: str | None = None,
         governance_mode: str | None = None,
         decision_reason: str | None = None,
         resource_id: str | None = None,
@@ -77,6 +74,13 @@ class EventCollector:
             raise ValueError(f"invalid jurisdiction_id: {jurisdiction_id!r}")
         if not policy_version:
             raise ValueError("policy_version cannot be empty")
+        for field_name, digest in (
+            ("action_intent_digest", action_intent_digest),
+            ("before_digest", before_digest),
+            ("after_digest", after_digest),
+        ):
+            if digest is not None and not _DIGEST_PATTERN.fullmatch(digest):
+                raise ValueError(f"{field_name} must be a sha256 digest")
 
         self._validate_identifiers(
             actor=actor,
@@ -89,24 +93,21 @@ class EventCollector:
             approval_ids=approval_ids,
             delegation_chain=delegation_chain,
         )
-
         if not self._keys.is_active(signing_key_id):
             raise PermissionError(f"signing key not active: {signing_key_id}")
         key_record = self._keys.get_record(signing_key_id)
         if key_record.bound_entity_id not in {actor.agent_id, actor.controller_id}:
             raise PermissionError(
-                f"signing key {signing_key_id} (bound to {key_record.bound_entity_id}) "
-                f"is not bound to actor.agent_id={actor.agent_id} or "
-                f"actor.controller_id={actor.controller_id}"
+                f"signing key {signing_key_id} is not bound to actor agent or controller"
             )
 
-        normalized_approval_ids: list[str] = []
-        for candidate_id in approval_ids or ():
-            if candidate_id not in normalized_approval_ids:
-                normalized_approval_ids.append(candidate_id)
-        if approval_id is not None and approval_id not in normalized_approval_ids:
-            normalized_approval_ids.insert(0, approval_id)
-        primary_approval_id = approval_id or (normalized_approval_ids[0] if normalized_approval_ids else None)
+        normalized_approvals: list[str] = []
+        for candidate in approval_ids or ():
+            if candidate not in normalized_approvals:
+                normalized_approvals.append(candidate)
+        if approval_id is not None and approval_id not in normalized_approvals:
+            normalized_approvals.insert(0, approval_id)
+        primary_approval = approval_id or (normalized_approvals[0] if normalized_approvals else None)
 
         event_dict: dict[str, Any] = {
             "schema_version": SCHEMA_VERSION,
@@ -122,35 +123,33 @@ class EventCollector:
             "signing_key_id": signing_key_id,
             "policy_version": policy_version,
         }
-        if delegation_id is not None:
-            event_dict["delegation_id"] = delegation_id
-        if authorization_id is not None:
-            event_dict["authorization_id"] = authorization_id
-        if primary_approval_id is not None:
-            event_dict["approval_id"] = primary_approval_id
-        if normalized_approval_ids:
-            event_dict["approval_ids"] = normalized_approval_ids
+        optional = {
+            "delegation_id": delegation_id,
+            "authorization_id": authorization_id,
+            "approval_id": primary_approval,
+            "action_intent_digest": action_intent_digest,
+            "governance_mode": governance_mode,
+            "decision_reason": decision_reason,
+            "resource_id": resource_id,
+            "before_digest": before_digest,
+            "after_digest": after_digest,
+        }
+        for key, value in optional.items():
+            if value is not None:
+                event_dict[key] = value
+        if normalized_approvals:
+            event_dict["approval_ids"] = normalized_approvals
         if delegation_chain:
             event_dict["delegation_chain"] = list(delegation_chain)
         if scope_context is not None:
             scope_dict = scope_context.to_dict()
             if scope_dict:
                 event_dict["scope_context"] = scope_dict
-        if governance_mode is not None:
-            event_dict["governance_mode"] = governance_mode
-        if decision_reason is not None:
-            event_dict["decision_reason"] = decision_reason
-        if resource_id is not None:
-            event_dict["resource_id"] = resource_id
-        if before_digest is not None:
-            event_dict["before_digest"] = before_digest
-        if after_digest is not None:
-            event_dict["after_digest"] = after_digest
 
         event_dict["event_hash"] = sha256_hex(canonicalize_for_hash(event_dict))
-        signing_key = self._keys.get_signing_key(signing_key_id)
-        event_dict["signature"] = signing_key.sign(canonicalize_for_signature(event_dict))
-
+        event_dict["signature"] = self._keys.get_signing_key(signing_key_id).sign(
+            canonicalize_for_signature(event_dict)
+        )
         event = Event.from_dict(event_dict)
         self._ledger.append(event)
         return event
@@ -184,10 +183,10 @@ class EventCollector:
             require_identifier_type(authorization_id, "authorization")
         if approval_id is not None:
             require_identifier_type(approval_id, "approval")
-        for candidate_id in approval_ids or ():
-            require_identifier_type(candidate_id, "approval")
-        for candidate_id in delegation_chain or ():
-            require_identifier_type(candidate_id, "delegation")
+        for candidate in approval_ids or ():
+            require_identifier_type(candidate, "approval")
+        for candidate in delegation_chain or ():
+            require_identifier_type(candidate, "delegation")
 
 
 __all__ = ["EventCollector"]
