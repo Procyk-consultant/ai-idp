@@ -3,112 +3,62 @@ Project: AI-IDP / AegisTrace
 Author and Intellectual Property Owner: Pierre-Edward Procyk
 Copyright: © 2026 Pierre-Edward Procyk. All rights reserved.
 File: src/aegistrace/signing/pqc.py
-Purpose: Post-quantum signature migration interface (ML-DSA / CRYSTALS-Dilithium)
+Purpose: Post-quantum signature schemes and migration support
 Classification: domain
 Security Classification: internal
 Version: 2.0.0
-Last Material Revision: 2026-08-01
+Last Material Revision: 2026-08-17
 Licence Status: No licence selected unless approved in writing by Pierre-Edward Procyk.
-
-This module provides:
-1. An abstract SignatureScheme interface that abstracts over signature schemes.
-2. A registry of schemes (Ed25519, ML-DSA-65, future schemes).
-3. A MigrationService that re-signs existing events with a new scheme while
-   preserving the original signatures (per spec/PERMANENT_RECORD_PROTOCOL.md).
-4. A SchemeVersioning record that tracks which scheme was used for each event.
-
-The module is interface-complete. Live use of ML-DSA requires either:
-- liboqs-python (https://github.com/open-quantum-safe/liboqs-python) with
-  NIST PQC standardized algorithms (ML-DSA, SLH-DSA), OR
-- A cloud KMS that supports PQC signing (when available).
-
-The cryptography library (PyCA) is expected to add PQC support in a future
-release (tracked at https://github.com/pyca/cryptography/issues/10845).
-
-Until PQC libraries are available, the PQCSignatureScheme classes raise
-NotImplementedError on sign/verify. The migration interface is ready;
-the algorithms will be plugged in when standardized libraries are available.
 """
 from __future__ import annotations
 
 import base64
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from datetime import UTC
-from typing import Any
+from datetime import UTC, datetime
+from typing import Any, ClassVar
 
 
 @dataclass
 class SignatureResult:
-    """A signature with its scheme identifier.
-
-    The scheme field allows mixed-scheme ledgers: events signed with
-    different schemes can coexist, and verifiers select the appropriate
-    scheme based on the scheme field.
-    """
-    scheme: str  # 'Ed25519' | 'ML-DSA-65' | 'SLH-DSA-128s' | ...
-    value: str  # '<scheme>:<base64>'
+    scheme: str
+    value: str
     signing_key_id: str
-
-
-class SignatureScheme(ABC):
-    """Abstract interface for signature schemes.
-
-    All schemes implement the same interface, allowing transparent
-    migration between schemes (e.g., Ed25519 -> ML-DSA-65).
-    """
-
-    @property
-    @abstractmethod
-    def name(self) -> str:
-        """Scheme name (e.g., 'Ed25519', 'ML-DSA-65')."""
-        ...
-
-    @property
-    @abstractmethod
-    def quantum_safe(self) -> bool:
-        """Whether this scheme is resistant to quantum attacks."""
-        ...
-
-    @property
-    @abstractmethod
-    def signature_size_bytes(self) -> int:
-        """Expected signature size in bytes."""
-        ...
-
-    @abstractmethod
-    def generate_keypair(self, key_id: str) -> KeyPair:
-        """Generate a new keypair."""
-        ...
-
-    @abstractmethod
-    def sign(self, private_key: Any, message: bytes) -> str:
-        """Sign a message and return '<scheme>:<base64>'."""
-        ...
-
-    @abstractmethod
-    def verify(self, public_key: Any, message: bytes, signature: str) -> bool:
-        """Verify a signature."""
-        ...
 
 
 @dataclass
 class KeyPair:
-    """A keypair for a specific signature scheme."""
     key_id: str
     scheme: str
     private_key: Any
     public_key: Any
-    public_pem: str  # PEM-encoded public key for verification
+    public_pem: str
+
+
+class SignatureScheme(ABC):
+    @property
+    @abstractmethod
+    def name(self) -> str: ...
+
+    @property
+    @abstractmethod
+    def quantum_safe(self) -> bool: ...
+
+    @property
+    @abstractmethod
+    def signature_size_bytes(self) -> int: ...
+
+    @abstractmethod
+    def generate_keypair(self, key_id: str) -> KeyPair: ...
+
+    @abstractmethod
+    def sign(self, private_key: Any, message: bytes) -> str: ...
+
+    @abstractmethod
+    def verify(self, public_key: Any, message: bytes, signature: str) -> bool: ...
 
 
 class Ed25519Scheme(SignatureScheme):
-    """Ed25519 signature scheme (current default).
-
-    Quantum-safe: NO (vulnerable to Shor's algorithm on sufficiently
-    large quantum computers).
-    """
-
     @property
     def name(self) -> str:
         return "Ed25519"
@@ -123,6 +73,7 @@ class Ed25519Scheme(SignatureScheme):
 
     def generate_keypair(self, key_id: str) -> KeyPair:
         from aegistrace.signing.ed25519 import SigningKey
+
         sk = SigningKey.generate(key_id)
         return KeyPair(
             key_id=key_id,
@@ -134,152 +85,137 @@ class Ed25519Scheme(SignatureScheme):
 
     def sign(self, private_key: Any, message: bytes) -> str:
         from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+
         if not isinstance(private_key, Ed25519PrivateKey):
             raise TypeError("private_key must be Ed25519PrivateKey")
-        sig = private_key.sign(message)
-        return f"Ed25519:{base64.b64encode(sig).decode('ascii')}"
+        value = private_key.sign(message)
+        return f"Ed25519:{base64.b64encode(value).decode('ascii')}"
 
     def verify(self, public_key: Any, message: bytes, signature: str) -> bool:
         from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
-        if not isinstance(public_key, Ed25519PublicKey):
-            return False
-        if not signature.startswith("Ed25519:"):
+
+        if not isinstance(public_key, Ed25519PublicKey) or not signature.startswith("Ed25519:"):
             return False
         try:
-            sig_bytes = base64.b64decode(signature[len("Ed25519:"):])
-            public_key.verify(sig_bytes, message)
+            public_key.verify(base64.b64decode(signature.split(":", 1)[1], validate=True), message)
             return True
         except Exception:
             return False
 
 
-class MLDSA65Scheme(SignatureScheme):
-    """ML-DSA-65 (CRYSTALS-Dilithium, security level 3) signature scheme.
+class _LibOQSSignatureScheme(SignatureScheme):
+    """Shared live liboqs-python implementation for stateless PQ signatures."""
 
-    NIST PQC standardization: FIPS 204 (August 2024).
-    Quantum-safe: YES.
+    algorithm_candidates: ClassVar[tuple[str, ...]] = ()
+    signature_prefix: ClassVar[str]
+    public_key_label: ClassVar[str]
 
-    This class is interface-complete. Live signing requires liboqs-python
-    or a cloud KMS that supports ML-DSA. Install with:
-        pip install liboqs-python
-    (requires liboqs system library: https://github.com/open-quantum-safe/liboqs)
-    """
+    @property
+    def quantum_safe(self) -> bool:
+        return True
+
+    def _oqs(self):
+        try:
+            import oqs  # type: ignore
+        except ImportError as exc:
+            raise ImportError(
+                f"liboqs-python is required for {self.name}. Install the 'pqc' extra."
+            ) from exc
+        return oqs
+
+    def _algorithm(self) -> str:
+        oqs = self._oqs()
+        enabled = set(oqs.get_enabled_sig_mechanisms())
+        for candidate in self.algorithm_candidates:
+            if candidate in enabled:
+                return candidate
+        raise RuntimeError(
+            f"No enabled liboqs mechanism for {self.name}; expected one of {self.algorithm_candidates}."
+        )
+
+    def _armor(self, public_key: bytes) -> str:
+        body = base64.b64encode(public_key).decode("ascii")
+        return (
+            f"-----BEGIN AEGISTRACE {self.public_key_label} PUBLIC KEY-----\n"
+            f"{body}\n"
+            f"-----END AEGISTRACE {self.public_key_label} PUBLIC KEY-----\n"
+        )
+
+    def generate_keypair(self, key_id: str) -> KeyPair:
+        oqs = self._oqs()
+        algorithm = self._algorithm()
+        with oqs.Signature(algorithm) as signer:
+            public_key = bytes(signer.generate_keypair())
+            private_key = bytes(signer.export_secret_key())
+        return KeyPair(
+            key_id=key_id,
+            scheme=self.name,
+            private_key=private_key,
+            public_key=public_key,
+            public_pem=self._armor(public_key),
+        )
+
+    def sign(self, private_key: Any, message: bytes) -> str:
+        if not isinstance(private_key, (bytes, bytearray, memoryview)):
+            raise TypeError(f"private_key for {self.name} must be bytes-like")
+        oqs = self._oqs()
+        algorithm = self._algorithm()
+        with oqs.Signature(algorithm, bytes(private_key)) as signer:
+            signature = bytes(signer.sign(message))
+        return f"{self.signature_prefix}:{base64.b64encode(signature).decode('ascii')}"
+
+    def verify(self, public_key: Any, message: bytes, signature: str) -> bool:
+        if not isinstance(public_key, (bytes, bytearray, memoryview)):
+            return False
+        expected = f"{self.signature_prefix}:"
+        if not signature.startswith(expected):
+            return False
+        try:
+            signature_bytes = base64.b64decode(signature[len(expected):], validate=True)
+            oqs = self._oqs()
+            algorithm = self._algorithm()
+            with oqs.Signature(algorithm) as verifier:
+                return bool(verifier.verify(message, signature_bytes, bytes(public_key)))
+        except Exception:
+            return False
+
+
+class MLDSA65Scheme(_LibOQSSignatureScheme):
+    """Live ML-DSA-65 implementation through liboqs-python."""
+
+    algorithm_candidates = ("ML-DSA-65",)
+    signature_prefix = "ML-DSA-65"
+    public_key_label = "ML-DSA-65"
 
     @property
     def name(self) -> str:
         return "ML-DSA-65"
 
     @property
-    def quantum_safe(self) -> bool:
-        return True
-
-    @property
     def signature_size_bytes(self) -> int:
-        return 3309  # ML-DSA-65 signature size per FIPS 204
-
-    def _ensure_liboqs(self) -> None:
-        try:
-            import oqs  # type: ignore
-            return oqs
-        except ImportError as e:
-            raise ImportError(
-                "liboqs-python is required for ML-DSA signing. "
-                "Install with: pip install liboqs-python "
-                "(requires liboqs system library)"
-            ) from e
-
-    def generate_keypair(self, key_id: str) -> KeyPair:
-        self._ensure_liboqs()
-        # Real implementation:
-        # with oqs.Signature("ML-DSA-65") as signer:
-        #     public_key = signer.generate_keypair()
-        #     private_key = signer.export_secret_key()
-        # For interface completeness, raise NotImplementedError
-        raise NotImplementedError(
-            "ML-DSA key generation requires liboqs-python. "
-            "Implement using oqs.Signature('ML-DSA-65')."
-        )
-
-    def sign(self, private_key: Any, message: bytes) -> str:
-        self._ensure_liboqs()
-        # Real implementation:
-        # with oqs.Signature("ML-DSA-65", secret_key=private_key) as signer:
-        #     sig = signer.sign(message)
-        # return f"ML-DSA-65:{base64.b64encode(sig).decode('ascii')}"
-        raise NotImplementedError(
-            "ML-DSA signing requires liboqs-python. "
-            "Implement using oqs.Signature('ML-DSA-65', secret_key=...).sign(message)."
-        )
-
-    def verify(self, public_key: Any, message: bytes, signature: str) -> bool:
-        self._ensure_liboqs()
-        if not signature.startswith("ML-DSA-65:"):
-            return False
-        # Real implementation:
-        # with oqs.Signature("ML-DSA-65") as verifier:
-        #     return verifier.verify(message, sig_bytes, public_key)
-        raise NotImplementedError(
-            "ML-DSA verification requires liboqs-python. "
-            "Implement using oqs.Signature('ML-DSA-65').verify(message, sig, public_key)."
-        )
+        return 3309
 
 
-class SLHDSA128sScheme(SignatureScheme):
-    """SLH-DSA-128s (SPHINCS+-128s) signature scheme.
+class SLHDSA128sScheme(_LibOQSSignatureScheme):
+    """Live SLH-DSA SHA2-128s implementation through liboqs-python."""
 
-    NIST PQC standardization: FIPS 205 (August 2024).
-    Quantum-safe: YES (hash-based, conservative security).
-
-    Smaller signatures would use SLH-DSA-128f (fast variant) but larger
-    signature size. SLH-DSA-128s has smaller signatures but slower signing.
-
-    This class is interface-complete. Live signing requires liboqs-python.
-    """
+    algorithm_candidates = (
+        "SLH_DSA_PURE_SHA2_128S",
+        "SPHINCS+-SHA2-128s-simple",
+    )
+    signature_prefix = "SLH-DSA-128s"
+    public_key_label = "SLH-DSA-128S"
 
     @property
     def name(self) -> str:
         return "SLH-DSA-128s"
 
     @property
-    def quantum_safe(self) -> bool:
-        return True
-
-    @property
     def signature_size_bytes(self) -> int:
-        return 7856  # SLH-DSA-128s signature size per FIPS 205
-
-    def _ensure_liboqs(self) -> None:
-        try:
-            import oqs  # type: ignore
-            return oqs
-        except ImportError as e:
-            raise ImportError(
-                "liboqs-python is required for SLH-DSA signing."
-            ) from e
-
-    def generate_keypair(self, key_id: str) -> KeyPair:
-        raise NotImplementedError(
-            "SLH-DSA key generation requires liboqs-python."
-        )
-
-    def sign(self, private_key: Any, message: bytes) -> str:
-        raise NotImplementedError(
-            "SLH-DSA signing requires liboqs-python."
-        )
-
-    def verify(self, public_key: Any, message: bytes, signature: str) -> bool:
-        raise NotImplementedError(
-            "SLH-DSA verification requires liboqs-python."
-        )
+        return 7856
 
 
 class SchemeRegistry:
-    """Registry of available signature schemes.
-
-    The registry allows the system to look up a scheme by name and to
-    enumerate available schemes (e.g., for migration planning).
-    """
-
     def __init__(self) -> None:
         self._schemes: dict[str, SignatureScheme] = {}
         self.register(Ed25519Scheme())
@@ -295,7 +231,7 @@ class SchemeRegistry:
         return self._schemes[name]
 
     def list_schemes(self) -> list[str]:
-        return list(self._schemes.keys())
+        return list(self._schemes)
 
     def quantum_safe_schemes(self) -> list[str]:
         return [name for name, scheme in self._schemes.items() if scheme.quantum_safe]
@@ -303,14 +239,6 @@ class SchemeRegistry:
 
 @dataclass
 class SchemeMigrationRecord:
-    """Record of a signature migration.
-
-    Per spec/PERMANENT_RECORD_PROTOCOL.md, migration:
-    1. Adopts a new signature scheme.
-    2. Re-signs existing events with the new scheme.
-    3. Records the re-signing as a new signed event.
-    4. Preserves the original signatures.
-    """
     migration_id: str
     from_scheme: str
     to_scheme: str
@@ -322,49 +250,29 @@ class SchemeMigrationRecord:
 
 
 class MigrationService:
-    """Service for migrating events from one signature scheme to another.
-
-    The migration preserves original signatures (per the permanent-record
-    protocol). Each migrated event receives a NEW signature in the new
-    scheme, recorded as a new migration event. The original event and
-    signature are preserved.
-
-    Migration is irreversible: once migrated, the new scheme is canonical.
-    However, the original signatures remain verifiable for audit purposes.
-    """
+    """Re-sign events with a new scheme while preserving historical signatures."""
 
     def __init__(self, registry: SchemeRegistry) -> None:
         self._registry = registry
         self._migrations: list[SchemeMigrationRecord] = []
 
     def plan_migration(self, from_scheme: str, to_scheme: str) -> dict[str, Any]:
-        """Plan a migration from one scheme to another.
-
-        Returns a migration plan with:
-        - scheme details
-        - estimated effort
-        - risk assessment
-        - recommended timeline
-        """
-        from_s = self._registry.get(from_scheme)
-        to_s = self._registry.get(to_scheme)
+        source = self._registry.get(from_scheme)
+        target = self._registry.get(to_scheme)
         return {
             "from_scheme": from_scheme,
             "to_scheme": to_scheme,
-            "from_quantum_safe": from_s.quantum_safe,
-            "to_quantum_safe": to_s.quantum_safe,
-            "from_signature_size": from_s.signature_size_bytes,
-            "to_signature_size": to_s.signature_size_bytes,
-            "size_increase_bytes": to_s.signature_size_bytes - from_s.signature_size_bytes,
-            "size_increase_percent": ((to_s.signature_size_bytes - from_s.signature_size_bytes) / from_s.signature_size_bytes) * 100,
-            "recommended": to_s.quantum_safe and not from_s.quantum_safe,
-            "risk_assessment": "low" if to_s.quantum_safe else "high",
-            "notes": (
-                f"Migration from {from_scheme} (quantum_safe={from_s.quantum_safe}) "
-                f"to {to_scheme} (quantum_safe={to_s.quantum_safe}). "
-                f"Signature size changes from {from_s.signature_size_bytes} bytes "
-                f"to {to_s.signature_size_bytes} bytes."
-            ),
+            "from_quantum_safe": source.quantum_safe,
+            "to_quantum_safe": target.quantum_safe,
+            "from_signature_size": source.signature_size_bytes,
+            "to_signature_size": target.signature_size_bytes,
+            "size_increase_bytes": target.signature_size_bytes - source.signature_size_bytes,
+            "size_increase_percent": (
+                (target.signature_size_bytes - source.signature_size_bytes)
+                / source.signature_size_bytes
+            ) * 100,
+            "recommended": target.quantum_safe and not source.quantum_safe,
+            "risk_assessment": "low" if target.quantum_safe else "high",
         }
 
     def migrate_events(
@@ -375,56 +283,30 @@ class MigrationService:
         new_signing_key_id: str,
         new_private_key: Any,
     ) -> SchemeMigrationRecord:
-        """Migrate a list of events from one scheme to another.
-
-        For each event:
-        1. Compute the canonical form (excluding signature).
-        2. Sign with the new scheme.
-        3. Attach the new signature (the original signature is preserved in
-           a 'signatures' field for audit).
-
-        Returns a migration record.
-        """
-        from datetime import datetime
-
         from aegistrace.identity.ids import make_event_id
         from aegistrace.signing.canonical import canonicalize_for_signature
 
-        to_scheme_obj = self._registry.get(to_scheme)
+        target = self._registry.get(to_scheme)
         migrated_ids: list[str] = []
         for event in events:
-            if hasattr(event, "to_dict"):
-                event_dict = event.to_dict()
-            else:
-                event_dict = event
-            # Compute canonical form for re-signing
-            canon = canonicalize_for_signature(event_dict)
-            # Sign with new scheme
-            try:
-                new_sig = to_scheme_obj.sign(new_private_key, canon)
-            except NotImplementedError as e:
-                raise NotImplementedError(
-                    f"Cannot migrate to {to_scheme}: {e}. "
-                    "Install the required PQC library."
-                ) from e
-            # Attach new signature (preserving original)
+            event_dict = event.to_dict() if hasattr(event, "to_dict") else dict(event)
+            new_signature = target.sign(new_private_key, canonicalize_for_signature(event_dict))
             if hasattr(event, "signature"):
-                # Preserve original signature in a signatures list
-                if not hasattr(event, "_migration_signatures"):
-                    event._migration_signatures = []
-                event._migration_signatures.append({
-                    "scheme": event_dict.get("signing_scheme", from_scheme),
-                    "signature": event.signature,
-                    "signing_key_id": event.signing_key_id,
-                })
-                event.signature = new_sig
+                historical = list(getattr(event, "_migration_signatures", []))
+                historical.append(
+                    {
+                        "scheme": event_dict.get("signing_scheme", from_scheme),
+                        "signature": event.signature,
+                        "signing_key_id": event.signing_key_id,
+                    }
+                )
+                event._migration_signatures = historical
+                event.signature = new_signature
                 event.signing_key_id = new_signing_key_id
-                # Add a scheme field if not present
-                if not hasattr(event, "signing_scheme"):
-                    event.signing_scheme = to_scheme
+                event.signing_scheme = to_scheme
             migrated_ids.append(event_dict.get("event_id", ""))
-        # Create migration record
-        migration = SchemeMigrationRecord(
+
+        record = SchemeMigrationRecord(
             migration_id="mig_" + make_event_id()[4:],
             from_scheme=from_scheme,
             to_scheme=to_scheme,
@@ -433,16 +315,14 @@ class MigrationService:
             migrated_by=new_signing_key_id,
             signing_key_id=new_signing_key_id,
         )
-        self._migrations.append(migration)
-        return migration
+        self._migrations.append(record)
+        return record
 
     def list_migrations(self) -> list[SchemeMigrationRecord]:
         return list(self._migrations)
 
 
-# Module-level singleton registry
 default_registry = SchemeRegistry()
-
 
 __all__ = [
     "SignatureResult",
