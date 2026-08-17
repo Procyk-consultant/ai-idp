@@ -3,7 +3,7 @@ Project: AI-IDP / AegisTrace
 Author and Intellectual Property Owner: Pierre-Edward Procyk
 Copyright: © 2026 Pierre-Edward Procyk. All rights reserved.
 File: tests/integration/test_api_governance.py
-Purpose: Integration tests for governed API writes and public-safe reads
+Purpose: Integration tests for authenticated governed API writes and public-safe reads
 Version: 2.0.0
 Last Material Revision: 2026-08-17
 Licence Status: No licence selected unless approved in writing by Pierre-Edward Procyk.
@@ -11,10 +11,13 @@ Licence Status: No licence selected unless approved in writing by Pierre-Edward 
 from __future__ import annotations
 
 import json
+import secrets
+from datetime import UTC, datetime
 
 import pytest
 from fastapi.testclient import TestClient
 
+from aegistrace.api.authentication import action_request_message
 from aegistrace.api.server import create_app
 from aegistrace.authorization.engine import PolicyEngine
 from aegistrace.delegation.broker import DelegationBroker
@@ -83,7 +86,7 @@ def api_stack():
         delegation_broker=delegations,
     )
     client = TestClient(app)
-    payload = {
+    base_payload = {
         "controller_id": controller,
         "principal_id": principal,
         "agent_id": agent,
@@ -101,19 +104,15 @@ def api_stack():
     }
     return {
         "client": client,
-        "app": app,
         "keys": keys,
         "registry": registry,
         "ledger": ledger,
-        "policy": policy,
-        "delegations": delegations,
         "authorization": authorization,
-        "payload": payload,
+        "base_payload": base_payload,
         "ids": {
             "controller": controller,
             "principal": principal,
             "agent": agent,
-            "instance": instance,
             "provider": provider,
             "model": model,
             "model_version": model_version,
@@ -124,24 +123,55 @@ def api_stack():
     }
 
 
+def _signed_payload(stack, overrides: dict | None = None) -> dict:
+    payload = dict(stack["base_payload"])
+    payload.update(overrides or {})
+    payload["request_timestamp"] = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+    payload["request_nonce"] = secrets.token_hex(16)
+    payload["request_signature"] = stack["keys"].get_signing_key(
+        payload["signing_key_id"]
+    ).sign(action_request_message(payload))
+    return payload
+
+
 class TestAPIGovernance:
-    def test_post_event_crosses_governed_boundary(self, api_stack) -> None:
-        response = api_stack["client"].post("/events", json=api_stack["payload"])
+    def test_post_event_requires_agent_proof_of_possession(self, api_stack) -> None:
+        response = api_stack["client"].post("/events", json=_signed_payload(api_stack))
         assert response.status_code == 200, response.text
         body = response.json()
         assert body["governance_mode"] == "GOVERNED"
         assert body["authorization_id"] == api_stack["authorization"].authorization_id
 
+    def test_invalid_request_signature_is_rejected_before_governance(self, api_stack) -> None:
+        payload = _signed_payload(api_stack)
+        payload["request_signature"] = "Ed25519:" + "A" * 88
+        response = api_stack["client"].post("/events", json=payload)
+        assert response.status_code == 401
+        assert len(api_stack["ledger"]) == 0
+
+    def test_replayed_authenticated_request_is_rejected(self, api_stack) -> None:
+        payload = _signed_payload(api_stack)
+        first = api_stack["client"].post("/events", json=payload)
+        assert first.status_code == 200
+        second = api_stack["client"].post("/events", json=payload)
+        assert second.status_code == 401
+        assert len(api_stack["ledger"]) == 1
+
     def test_missing_authorization_field_is_rejected_by_contract(self, api_stack) -> None:
-        payload = dict(api_stack["payload"])
+        payload = _signed_payload(api_stack)
         payload.pop("authorization_id")
         response = api_stack["client"].post("/events", json=payload)
         assert response.status_code == 422
+        assert len(api_stack["ledger"]) == 0
 
     def test_unknown_authorization_is_denied_not_executed(self, api_stack) -> None:
-        payload = dict(api_stack["payload"])
-        payload["visibility"] = "ORGANIZATION_PRIVATE"
-        payload["authorization_id"] = str(make_identifier("authorization", "missing"))
+        payload = _signed_payload(
+            api_stack,
+            {
+                "visibility": "ORGANIZATION_PRIVATE",
+                "authorization_id": str(make_identifier("authorization", "missing")),
+            },
+        )
         response = api_stack["client"].post("/events", json=payload)
         assert response.status_code == 403
         body = response.json()["detail"]
@@ -152,13 +182,10 @@ class TestAPIGovernance:
         assert events[0].action == "DENY"
 
     def test_public_list_is_strict_projection(self, api_stack) -> None:
-        response = api_stack["client"].post("/events", json=api_stack["payload"])
+        response = api_stack["client"].post("/events", json=_signed_payload(api_stack))
         assert response.status_code == 200
         event_id = response.json()["event_id"]
-
-        listing = api_stack["client"].get("/events")
-        assert listing.status_code == 200
-        records = listing.json()
+        records = api_stack["client"].get("/events").json()
         assert len(records) == 1
         public = records[0]
         assert public["event_id"] == event_id
@@ -180,18 +207,15 @@ class TestAPIGovernance:
         assert "private-resource" not in serialized
 
     def test_nonpublic_event_cannot_be_enumerated_or_fetched(self, api_stack) -> None:
-        payload = dict(api_stack["payload"])
-        payload["visibility"] = "ORGANIZATION_PRIVATE"
-        payload["action"] = "READ"
+        payload = _signed_payload(
+            api_stack,
+            {"visibility": "ORGANIZATION_PRIVATE", "action": "READ"},
+        )
         response = api_stack["client"].post("/events", json=payload)
         assert response.status_code == 200
         event_id = response.json()["event_id"]
-
-        listing = api_stack["client"].get("/events")
-        assert listing.status_code == 200
-        assert listing.json() == []
-        fetched = api_stack["client"].get(f"/events/{event_id}")
-        assert fetched.status_code == 404
+        assert api_stack["client"].get("/events").json() == []
+        assert api_stack["client"].get(f"/events/{event_id}").status_code == 404
 
     def test_public_verification_keys_are_scoped_and_do_not_expose_bindings(self, api_stack) -> None:
         private_agent = str(make_identifier("agent", "private-agent"))
@@ -217,36 +241,27 @@ class TestAPIGovernance:
             visibility="ORGANIZATION_PRIVATE",
             signing_key_id=private_key,
         )
-        public_response = api_stack["client"].post("/events", json=api_stack["payload"])
+        public_response = api_stack["client"].post("/events", json=_signed_payload(api_stack))
         assert public_response.status_code == 200
 
-        response = api_stack["client"].get("/verification/keys")
-        assert response.status_code == 200
-        exported = response.json()["keys"]
+        exported = api_stack["client"].get("/verification/keys").json()["keys"]
         assert [record["key_id"] for record in exported] == [api_stack["ids"]["agent_key"]]
         assert all("bound_entity_id" not in record for record in exported)
         assert private_key not in json.dumps(exported)
 
     def test_public_registry_returns_only_reviewed_attributes(self, api_stack) -> None:
-        provider_response = api_stack["client"].get(
-            f"/registry/{api_stack['ids']['provider']}"
-        )
+        provider_response = api_stack["client"].get(f"/registry/{api_stack['ids']['provider']}")
         assert provider_response.status_code == 200
         assert provider_response.json()["attributes"] == {"label": "Example Provider"}
         assert "SECRET-CONTRACT" not in provider_response.text
 
-        principal_response = api_stack["client"].get(
-            f"/registry/{api_stack['ids']['principal']}"
-        )
+        principal_response = api_stack["client"].get(f"/registry/{api_stack['ids']['principal']}")
         assert principal_response.status_code == 404
         assert "private@example.invalid" not in principal_response.text
 
     def test_verify_endpoint_does_not_disclose_failure_details(self, api_stack) -> None:
-        response = api_stack["client"].post("/events", json=api_stack["payload"])
-        assert response.status_code == 200
-        verification = api_stack["client"].post("/verify")
-        assert verification.status_code == 200
-        body = verification.json()
+        assert api_stack["client"].post("/events", json=_signed_payload(api_stack)).status_code == 200
+        body = api_stack["client"].post("/verify").json()
         assert body["ok"] is True
         assert "failures" not in body
         assert "failing_event_ids" not in body
