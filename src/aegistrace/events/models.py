@@ -6,15 +6,16 @@ File: src/aegistrace/events/models.py
 Purpose: Event data model
 Classification: domain
 Version: 2.0.0
-Last Material Revision: 2026-08-01
+Last Material Revision: 2026-08-17
 Licence Status: No licence selected unless approved in writing by Pierre-Edward Procyk.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
-# Canonical action vocabulary (Master Prompt §6)
+from aegistrace.authorization.scope import ScopeContext
+
 ACTIONS: list[str] = [
     "DISCOVER", "ENUMERATE", "OPEN", "READ", "SEARCH", "QUERY",
     "CREATE", "GENERATE", "MODIFY", "REWRITE", "PATCH", "MOVE",
@@ -34,7 +35,7 @@ ACTIONS: list[str] = [
 ]
 
 VISIBILITY_TIERS = ("PUBLIC", "CONTROLLED", "ORGANIZATION_PRIVATE", "SEALED")
-
+GOVERNANCE_MODES = ("GOVERNED", "EVIDENCE_ONLY", "DENIAL")
 SCHEMA_VERSION = "2.0.0"
 
 
@@ -74,19 +75,9 @@ class ExecutionContext:
 class Event:
     """A signed, hash-chained event record.
 
-    Invariants (verified at append time):
-        - schema_version is current.
-        - event_id is unique.
-        - timestamp is ISO 8601 UTC.
-        - jurisdiction_id is a valid Canadian jurisdiction.
-        - actor has all four identifier fields.
-        - execution_context has all four identifier fields.
-        - action is one of the canonical ACTIONS.
-        - visibility is one of the canonical VISIBILITY_TIERS.
-        - previous_event_hash matches the previous event's event_hash.
-        - event_hash is correctly computed.
-        - signature is a valid Ed25519 signature over the canonical form.
-        - signing_key_id is bound to the actor.agent_id at signing time.
+    Optional governance fields are additive. Legacy v2.0.0 records that do
+    not contain them remain byte-semantically verifiable because absent fields
+    are not synthesized during serialization.
     """
 
     schema_version: str
@@ -105,13 +96,18 @@ class Event:
     delegation_id: str | None = None
     authorization_id: str | None = None
     approval_id: str | None = None
+    approval_ids: list[str] = field(default_factory=list)
+    delegation_chain: list[str] = field(default_factory=list)
+    scope_context: ScopeContext | None = None
+    governance_mode: str | None = None
+    decision_reason: str | None = None
     resource_id: str | None = None
     before_digest: str | None = None
     after_digest: str | None = None
     policy_version: str = "1.0.0"
 
     def to_dict(self) -> dict[str, Any]:
-        d: dict[str, Any] = {
+        result: dict[str, Any] = {
             "schema_version": self.schema_version,
             "event_id": self.event_id,
             "timestamp": self.timestamp,
@@ -128,55 +124,80 @@ class Event:
             "policy_version": self.policy_version,
         }
         if self.delegation_id is not None:
-            d["delegation_id"] = self.delegation_id
+            result["delegation_id"] = self.delegation_id
         if self.authorization_id is not None:
-            d["authorization_id"] = self.authorization_id
+            result["authorization_id"] = self.authorization_id
         if self.approval_id is not None:
-            d["approval_id"] = self.approval_id
+            result["approval_id"] = self.approval_id
+        if self.approval_ids:
+            result["approval_ids"] = list(self.approval_ids)
+        if self.delegation_chain:
+            result["delegation_chain"] = list(self.delegation_chain)
+        if self.scope_context is not None:
+            scope_dict = self.scope_context.to_dict()
+            if scope_dict:
+                result["scope_context"] = scope_dict
+        if self.governance_mode is not None:
+            result["governance_mode"] = self.governance_mode
+        if self.decision_reason is not None:
+            result["decision_reason"] = self.decision_reason
         if self.resource_id is not None:
-            d["resource_id"] = self.resource_id
+            result["resource_id"] = self.resource_id
         if self.before_digest is not None:
-            d["before_digest"] = self.before_digest
+            result["before_digest"] = self.before_digest
         if self.after_digest is not None:
-            d["after_digest"] = self.after_digest
-        return d
+            result["after_digest"] = self.after_digest
+        return result
 
     @classmethod
-    def from_dict(cls, d: dict[str, Any]) -> Event:
+    def from_dict(cls, value: dict[str, Any]) -> Event:
         actor = Actor(
-            controller_id=d["actor"]["controller_id"],
-            principal_id=d["actor"]["principal_id"],
-            agent_id=d["actor"]["agent_id"],
-            agent_instance_id=d["actor"]["agent_instance_id"],
+            controller_id=value["actor"]["controller_id"],
+            principal_id=value["actor"]["principal_id"],
+            agent_id=value["actor"]["agent_id"],
+            agent_instance_id=value["actor"]["agent_instance_id"],
         )
-        ec = ExecutionContext(
-            provider_id=d["execution_context"]["provider_id"],
-            model_id=d["execution_context"]["model_id"],
-            model_version_id=d["execution_context"]["model_version_id"],
-            deployment_id=d["execution_context"]["deployment_id"],
+        execution_context = ExecutionContext(
+            provider_id=value["execution_context"]["provider_id"],
+            model_id=value["execution_context"]["model_id"],
+            model_version_id=value["execution_context"]["model_version_id"],
+            deployment_id=value["execution_context"]["deployment_id"],
         )
         return cls(
-            schema_version=d["schema_version"],
-            event_id=d["event_id"],
-            timestamp=d["timestamp"],
-            jurisdiction_id=d["jurisdiction_id"],
+            schema_version=value["schema_version"],
+            event_id=value["event_id"],
+            timestamp=value["timestamp"],
+            jurisdiction_id=value["jurisdiction_id"],
             actor=actor,
-            execution_context=ec,
-            task_id=d["task_id"],
-            action=d["action"],
-            visibility=d["visibility"],
-            previous_event_hash=d["previous_event_hash"],
-            event_hash=d["event_hash"],
-            signature=d["signature"],
-            signing_key_id=d["signing_key_id"],
-            delegation_id=d.get("delegation_id"),
-            authorization_id=d.get("authorization_id"),
-            approval_id=d.get("approval_id"),
-            resource_id=d.get("resource_id"),
-            before_digest=d.get("before_digest"),
-            after_digest=d.get("after_digest"),
-            policy_version=d.get("policy_version", "1.0.0"),
+            execution_context=execution_context,
+            task_id=value["task_id"],
+            action=value["action"],
+            visibility=value["visibility"],
+            previous_event_hash=value["previous_event_hash"],
+            event_hash=value["event_hash"],
+            signature=value["signature"],
+            signing_key_id=value["signing_key_id"],
+            delegation_id=value.get("delegation_id"),
+            authorization_id=value.get("authorization_id"),
+            approval_id=value.get("approval_id"),
+            approval_ids=list(value.get("approval_ids", [])),
+            delegation_chain=list(value.get("delegation_chain", [])),
+            scope_context=ScopeContext.from_dict(value.get("scope_context")) if value.get("scope_context") else None,
+            governance_mode=value.get("governance_mode"),
+            decision_reason=value.get("decision_reason"),
+            resource_id=value.get("resource_id"),
+            before_digest=value.get("before_digest"),
+            after_digest=value.get("after_digest"),
+            policy_version=value.get("policy_version", "1.0.0"),
         )
 
 
-__all__ = ["ACTIONS", "VISIBILITY_TIERS", "SCHEMA_VERSION", "Actor", "ExecutionContext", "Event"]
+__all__ = [
+    "ACTIONS",
+    "VISIBILITY_TIERS",
+    "GOVERNANCE_MODES",
+    "SCHEMA_VERSION",
+    "Actor",
+    "ExecutionContext",
+    "Event",
+]
