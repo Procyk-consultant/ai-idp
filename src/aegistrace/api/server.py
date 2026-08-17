@@ -3,7 +3,7 @@ Project: AI-IDP / AegisTrace
 Author and Intellectual Property Owner: Pierre-Edward Procyk
 Copyright: © 2026 Pierre-Edward Procyk. All rights reserved.
 File: src/aegistrace/api/server.py
-Purpose: Public-safe FastAPI server exposing governed AegisTrace operations
+Purpose: Public-safe FastAPI server exposing authenticated governed AegisTrace operations
 Classification: presentation
 Version: 2.0.0
 Last Material Revision: 2026-08-17
@@ -16,6 +16,7 @@ from typing import Any
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
+from aegistrace.api.authentication import ActionRequestAuthenticator, RequestAuthenticationError
 from aegistrace.authorization.engine import PolicyEngine
 from aegistrace.authorization.scope import ScopeContext
 from aegistrace.delegation.broker import DelegationBroker
@@ -64,6 +65,9 @@ class EventRequest(BaseModel):
     resource_id: str | None = None
     before_digest: str | None = None
     after_digest: str | None = None
+    request_timestamp: str
+    request_nonce: str = Field(min_length=16, max_length=256)
+    request_signature: str
 
 
 def create_app(
@@ -73,12 +77,14 @@ def create_app(
     ledger: AppendOnlyLedger | None = None,
     policy_engine: PolicyEngine | None = None,
     delegation_broker: DelegationBroker | None = None,
+    request_authenticator: ActionRequestAuthenticator | None = None,
 ) -> FastAPI:
     """Create a fail-closed public API bound to shared AegisTrace services.
 
-    The API never exposes organization-private/controlled/sealed event bodies.
-    Operational event writes cross ``GovernedEventService`` and therefore
-    require a valid authorization plus any required approvals/delegation.
+    Operational writes require two independent checks before canonical append:
+    cryptographic request authentication (agent proof-of-possession + nonce) and
+    AI-IDP governance authorization/delegation/approval evaluation. Public reads
+    expose only explicit disclosure projections.
     """
     keys = key_service or KeyService()
     entity_registry = registry or Registry()
@@ -94,6 +100,7 @@ def create_app(
     )
     verifier = LedgerVerifier(keys)
     projector = PublicEventProjector()
+    authenticator = request_authenticator or ActionRequestAuthenticator(keys)
 
     app = FastAPI(
         title="AegisTrace",
@@ -110,11 +117,16 @@ def create_app(
         "governed": governed,
         "verifier": verifier,
         "projector": projector,
+        "authenticator": authenticator,
     }
 
     @app.get("/health")
     def health() -> dict[str, str]:
-        return {"status": "ok", "version": "2.0.0", "write_boundary": "governed"}
+        return {
+            "status": "ok",
+            "version": "2.0.0",
+            "write_boundary": "authenticated+governed",
+        }
 
     @app.get("/actions")
     def list_actions() -> list[str]:
@@ -126,6 +138,12 @@ def create_app(
 
     @app.post("/events")
     def record_event(request: EventRequest) -> dict[str, Any]:
+        signed_payload = request.model_dump(exclude={"request_signature"}, exclude_none=True)
+        try:
+            authenticator.verify_and_reserve(signed_payload, request.request_signature)
+        except RequestAuthenticationError as exc:
+            raise HTTPException(status_code=401, detail="action request authentication failed") from exc
+
         actor = Actor(
             controller_id=request.controller_id,
             principal_id=request.principal_id,
