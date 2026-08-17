@@ -77,30 +77,35 @@ tectonic main.tex
 
 ## Repository Structure
 
-```
+```text
 ai-idp-aegistrace/
-├── README.md                          ← you are here
-├── FILING_INSTRUCTIONS.md             ← What goes where, to who, why
+├── README.md
+├── FILING_INSTRUCTIONS.md
 ├── project-control/                   ← Control records, status, decisions
-├── brand/                             ← Official brand assets (originals preserved)
+├── brand/                             ← Official brand assets
 ├── research/                          ← Research protocol, registers, evidence, synthesis
-├── university/                        ← University research package (md+docx+pdf)
-├── science/                           ← Scientific method, hypotheses, results, and limitations
+├── university/                        ← University research package
+├── science/                           ← Scientific method, hypotheses, results, limitations
 ├── government/                        ← Canadian government proposal package
 ├── administration/                    ← Administrative implementation
 ├── impact/                            ← Business, HR, societal impact reports
 ├── spec/                              ← Formal technical specifications (25 documents)
 ├── schemas/                           ← JSON Schemas (15 current schemas)
 ├── src/aegistrace/                    ← Functional reference implementation
-├── src/aegistrace/adapters/           ← External adapters
+│   ├── api/                           ← Authenticated governed HTTP boundary + replay state contract
+│   ├── authorization/                 ← Scope, approvals, entitlements, transactional consumption
+│   ├── delegation/                    ← Bounded delegation and lineage
+│   ├── disclosure/                    ← Public-safe projections
+│   ├── federation/                    ← Signed inter-registry federation gateway
+│   ├── ledger/                        ← Append-only/WAL/parallel verification
+│   ├── signing/                       ← Ed25519, HSM/KMS and PQC paths
+│   └── storage/                       ← SQLite/PostgreSQL persistence + durable security state
 ├── tests/                             ← Unit, integration, security, privacy, permanence, conformance
-├── tests/conformance/                 ← Executable conformance suite
 ├── examples/                          ← Worked examples
 ├── threat-model/                      ← Threat model and attack trees
 ├── docs/                              ← Developer, auditor, regulator documentation
-├── paper/                             ← Research-paper LaTeX project + compiled PDF
-├── scripts/                           ← Generation and utility scripts
-├── release/                           ← Release metadata, checksums, and completion reports
+├── paper/                             ← Research-paper LaTeX project + compiled historical PDF
+├── release/                           ← Release metadata, checksums, completion/validation records
 └── .github/workflows/                 ← CI workflow definitions
 ```
 
@@ -129,29 +134,32 @@ ai-idp-aegistrace/
 
 - **Python 3.12**
 - **Ed25519 signatures** via `cryptography`
-- **SHA-256** for content digests and event hashes
+- **SHA-256** for content digests, action-intent commitments and event hashes
 - **JSONL** append-only ledger with hash chaining
 - **Merkle trees** for verification anchoring
-- **FastAPI** governed HTTP boundary with request proof-of-possession and anti-replay controls
-- **SQLite** for local storage; **PostgreSQL*** for production persistence
+- **FastAPI** governed HTTP boundary with agent proof-of-possession and anti-replay controls
+- **SQLite / PostgreSQL** durable nonce reservation and atomic approval-consumption stores
+- **Pluggable approver entitlement policy** with fail-closed default and external IAM extension point
+- **Signed federation agreements** and fail-closed cross-registry public resolution
 - **liboqs*** for ML-DSA-65 and SLH-DSA SHA2-128s signing/verification
 - **pytest** for executable engineering/conformance evidence
 - **Tectonic** for LaTeX compilation
 
 ### Production / High-Assurance Implementation
 
-- **PostgreSQL storage backend*** with JSONB, BIGSERIAL and SSL-by-default
+- **PostgreSQL storage backend*** with JSONB, BIGSERIAL, SSL-by-default, shared replay reservation and atomic approval consumption
 - **PKCS#11 Ed25519 HSM signing*** using token-generated non-extractable private keys
 - **AWS KMS signing*** with provider-side asymmetric keys, including Ed25519 by default and configurable key specs
 - **Azure Key Vault signing*** using EC signing keys
 - **Google Cloud KMS signing*** using asymmetric signing keys and optional HSM protection
 - **Batched high-throughput ledger** with fail-closed write-ahead-log recovery
-- **Parallel ledger verification** while preserving deterministic report ordering
+- **Parallel ledger verification** with deterministic report ordering
 - **OpenTelemetry runtime exporter*** for observability
 - **Post-quantum signatures***: ML-DSA-65 and SLH-DSA SHA2-128s live code paths through liboqs
+- **Signed federation gateway** with bilateral key-bound agreements, TTL-bounded cache, public-safe resolution, federation-break detection and disclosed-chain verification
 - **Live GitHub remote integration*** for Merkle anchor/status/evidence publication paths
 
-> * **Capability-status note:** starred capabilities are implemented source paths whose live operation depends on an external service, credential, hardware/token, runtime library or endpoint. The historical 2026-08-02 validation corpus exercised the earlier v2.0.0 production-hardening interfaces; the additional 2026-08-17 backend implementations and hardening changes have **not yet been rerun** and therefore are not being represented as newly validated production activations.
+> * **Capability-status note:** starred capabilities are implemented source paths whose live operation depends on an external service, credential, hardware/token, runtime library or endpoint. The historical 2026-08-02 validation corpus exercised the earlier v2.0.0 state; the additional 2026-08-17 implementation and hardening changes have **not yet been rerun** and therefore are not represented as newly validated production activations.
 
 ---
 
@@ -163,15 +171,18 @@ pytest tests/ -v
 
 **Last recorded full validation: 113/113 tests passed on 2026-08-02** across the then-current v2.0.0 corpus.
 
-The reconciliation branch adds substantially stronger source tests for:
+The reconciliation branch adds or strengthens source tests for:
 
 - governed execution boundaries;
-- authorization and exact-action approval integrity;
+- authorization, approver entitlement and exact-action approval integrity;
+- action-intent retargeting prevention, including visibility changes;
+- atomic/durable approval consumption;
 - delegation scope/lineage enforcement;
-- API proof-of-possession and replay resistance;
+- API proof-of-possession and durable replay resistance;
 - public-disclosure leakage prevention;
 - canonical-state isolation;
-- WAL recovery and ledger hardening;
+- WAL recovery, duplicate detection and ledger hardening;
+- signed federation agreements and cross-registry disclosed-chain verification;
 - production cryptographic backend behavior;
 - live liboqs ML-DSA / SLH-DSA round trips when the PQC runtime is installed.
 
@@ -187,7 +198,7 @@ AI-IDP defines four conformance levels (L1–L4) as the target implementation an
 
 - **L1 (Baseline):** Persistent identifiers, signed events, local ledger.
 - **L2 (Standard):** L1 + public verification, private evidence, delegation, authorization, approval, resource manifests.
-- **L3 (High Assurance):** L2 + independent archival replication, federation, database/CI-CD adapters, annual audit.
+- **L3 (High Assurance):** L2 + independent archival replication, signed federation, database/CI-CD adapters, annual audit.
 - **L4 (Maximum Assurance):** L3 + dual approval, regulator-controlled vault, real-time transparency log, PQC readiness.
 
 These levels define the intended conformity destination of the standard; adoption or legal enforceability depends on the applicable standards, administrative, contractual, procurement or legislative route.
@@ -200,6 +211,7 @@ These levels define the intended conformity destination of the standard; adoptio
 - **Sealed records** for sensitive information
 - **Content separation** between durable evidence metadata and sensitive payloads
 - **Allow-listed public projections** rather than raw event disclosure
+- **Scoped public verification-key export**
 - **Access logging** for non-public record access paths
 - **Recourse mechanisms** for affected persons
 
@@ -259,9 +271,9 @@ LinkedIn: [linkedin.com/in/pierre-edward-procyk-223b75305](https://www.linkedin.
 
 ## Status
 
-See `project-control/PROJECT_STATUS.md`, `project-control/VALIDATION_STATUS.md`, `project-control/SOURCE_HARDENING_COMPLETION_2026-08-17.md`, `project-control/CRYPTO_BACKEND_COMPLETION_2026-08-17.md`, `release/RECONCILIATION_VALIDATION_STATUS_2026-08-17.md`, and `release/VALIDATION_REPORT.md`.
+See `project-control/PROJECT_STATUS.md`, `project-control/VALIDATION_STATUS.md`, `project-control/SOURCE_HARDENING_COMPLETION_2026-08-17.md`, `project-control/CRYPTO_BACKEND_COMPLETION_2026-08-17.md`, `project-control/STATIC_CONFORMANCE_PATCH_LOG_2026-08-17.md`, `release/RECONCILIATION_VALIDATION_STATUS_2026-08-17.md`, and `release/VALIDATION_REPORT.md`.
 
 **Historical validated baseline:** v2.0.0 / 2026-08-02 — 113/113 tests recorded  
-**Current reconciliation source material:** 2026-08-17 — implementation/hardening complete, fresh runtime validation pending  
+**Current reconciliation source material:** 2026-08-17 — source implementation/hardening complete; fresh runtime and external target-environment validation pending  
 **Version:** 2.0.0  
 **Research paper:** last recorded clean Tectonic compile passed on 2026-08-02; public archival record at https://doi.org/10.5281/zenodo.21769036
