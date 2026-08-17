@@ -14,6 +14,7 @@ from __future__ import annotations
 from threading import RLock
 
 from aegistrace.authorization.engine import PolicyEngine
+from aegistrace.authorization.intent import ActionIntent
 from aegistrace.authorization.scope import ScopeContext
 from aegistrace.delegation.broker import DelegationBroker
 from aegistrace.events.collector import EventCollector
@@ -31,13 +32,12 @@ class GovernanceDenied(PermissionError):
 
 
 class GovernedEventService:
-    """Authorize an action before it becomes canonical AegisTrace evidence.
+    """Authorize an exact action intent before canonical evidence is accepted.
 
-    The low-level ``EventCollector`` remains available for evidence import,
-    verification fixtures, and explicitly evidence-only workflows. Operational
-    action execution should cross this service instead. The service serializes
-    in-process governance decisions so approval selection, canonical append,
-    and approval consumption cannot interleave with another governed write.
+    The low-level EventCollector remains available for evidence import and
+    explicit evidence-only workflows. Operational writes cross this service.
+    The in-process lock serializes approval selection, append, and consumption;
+    distributed deployments require a transactional/shared enforcement layer.
     """
 
     def __init__(
@@ -74,6 +74,26 @@ class GovernedEventService:
         after_digest: str | None = None,
         record_denial: bool = True,
     ) -> Event:
+        intent = ActionIntent(
+            controller_id=actor.controller_id,
+            principal_id=actor.principal_id,
+            agent_id=actor.agent_id,
+            agent_instance_id=actor.agent_instance_id,
+            provider_id=execution_context.provider_id,
+            model_id=execution_context.model_id,
+            model_version_id=execution_context.model_version_id,
+            deployment_id=execution_context.deployment_id,
+            task_id=task_id,
+            action=action,
+            jurisdiction_id=jurisdiction_id,
+            delegation_id=delegation_id,
+            resource_id=resource_id,
+            before_digest=before_digest,
+            after_digest=after_digest,
+            scope_context=scope_context,
+        )
+        action_intent_digest = intent.digest()
+
         with self._lock:
             try:
                 self._validate_registry_chain(
@@ -92,7 +112,6 @@ class GovernedEventService:
                     raise GovernanceDenied("authorization agent does not match actor agent")
                 if authorization.task_id != task_id:
                     raise GovernanceDenied("authorization task does not match event task")
-
                 if authorization.delegation_id != delegation_id:
                     if authorization.delegation_id is not None or delegation_id is not None:
                         raise GovernanceDenied("authorization and event delegation references do not match")
@@ -100,6 +119,7 @@ class GovernedEventService:
                 decision = self._policy.evaluate(
                     action=action,
                     authorization_id=authorization_id,
+                    action_digest=action_intent_digest,
                     approval_id=approval_id,
                     approval_ids=approval_ids,
                     scope_context=scope_context,
@@ -108,6 +128,7 @@ class GovernedEventService:
                     raise GovernanceDenied(decision.reason)
 
                 delegation_chain: list[str] = []
+                agent_record = self._registry.resolve(actor.agent_id)
                 if delegation_id is not None:
                     if not self._delegations.verify_action(
                         delegation_id,
@@ -117,16 +138,19 @@ class GovernedEventService:
                         action=action,
                         context=scope_context,
                     ):
-                        raise GovernanceDenied("delegation chain is missing, invalid, revoked, expired, or outside scope")
+                        raise GovernanceDenied(
+                            "delegation chain is missing, invalid, revoked, expired, or outside scope"
+                        )
                     delegation_chain = self._delegations.delegation_chain(delegation_id)
-                    agent_record = self._registry.resolve(actor.agent_id)
-                    expected_parent_delegation = agent_record.attributes.get("parent_delegation_id")
-                    if expected_parent_delegation is not None and expected_parent_delegation != delegation_id:
-                        raise GovernanceDenied("agent registry binding points to a different parent delegation")
-                else:
-                    agent_record = self._registry.resolve(actor.agent_id)
-                    if agent_record.attributes.get("parent_delegation_id") is not None:
-                        raise GovernanceDenied("delegated child agent is missing its parent delegation reference")
+                    expected_parent = agent_record.attributes.get("parent_delegation_id")
+                    if expected_parent is not None and expected_parent != delegation_id:
+                        raise GovernanceDenied(
+                            "agent registry binding points to a different parent delegation"
+                        )
+                elif agent_record.attributes.get("parent_delegation_id") is not None:
+                    raise GovernanceDenied(
+                        "delegated child agent is missing its parent delegation reference"
+                    )
 
                 event = self._collector.record(
                     actor=actor,
@@ -142,13 +166,13 @@ class GovernedEventService:
                     approval_id=approval_id,
                     approval_ids=list(decision.satisfied_approval_ids),
                     scope_context=scope_context,
+                    action_intent_digest=action_intent_digest,
                     governance_mode="GOVERNED",
                     resource_id=resource_id,
                     before_digest=before_digest,
                     after_digest=after_digest,
                     policy_version=authorization.policy_version,
                 )
-
                 if decision.satisfied_approval_ids and not self._policy.consume_approvals(
                     decision.satisfied_approval_ids
                 ):
@@ -165,6 +189,7 @@ class GovernedEventService:
                         execution_context=execution_context,
                         task_id=task_id,
                         requested_action=action,
+                        action_intent_digest=action_intent_digest,
                         visibility=visibility,
                         signing_key_id=signing_key_id,
                         jurisdiction_id=jurisdiction_id,
@@ -183,8 +208,8 @@ class GovernedEventService:
         execution_context: ExecutionContext,
         task_id: str,
     ) -> None:
-        controller = self._require_active(actor.controller_id, "controller")
-        principal = self._require_active(actor.principal_id, "principal")
+        self._require_active(actor.controller_id, "controller")
+        self._require_active(actor.principal_id, "principal")
         agent = self._require_active(actor.agent_id, "agent")
         instance = self._require_active(actor.agent_instance_id, "agent-instance")
         self._require_active(execution_context.provider_id, "provider")
@@ -193,13 +218,11 @@ class GovernedEventService:
         self._require_active(execution_context.deployment_id, "deployment")
         self._require_active(task_id, "task")
 
-        del controller, principal
         bound_controller = agent.attributes.get("controller_id")
         if bound_controller is None:
             raise GovernanceDenied("agent registry record is missing controller_id binding")
         if bound_controller != actor.controller_id:
             raise GovernanceDenied("agent registry controller binding does not match actor controller")
-
         bound_agent = instance.attributes.get("agent_id")
         if bound_agent is None:
             raise GovernanceDenied("agent-instance registry record is missing agent_id binding")
@@ -226,6 +249,7 @@ class GovernedEventService:
         execution_context: ExecutionContext,
         task_id: str,
         requested_action: str,
+        action_intent_digest: str,
         visibility: str,
         signing_key_id: str,
         jurisdiction_id: str,
@@ -235,7 +259,7 @@ class GovernedEventService:
         resource_id: str | None,
         reason: str,
     ) -> str | None:
-        """Best-effort denial evidence; denial itself never becomes permission."""
+        """Best-effort denial evidence; denial evidence never becomes permission."""
         try:
             event = self._collector.record(
                 actor=actor,
@@ -248,6 +272,7 @@ class GovernedEventService:
                 delegation_id=delegation_id,
                 authorization_id=authorization_id,
                 scope_context=scope_context,
+                action_intent_digest=action_intent_digest,
                 governance_mode="DENIAL",
                 decision_reason=f"requested_action={requested_action}; reason={reason}",
                 resource_id=resource_id,
