@@ -3,10 +3,10 @@ Project: AI-IDP / AegisTrace
 Author and Intellectual Property Owner: Pierre-Edward Procyk
 Copyright: © 2026 Pierre-Edward Procyk. All rights reserved.
 File: src/aegistrace/api/server.py
-Purpose: FastAPI server exposing AegisTrace operations
-Classification: application
+Purpose: Public-safe FastAPI server exposing governed AegisTrace operations
+Classification: presentation
 Version: 2.0.0
-Last Material Revision: 2026-08-01
+Last Material Revision: 2026-08-17
 Licence Status: No licence selected unless approved in writing by Pierre-Edward Procyk.
 """
 from __future__ import annotations
@@ -14,13 +14,32 @@ from __future__ import annotations
 from typing import Any
 
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
+from aegistrace.authorization.engine import PolicyEngine
+from aegistrace.authorization.scope import ScopeContext
+from aegistrace.delegation.broker import DelegationBroker
+from aegistrace.disclosure.public import PublicEventProjector, PublicProjectionError
 from aegistrace.events.collector import EventCollector
-from aegistrace.events.models import ACTIONS, VISIBILITY_TIERS
+from aegistrace.events.models import ACTIONS, VISIBILITY_TIERS, Actor, ExecutionContext
+from aegistrace.governance.service import GovernanceDenied, GovernedEventService
 from aegistrace.identity.keys import KeyService
 from aegistrace.identity.lifecycle import Registry
 from aegistrace.ledger.append_only import AppendOnlyLedger, LedgerVerifier
+
+
+class ScopeContextRequest(BaseModel):
+    task_class: str | None = None
+    resource_class: str | None = None
+    geography: str | None = None
+    tool_class: str | None = None
+    model_class: str | None = None
+    provider_class: str | None = None
+    evaluated_at: str | None = None
+    requested_delegation_depth: int | None = Field(default=None, ge=0)
+
+    def to_domain(self) -> ScopeContext:
+        return ScopeContext(**self.model_dump())
 
 
 class EventRequest(BaseModel):
@@ -36,10 +55,12 @@ class EventRequest(BaseModel):
     action: str
     visibility: str
     signing_key_id: str
+    authorization_id: str
     jurisdiction_id: str = "ca"
     delegation_id: str | None = None
-    authorization_id: str | None = None
     approval_id: str | None = None
+    approval_ids: list[str] = Field(default_factory=list)
+    scope_context: ScopeContextRequest | None = None
     resource_id: str | None = None
     before_digest: str | None = None
     after_digest: str | None = None
@@ -50,29 +71,50 @@ def create_app(
     registry: Registry | None = None,
     key_service: KeyService | None = None,
     ledger: AppendOnlyLedger | None = None,
+    policy_engine: PolicyEngine | None = None,
+    delegation_broker: DelegationBroker | None = None,
 ) -> FastAPI:
-    """Create a FastAPI app bound to the given AegisTrace components.
+    """Create a fail-closed public API bound to shared AegisTrace services.
 
-    For production use, supply persistent components; for tests, the
-    defaults are in-memory.
+    The API never exposes organization-private/controlled/sealed event bodies.
+    Operational event writes cross ``GovernedEventService`` and therefore
+    require a valid authorization plus any required approvals/delegation.
     """
+    keys = key_service or KeyService()
+    entity_registry = registry or Registry()
+    event_ledger = ledger or AppendOnlyLedger()
+    policy = policy_engine or PolicyEngine(keys)
+    delegations = delegation_broker or DelegationBroker(keys)
+    collector = EventCollector(event_ledger, keys)
+    governed = GovernedEventService(
+        collector=collector,
+        policy_engine=policy,
+        delegation_broker=delegations,
+        registry=entity_registry,
+    )
+    verifier = LedgerVerifier(keys)
+    projector = PublicEventProjector()
+
     app = FastAPI(
         title="AegisTrace",
-        description="Reference HTTP API for the AI-IDP standard",
+        description="Reference HTTP API for the proposed AI-IDP standard",
         version="2.0.0",
     )
-
-    state: dict[str, Any] = {
-        "registry": registry or Registry(),
-        "keys": key_service or KeyService(),
-        "ledger": ledger or AppendOnlyLedger(),
+    app.state.aegistrace = {
+        "registry": entity_registry,
+        "keys": keys,
+        "ledger": event_ledger,
+        "policy": policy,
+        "delegations": delegations,
+        "collector": collector,
+        "governed": governed,
+        "verifier": verifier,
+        "projector": projector,
     }
-    state["collector"] = EventCollector(state["ledger"], state["keys"])
-    state["verifier"] = LedgerVerifier(state["keys"])
 
     @app.get("/health")
     def health() -> dict[str, str]:
-        return {"status": "ok", "version": "2.0.0"}
+        return {"status": "ok", "version": "2.0.0", "write_boundary": "governed"}
 
     @app.get("/actions")
     def list_actions() -> list[str]:
@@ -83,78 +125,98 @@ def create_app(
         return list(VISIBILITY_TIERS)
 
     @app.post("/events")
-    def record_event(req: EventRequest) -> dict[str, Any]:
-        from aegistrace.events.models import Actor, ExecutionContext
+    def record_event(request: EventRequest) -> dict[str, Any]:
+        actor = Actor(
+            controller_id=request.controller_id,
+            principal_id=request.principal_id,
+            agent_id=request.agent_id,
+            agent_instance_id=request.agent_instance_id,
+        )
+        execution_context = ExecutionContext(
+            provider_id=request.provider_id,
+            model_id=request.model_id,
+            model_version_id=request.model_version_id,
+            deployment_id=request.deployment_id,
+        )
+        scope_context = request.scope_context.to_domain() if request.scope_context else None
         try:
-            actor = Actor(
-                controller_id=req.controller_id,
-                principal_id=req.principal_id,
-                agent_id=req.agent_id,
-                agent_instance_id=req.agent_instance_id,
-            )
-            ec = ExecutionContext(
-                provider_id=req.provider_id,
-                model_id=req.model_id,
-                model_version_id=req.model_version_id,
-                deployment_id=req.deployment_id,
-            )
-            event = state["collector"].record(
+            event = governed.record(
                 actor=actor,
-                execution_context=ec,
-                task_id=req.task_id,
-                action=req.action,
-                visibility=req.visibility,
-                signing_key_id=req.signing_key_id,
-                jurisdiction_id=req.jurisdiction_id,
-                delegation_id=req.delegation_id,
-                authorization_id=req.authorization_id,
-                approval_id=req.approval_id,
-                resource_id=req.resource_id,
-                before_digest=req.before_digest,
-                after_digest=req.after_digest,
+                execution_context=execution_context,
+                task_id=request.task_id,
+                action=request.action,
+                visibility=request.visibility,
+                signing_key_id=request.signing_key_id,
+                authorization_id=request.authorization_id,
+                jurisdiction_id=request.jurisdiction_id,
+                delegation_id=request.delegation_id,
+                approval_id=request.approval_id,
+                approval_ids=request.approval_ids,
+                scope_context=scope_context,
+                resource_id=request.resource_id,
+                before_digest=request.before_digest,
+                after_digest=request.after_digest,
             )
             return event.to_dict()
+        except GovernanceDenied as exc:
+            raise HTTPException(
+                status_code=403,
+                detail={"reason": exc.reason, "denial_event_id": exc.denial_event_id},
+            ) from exc
         except (ValueError, PermissionError) as exc:
             raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     @app.get("/events")
-    def list_events() -> list[dict[str, Any]]:
-        return [e.to_dict() for e in state["ledger"].events()]
+    def list_public_events() -> list[dict[str, Any]]:
+        return projector.project_many(event_ledger.events())
 
     @app.get("/events/{event_id}")
-    def get_event(event_id: str) -> dict[str, Any]:
-        e = state["ledger"].get(event_id)
-        if e is None:
-            raise HTTPException(status_code=404, detail="event not found")
-        return e.to_dict()
+    def get_public_event(event_id: str) -> dict[str, Any]:
+        event = event_ledger.get(event_id)
+        if event is None or event.visibility != "PUBLIC":
+            raise HTTPException(status_code=404, detail="public event not found")
+        try:
+            return projector.project(event)
+        except PublicProjectionError as exc:
+            raise HTTPException(status_code=404, detail="public event not found") from exc
 
     @app.post("/verify")
     def verify_ledger() -> dict[str, Any]:
-        report = state["verifier"].verify(state["ledger"])
+        report = verifier.verify(event_ledger)
         return {
             "ok": report.ok,
-            "failures": report.failures,
-            "failing_event_ids": report.failing_event_ids,
+            "failure_count": len(report.failures),
+            "verification_mode": report.verification_mode,
+            "verified_signature_count": report.verified_signature_count,
         }
 
+    @app.get("/verification/keys")
+    def public_verification_keys() -> dict[str, Any]:
+        public_key_ids = {
+            event.signing_key_id for event in event_ledger.events() if event.visibility == "PUBLIC"
+        }
+        return keys.export_public_registry(key_ids=public_key_ids)
+
     @app.get("/registry/{entity_id}")
-    def get_entity(entity_id: str) -> dict[str, Any]:
-        rec = state["registry"].get(entity_id)
-        if rec is None:
-            raise HTTPException(status_code=404, detail="entity not found")
+    def get_public_entity(entity_id: str) -> dict[str, Any]:
+        record = entity_registry.get(entity_id)
+        if record is None or record.attributes.get("public") is not True:
+            raise HTTPException(status_code=404, detail="public entity not found")
+        public_attributes = record.attributes.get("public_attributes", {})
+        if not isinstance(public_attributes, dict):
+            raise HTTPException(status_code=500, detail="invalid public registry projection")
         return {
-            "entity_id": rec.entity_id,
-            "entity_type": rec.entity_type,
-            "state": rec.state,
-            "attributes": rec.attributes,
-            "created_at": rec.created_at,
+            "entity_id": record.entity_id,
+            "entity_type": record.entity_type,
+            "state": record.state,
+            "created_at": record.created_at,
+            "attributes": dict(public_attributes),
         }
 
     return app
 
 
-# Module-level app for `uvicorn aegistrace.api.server:app`
 app = create_app()
 
 
-__all__ = ["create_app", "app", "EventRequest"]
+__all__ = ["create_app", "app", "EventRequest", "ScopeContextRequest"]
