@@ -12,6 +12,7 @@ Licence Status: No licence selected unless approved in writing by Pierre-Edward 
 from __future__ import annotations
 
 import copy
+import re
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from threading import RLock
@@ -29,16 +30,15 @@ APPROVAL_REQUIRED: set[str] = {
     "CHANGE_POLICY", "TRIGGER_EXTERNAL_EFFECT", "MODIFY_PRODUCTION", "ALTER_DATABASE_SCHEMA",
     "MODIFY_INFRASTRUCTURE", "PUBLISH", "DELETE",
 }
-
 DUAL_APPROVAL_REQUIRED: set[str] = {
     "DESTROY_KEY", "MODIFY_PRODUCTION", "ALTER_DATABASE_SCHEMA",
 }
-
 FAIL_CLOSED: set[str] = {
     "DEPLOY", "RELEASE", "DESTROY_RESOURCE", "DESTROY_KEY", "CHANGE_PERMISSION",
     "CHANGE_POLICY", "TRIGGER_EXTERNAL_EFFECT", "MODIFY_PRODUCTION", "ALTER_DATABASE_SCHEMA",
     "MODIFY_INFRASTRUCTURE", "PUBLISH", "DELETE",
 }
+_DIGEST_PATTERN = re.compile(r"^sha256:[0-9a-f]{64}$")
 
 
 @dataclass
@@ -60,10 +60,8 @@ class Authorization:
     def is_active(self) -> bool:
         if self.state != "active":
             return False
-        if self.expires_at:
-            now = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
-            if now > self.expires_at:
-                return False
+        if self.expires_at and datetime.now(UTC) > _parse_timestamp(self.expires_at):
+            return False
         return True
 
 
@@ -71,6 +69,7 @@ class Authorization:
 class Approval:
     approval_id: str
     action: str
+    action_digest: str
     approver_id: str
     authorization_id: str
     policy_version: str
@@ -84,10 +83,8 @@ class Approval:
     def is_usable(self) -> bool:
         if self.used:
             return False
-        if self.expires_at:
-            now = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
-            if now > self.expires_at:
-                return False
+        if self.expires_at and datetime.now(UTC) > _parse_timestamp(self.expires_at):
+            return False
         return True
 
 
@@ -104,11 +101,7 @@ class PolicyDecision:
 
 
 class PolicyEngine:
-    """Evaluate signed authorizations and approvals against policy.
-
-    Authority records returned to callers are snapshots. Canonical authorization
-    and approval state can only be changed through service operations.
-    """
+    """Evaluate signed authorizations and exact-action approvals against policy."""
 
     def __init__(self, key_service: KeyService, policy_version: str = "1.0.0") -> None:
         self._keys = key_service
@@ -145,6 +138,7 @@ class PolicyEngine:
         record: dict[str, Any] = {
             "approval_id": approval.approval_id,
             "action": approval.action,
+            "action_digest": approval.action_digest,
             "approver_id": approval.approver_id,
             "authorization_id": approval.authorization_id,
             "policy_version": approval.policy_version,
@@ -157,9 +151,13 @@ class PolicyEngine:
     def verify_authorization(self, authorization_id: str) -> bool:
         with self._lock:
             authorization = self._authorizations.get(authorization_id)
-            if authorization is None or not authorization.is_active():
+            if authorization is None:
                 return False
-            if authorization.policy_version != self.policy_version:
+            try:
+                active = authorization.is_active()
+            except ValueError:
+                return False
+            if not active or authorization.policy_version != self.policy_version:
                 return False
             if not self._key_is_bound_to(
                 authorization.signing_key_id,
@@ -169,8 +167,7 @@ class PolicyEngine:
             try:
                 record = self._keys.get_record(authorization.signing_key_id)
                 public_key = SigningKey.from_public_pem(
-                    authorization.signing_key_id,
-                    record.public_pem,
+                    authorization.signing_key_id, record.public_pem
                 ).public_key
                 return SigningKey.verify(
                     public_key,
@@ -183,9 +180,15 @@ class PolicyEngine:
     def verify_approval(self, approval_id: str) -> bool:
         with self._lock:
             approval = self._approvals.get(approval_id)
-            if approval is None or not approval.is_usable():
+            if approval is None:
                 return False
-            if approval.policy_version != self.policy_version:
+            try:
+                usable = approval.is_usable()
+            except ValueError:
+                return False
+            if not usable or approval.policy_version != self.policy_version:
+                return False
+            if not _DIGEST_PATTERN.fullmatch(approval.action_digest):
                 return False
             authorization = self._authorizations.get(approval.authorization_id)
             if authorization is None or not self.verify_authorization(authorization.authorization_id):
@@ -195,8 +198,7 @@ class PolicyEngine:
             try:
                 record = self._keys.get_record(approval.signing_key_id)
                 public_key = SigningKey.from_public_pem(
-                    approval.signing_key_id,
-                    record.public_pem,
+                    approval.signing_key_id, record.public_pem
                 ).public_key
                 return SigningKey.verify(
                     public_key,
@@ -218,11 +220,12 @@ class PolicyEngine:
         delegation_id: str | None = None,
         expires_at: str | None = None,
     ) -> Authorization:
+        if expires_at is not None:
+            _parse_timestamp(expires_at)
         if not self._keys.is_active(signing_key_id):
             raise PermissionError(f"signing key not active: {signing_key_id}")
         if not self._key_is_bound_to(signing_key_id, {principal_id, controller_id}):
             raise PermissionError("authorization signing key is not bound to the principal or accountable controller")
-
         authorization = Authorization(
             authorization_id=str(make_identifier("authorization", make_slug("auth"))),
             principal_id=principal_id,
@@ -231,7 +234,7 @@ class PolicyEngine:
             task_id=task_id,
             scope=copy.deepcopy(scope or {}),
             policy_version=self.policy_version,
-            issued_at=datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            issued_at=_now(),
             expires_at=expires_at,
             delegation_id=delegation_id,
             signing_key_id=signing_key_id,
@@ -264,6 +267,7 @@ class PolicyEngine:
         self,
         *,
         action: str,
+        action_digest: str,
         approver_id: str,
         authorization_id: str,
         signing_key_id: str,
@@ -271,6 +275,10 @@ class PolicyEngine:
     ) -> Approval:
         if action not in ACTIONS:
             raise ValueError(f"invalid action: {action}")
+        if not _DIGEST_PATTERN.fullmatch(action_digest):
+            raise ValueError("action_digest must be a sha256 digest")
+        if expires_at is not None:
+            _parse_timestamp(expires_at)
         with self._lock:
             authorization = self._authorizations.get(authorization_id)
             if authorization is None:
@@ -281,14 +289,14 @@ class PolicyEngine:
             raise PermissionError(f"signing key not active: {signing_key_id}")
         if not self._key_is_bound_to(signing_key_id, {approver_id}):
             raise PermissionError("approval signing key is not bound to the approver")
-
         approval = Approval(
             approval_id=str(make_identifier("approval", make_slug("apr"))),
             action=action,
+            action_digest=action_digest,
             approver_id=approver_id,
             authorization_id=authorization_id,
             policy_version=self.policy_version,
-            approved_at=datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            approved_at=_now(),
             expires_at=expires_at,
             signing_key_id=signing_key_id,
         )
@@ -311,13 +319,13 @@ class PolicyEngine:
         *,
         action: str,
         authorization_id: str,
+        action_digest: str | None = None,
         approval_id: str | None = None,
         approval_ids: list[str] | tuple[str, ...] | None = None,
         scope_context: ScopeContext | None = None,
     ) -> PolicyDecision:
         if action not in ACTIONS:
             return PolicyDecision(deny=True, reason=f"invalid action: {action}")
-
         with self._lock:
             authorization = self._authorizations.get(authorization_id)
             if authorization is None:
@@ -328,17 +336,24 @@ class PolicyEngine:
                 deny=True,
                 reason="authorization invalid, inactive, stale, or signature verification failed",
             )
-
         try:
             scope_decision = evaluate_scope(
-                authorization_snapshot.scope,
-                action=action,
-                context=scope_context,
+                authorization_snapshot.scope, action=action, context=scope_context
             )
         except (TypeError, ValueError) as exc:
             return PolicyDecision(deny=True, reason=f"authorization scope is malformed: {exc}")
         if not scope_decision.allowed:
             return PolicyDecision(deny=True, reason=scope_decision.reason)
+
+        required_count = self.required_approval_count(action)
+        if required_count == 0:
+            return PolicyDecision(deny=False, reason="permitted")
+        if action_digest is None or not _DIGEST_PATTERN.fullmatch(action_digest):
+            return PolicyDecision(
+                deny=True,
+                reason=f"exact action digest required for approval-gated action {action}",
+                approval_required=True,
+            )
 
         candidate_ids: list[str] = []
         for candidate_id in approval_ids or ():
@@ -346,44 +361,41 @@ class PolicyEngine:
                 candidate_ids.append(candidate_id)
         if approval_id is not None and approval_id not in candidate_ids:
             candidate_ids.append(approval_id)
-
-        required_count = self.required_approval_count(action)
-        if required_count == 0:
-            return PolicyDecision(deny=False, reason="permitted")
         if not candidate_ids:
             return PolicyDecision(
-                deny=True,
-                reason=f"approval required for {action}",
-                approval_required=True,
+                deny=True, reason=f"approval required for {action}", approval_required=True
             )
 
         valid_approvals: list[Approval] = []
         for candidate_id in candidate_ids:
             with self._lock:
                 approval = self._approvals.get(candidate_id)
-                approval_snapshot = copy.deepcopy(approval) if approval is not None else None
-            if approval_snapshot is None or not self.verify_approval(candidate_id):
+                snapshot = copy.deepcopy(approval) if approval is not None else None
+            if snapshot is None or not self.verify_approval(candidate_id):
                 continue
-            if approval_snapshot.action != action or approval_snapshot.authorization_id != authorization_id:
+            if snapshot.action != action:
                 continue
-            valid_approvals.append(approval_snapshot)
+            if snapshot.action_digest != action_digest:
+                continue
+            if snapshot.authorization_id != authorization_id:
+                continue
+            valid_approvals.append(snapshot)
 
         distinct: dict[str, Approval] = {}
         for approval in valid_approvals:
             distinct.setdefault(approval.approver_id, approval)
         selected = list(distinct.values())[:required_count]
         if len(selected) < required_count:
-            requirement = "two distinct approvals" if required_count == 2 else "a valid approval"
+            requirement = "two distinct exact-action approvals" if required_count == 2 else "a valid exact-action approval"
             return PolicyDecision(
                 deny=True,
                 reason=f"{requirement} required for {action}",
                 approval_required=True,
             )
-
         return PolicyDecision(
             deny=False,
             reason="permitted",
-            satisfied_approval_ids=tuple(approval.approval_id for approval in selected),
+            satisfied_approval_ids=tuple(item.approval_id for item in selected),
         )
 
     def consume_approvals(self, approval_ids: list[str] | tuple[str, ...]) -> bool:
@@ -393,7 +405,7 @@ class PolicyEngine:
         with self._lock:
             if not all(self.verify_approval(approval_id) for approval_id in unique_ids):
                 return False
-            used_at = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+            used_at = _now()
             for approval_id in unique_ids:
                 approval = self._approvals[approval_id]
                 approval.used = True
@@ -404,12 +416,19 @@ class PolicyEngine:
         return self.consume_approvals((approval_id,))
 
 
+def _now() -> str:
+    return datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def _parse_timestamp(value: str) -> datetime:
+    normalized = value[:-1] + "+00:00" if value.endswith("Z") else value
+    parsed = datetime.fromisoformat(normalized)
+    if parsed.tzinfo is None:
+        raise ValueError("timestamp must include a timezone")
+    return parsed.astimezone(UTC)
+
+
 __all__ = [
-    "APPROVAL_REQUIRED",
-    "DUAL_APPROVAL_REQUIRED",
-    "FAIL_CLOSED",
-    "Authorization",
-    "Approval",
-    "PolicyEngine",
-    "PolicyDecision",
+    "APPROVAL_REQUIRED", "DUAL_APPROVAL_REQUIRED", "FAIL_CLOSED",
+    "Authorization", "Approval", "PolicyEngine", "PolicyDecision",
 ]
