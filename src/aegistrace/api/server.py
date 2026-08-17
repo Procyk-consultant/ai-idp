@@ -17,7 +17,10 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
 from aegistrace.api.authentication import ActionRequestAuthenticator, RequestAuthenticationError
+from aegistrace.api.replay import ReplayReservationStore
+from aegistrace.authorization.consumption import ApprovalConsumptionStore
 from aegistrace.authorization.engine import PolicyEngine
+from aegistrace.authorization.entitlements import ApproverEntitlementProvider
 from aegistrace.authorization.scope import ScopeContext
 from aegistrace.delegation.broker import DelegationBroker
 from aegistrace.disclosure.public import PublicEventProjector, PublicProjectionError
@@ -78,18 +81,43 @@ def create_app(
     policy_engine: PolicyEngine | None = None,
     delegation_broker: DelegationBroker | None = None,
     request_authenticator: ActionRequestAuthenticator | None = None,
+    replay_store: ReplayReservationStore | None = None,
+    approval_consumption_store: ApprovalConsumptionStore | None = None,
+    approver_entitlements: ApproverEntitlementProvider | None = None,
 ) -> FastAPI:
     """Create a fail-closed public API bound to shared AegisTrace services.
 
     Operational writes require two independent checks before canonical append:
-    cryptographic request authentication (agent proof-of-possession + nonce) and
-    AI-IDP governance authorization/delegation/approval evaluation. Public reads
-    expose only explicit disclosure projections.
+    cryptographic request authentication (agent proof-of-possession + atomic
+    nonce reservation) and AI-IDP governance authorization/delegation/approval
+    evaluation. Public reads expose only explicit disclosure projections.
+
+    High-assurance deployments should inject the same durable storage backend
+    (for example PostgresStorage) as both ``replay_store`` and
+    ``approval_consumption_store``. If a preconfigured PolicyEngine or request
+    authenticator is supplied, their corresponding stores must be configured on
+    those objects instead of also passing them here.
     """
+    if policy_engine is not None and (
+        approval_consumption_store is not None or approver_entitlements is not None
+    ):
+        raise ValueError(
+            "approval_consumption_store/approver_entitlements cannot be supplied "
+            "with a preconfigured policy_engine"
+        )
+    if request_authenticator is not None and replay_store is not None:
+        raise ValueError(
+            "replay_store cannot be supplied with a preconfigured request_authenticator"
+        )
+
     keys = key_service or KeyService()
     entity_registry = registry or Registry()
     event_ledger = ledger or AppendOnlyLedger()
-    policy = policy_engine or PolicyEngine(keys)
+    policy = policy_engine or PolicyEngine(
+        keys,
+        approval_consumption_store=approval_consumption_store,
+        approver_entitlements=approver_entitlements,
+    )
     delegations = delegation_broker or DelegationBroker(keys)
     collector = EventCollector(event_ledger, keys)
     governed = GovernedEventService(
@@ -100,7 +128,10 @@ def create_app(
     )
     verifier = LedgerVerifier(keys)
     projector = PublicEventProjector()
-    authenticator = request_authenticator or ActionRequestAuthenticator(keys)
+    authenticator = request_authenticator or ActionRequestAuthenticator(
+        keys,
+        replay_store=replay_store,
+    )
 
     app = FastAPI(
         title="AegisTrace",
@@ -215,7 +246,7 @@ def create_app(
         }
         return keys.export_public_registry(key_ids=public_key_ids)
 
-    @app.get("/registry/{entity_id}")
+    @app.get("/registry/{entity_id:path}")
     def get_public_entity(entity_id: str) -> dict[str, Any]:
         record = entity_registry.get(entity_id)
         if record is None or record.attributes.get("public") is not True:
