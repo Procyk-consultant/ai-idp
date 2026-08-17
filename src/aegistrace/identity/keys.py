@@ -12,6 +12,7 @@ Licence Status: No licence selected unless approved in writing by Pierre-Edward 
 """
 from __future__ import annotations
 
+import copy
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any, Iterable
@@ -37,7 +38,6 @@ class KeyRecord:
         return self.state == "active"
 
     def to_public_dict(self, *, include_binding: bool = False) -> dict[str, Any]:
-        """Return verify-only material with private bindings omitted by default."""
         result: dict[str, Any] = {
             "key_id": self.key_id,
             "public_pem": self.public_pem,
@@ -56,9 +56,9 @@ class KeyRecord:
 class KeyService:
     """Manage signing-key lifecycles and verify-only public keys.
 
-    Public-key import/export never creates, serializes, or reconstructs private
-    material. Public export is allow-listable so an API does not disclose every
-    internal signing-key identifier by default.
+    Key records returned to callers are snapshots. Lifecycle state can only be
+    changed through the service operations, preventing alias-based reactivation
+    or rebinding of canonical key metadata.
     """
 
     VALID_STATES = {"active", "rotated", "suspended", "revoked", "terminated"}
@@ -71,14 +71,13 @@ class KeyService:
         if key_id in self._keys:
             raise ValueError(f"key_id already exists: {key_id}")
         signing_key = SigningKey.generate(key_id)
-        record = KeyRecord(
+        self._keys[key_id] = KeyRecord(
             key_id=key_id,
             public_pem=signing_key.public_pem(),
             state="active",
             created_at=_now(),
             bound_entity_id=bound_entity_id,
         )
-        self._keys[key_id] = record
         self._signing_keys[key_id] = signing_key
         return signing_key
 
@@ -112,7 +111,7 @@ class KeyService:
             successor_key_id=successor_key_id,
         )
         self._keys[key_id] = record
-        return record
+        return copy.deepcopy(record)
 
     def get_signing_key(self, key_id: str) -> SigningKey:
         record = self._keys.get(key_id)
@@ -132,7 +131,7 @@ class KeyService:
         return record.public_pem
 
     def get_record(self, key_id: str) -> KeyRecord:
-        return self._keys[key_id]
+        return copy.deepcopy(self._keys[key_id])
 
     def rotate(self, old_key_id: str, new_key_id: str) -> SigningKey:
         old = self._keys.get(old_key_id)
@@ -179,7 +178,7 @@ class KeyService:
         return record is not None and record.is_active()
 
     def all_records(self) -> dict[str, KeyRecord]:
-        return dict(self._keys)
+        return copy.deepcopy(self._keys)
 
     def export_public_registry(
         self,
@@ -187,7 +186,6 @@ class KeyService:
         key_ids: Iterable[str] | None = None,
         include_bindings: bool = False,
     ) -> dict[str, Any]:
-        """Export selected public verification material without private keys."""
         selected = sorted(set(key_ids) if key_ids is not None else set(self._keys))
         unknown = [key_id for key_id in selected if key_id not in self._keys]
         if unknown:
