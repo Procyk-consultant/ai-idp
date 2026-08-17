@@ -4,213 +4,203 @@ Project: AI-IDP / AegisTrace
 Author: Pierre-Edward Procyk
 Copyright: © 2026 Pierre-Edward Procyk. All rights reserved.
 File: project-control/STATIC_CONFORMANCE_AUDIT_2026-08-16.md
-Title: Static Code-to-Standard Conformance Audit — 2026-08-16
+Title: Static Code-to-Standard Conformance Audit — Reconciled 2026-08-17
 Version: 2.0.0-reconciliation
-Status: Working Audit / Not Runtime-Revalidated
-Last Material Revision: 2026-08-16
+Status: Source Hardening Complete / Runtime Revalidation Pending
+Last Material Revision: 2026-08-17
 Branch: reconcile-2026-08-14
 Baseline Commit: b13e51baa51c9e2bb0a5bff4f3911a6902b51206
 Licence Status: No licence selected unless approved in writing by Pierre-Edward Procyk
 ---
 
-# Static Code-to-Standard Conformance Audit — 2026-08-16
+# Static Code-to-Standard Conformance Audit
 
-## 1. Purpose
+## 1. Scope
 
-This audit compares the AI-IDP normative target, the AegisTrace v2.0.0 reference implementation, the executable tests, and the public-facing project documentation. It preserves the project's intended high-assurance destination rather than weakening requirements to match incomplete integrations.
+This audit compares the AI-IDP normative target, AegisTrace source, schemas, tests, and public documentation. It preserves the intended high-assurance destination rather than weakening the standard to match temporary implementation or deployment limits.
 
-This is a **static reconciliation pass**. No test suite, compilation, live HSM/KMS operation, live PostgreSQL deployment, live OTLP export, live PQC signing, or release build was executed during this pass.
+This is a **static/source reconciliation**. No fresh test suite, compiler, live PostgreSQL instance, HSM/KMS, OTLP endpoint, PQC runtime, credentialed remote publication, or release build was executed during this pass.
 
-## 2. Authoritative Validation Baseline
+## 2. Executed baseline versus current branch
 
-The last fully executed validation remains the 2026-08-02 v2.0.0 baseline documented in `release/VALIDATION_REPORT.md` and `project-control/VALIDATION_STATUS.md`:
+### Historical executed baseline — 2026-08-02
+
+The recorded baseline reports:
 
 - 113/113 tests passed;
-- clean AegisTrace demo completed;
-- four-event ledger verification passed;
-- 23 normative invariants were represented in the validation corpus;
-- JSON schemas validated against Draft 2020-12;
+- demo/ledger verification passed for that source state;
 - Tectonic paper compilation passed;
-- production-hardening modules were represented in the validated test corpus.
+- 25 specification documents and 14 JSON schemas were represented in the baseline corpus.
 
-The current reconciliation branch contains post-baseline code changes. Therefore, **113/113 is historical evidence, not a validation claim for the current branch** until a fresh authorized run is completed.
+Those facts remain historical evidence for the 2026-08-02 source state.
 
-The latest observed GitHub-hosted CI failure is classified separately: GitHub reported that the job did not start because the account was locked due to a billing issue. No workflow step executed; this is not evidence of a compilation or test failure.
+### Current hardening branch — 2026-08-17
 
-## 3. Status Vocabulary
+The reconciliation branch contains material post-baseline source changes. It now contains **15 JSON schemas**, including the explicit approval schema. These changes are not assigned a new passing-test count until the validation gate is actually executed.
+
+## 3. Status vocabulary
 
 | Status | Meaning |
 |---|---|
-| `VERIFIED-BASELINE` | Directly supported by the recorded 2026-08-02 executed validation. |
-| `STATIC-CONFIRMED` | Implementation is directly visible in source during this audit, but not newly executed. |
-| `HARDENED-UNVALIDATED` | Static defect/gap was patched on the reconciliation branch; fresh execution still required. |
-| `TARGET*` | Required/intended high-assurance capability with implementation/interface work present, but live activation or completion depends on external runtime/service/hardware or remaining implementation work. |
-| `GAP` | Static inspection found a mismatch between normative intent and implementation/test depth. |
-| `HISTORICAL` | Preserved evidence from an older project state; not a current-state assertion. |
+| `VERIFIED-BASELINE` | Supported by the recorded 2026-08-02 executed validation. |
+| `STATIC-CONFIRMED` | Directly visible in the current source, not newly executed. |
+| `HARDENED-UNVALIDATED` | A source gap was closed or materially hardened; fresh runtime validation remains required. |
+| `TARGET*` | High-assurance requirement/capability whose live activation depends on external infrastructure, runtime, credentials, hardware, institutional authority, or deployment topology. |
+| `HISTORICAL` | Evidence about an older source/release state, retained without being presented as current execution evidence. |
 
-## 4. Core Conformance Matrix
+## 4. Current conformance matrix
 
-| Area | Normative intent | Current static assessment | Status |
-|---|---|---|---|
-| Persistent actor identity | Permanent unique actor and instance identifiers | URI/identifier model and lifecycle registry implemented | `STATIC-CONFIRMED` |
-| Identifier resolvability | Revoked/terminated identities remain resolvable | Lifecycle registry preserves records and resolution | `VERIFIED-BASELINE` / `STATIC-CONFIRMED` |
-| Ed25519 event signatures | Material events cryptographically signed | Signing and verification implementation present | `VERIFIED-BASELINE` |
-| Hash-chained ledger | Append-only sequence with detectable tampering/reordering | Core ledger present; branch now also rejects duplicate event IDs | `HARDENED-UNVALIDATED` |
-| Independent verification | Verification must fail when cryptographic evidence is unavailable/invalid | Branch changed unknown-key behavior from silent skip to explicit failure; hash-only mode must be explicit | `HARDENED-UNVALIDATED` |
-| Public verification keys | Verifier can operate without private signing material | Branch adds verify-only public-key registry import/export | `HARDENED-UNVALIDATED` |
-| Authorization | Every governed action resolves to valid signed authority | Signatures existed; branch adds signature, policy-version and signer-binding verification | `HARDENED-UNVALIDATED` |
-| Approval | Required approvals are signed, valid and single-use | Existing single-use model retained; branch adds signature/binding validation | `HARDENED-UNVALIDATED` |
-| Dual approval | High-impact designated actions require two distinct approvers | Constant existed but was not enforced; branch now enforces two distinct valid approvals for designated actions | `HARDENED-UNVALIDATED` |
-| Delegation | Child authority is bounded, signed and revocable | Signed delegation and basic action/resource/task/time scope exist | `STATIC-CONFIRMED` / `GAP` |
-| Governance enforcement at event boundary | Event acceptance should resolve authorization/delegation/approval before governed action | `EventCollector` validates signature-key binding and event integrity but is not yet directly coupled to `PolicyEngine`/`DelegationBroker` | `GAP` |
-| API governance enforcement | HTTP event ingestion should not bypass authority checks | API currently wires registry/keys/ledger/collector but not policy/delegation services | `GAP` |
-| Public-tier redaction | PUBLIC projection excludes sensitive fields | Visibility tier is recorded; current tests do not demonstrate a complete projection/redaction enforcement path | `GAP` |
-| PostgreSQL* | Production persistence with sequence integrity, access logs, anchors and legal holds | Substantial backend exists; explicit batch-sequence semantics require hardening review | `TARGET*` / `GAP` |
-| HSM/KMS* | Private keys remain within HSM/KMS; signing occurs there | Abstractions and provider paths exist; live PKCS#11/cloud signing methods are not yet fully implemented/activated | `TARGET*` |
-| OpenTelemetry* | Runtime observability export without replacing canonical ledger | Exporter implementation present; external collector activation required | `TARGET*` / `STATIC-CONFIRMED` |
-| PQC migration* | Cryptographic agility toward ML-DSA/SLH-DSA | Scheme abstraction and migration orchestration exist; live PQC operations require external runtime and completion | `TARGET*` |
-| GitHub remote* | Publish anchors/status/evidence through remote integration | REST/git paths implemented; live credentialed deployment is external | `TARGET*` / `STATIC-CONFIRMED` |
-| Batched WAL ledger | High-throughput durable append path | Implementation exists; corrupted WAL handling currently requires fail-closed hardening | `GAP` |
-| Conformance tests | Executable evidence for normative invariants | Historical suite passed; static review found some tests verify only shallow proxies for broader invariants | `VERIFIED-BASELINE` / `GAP` |
+| Area | Current source assessment | Status |
+|---|---|---|
+| Persistent actor identity | Typed AI-IDP identifiers, lifecycle registry, permanent resolvability model | `STATIC-CONFIRMED` |
+| Canonical state isolation | Ledger, registry, key, authorization, approval, and delegation getters return snapshots rather than mutable canonical aliases | `HARDENED-UNVALIDATED` |
+| Event signing | Ed25519 event signing and historical public-key verification present | `VERIFIED-BASELINE` + `STATIC-CONFIRMED` |
+| Hash-chained ledger | Ordered append, duplicate-ID rejection, hash verification, alias-resistant storage | `HARDENED-UNVALIDATED` |
+| Independent verification | Missing public keys fail full verification; hash-only mode explicit; public-key import/export supported | `HARDENED-UNVALIDATED` |
+| Parallel verification | Ordered chain/hash verification plus optional parallel signature checks with deterministic result ordering | `HARDENED-UNVALIDATED` |
+| Authorization | Signed, issuer-bound, policy-versioned, actor/task/controller/principal-bound, fail-closed scope enforcement | `HARDENED-UNVALIDATED` |
+| Scope dimensions | Action/task/resource/geography/tool/model/provider/time/depth evaluated; missing restricted context denies | `HARDENED-UNVALIDATED` |
+| Approval | Signed, approver-bound, exact action-intent digest, single use | `HARDENED-UNVALIDATED` |
+| Dual approval | Two distinct approvers required for designated actions and both must approve the same exact intent digest | `HARDENED-UNVALIDATED` |
+| Delegation | Full-dimensional scope, nested subset enforcement, depth consumption, recursive signature/lineage verification, cycle protection | `HARDENED-UNVALIDATED` |
+| Governed event boundary | Registry + authorization + scope + delegation + exact approval checks precede governed canonical append | `HARDENED-UNVALIDATED` |
+| Denial evidence | Denied actions remain denied; best-effort signed `DENY` evidence records reason/request digest | `HARDENED-UNVALIDATED` |
+| API request authentication | Agent proof-of-possession, timestamp freshness and nonce replay rejection before governance | `HARDENED-UNVALIDATED` |
+| API public event disclosure | Strict allow-list projections; non-public event lookup non-enumerating | `HARDENED-UNVALIDATED` |
+| Public verification keys | Export limited to keys used by PUBLIC evidence; private bindings omitted by default | `HARDENED-UNVALIDATED` |
+| Public registry | Explicit public flag plus reviewed `public_attributes`; internal attributes not returned | `HARDENED-UNVALIDATED` |
+| PostgreSQL* | Database-owned BIGSERIAL sequence, JSONB handling, production-oriented backend path | `HARDENED-UNVALIDATED` / `TARGET*` |
+| Batched WAL | Validate-before-WAL, fsync option, caller-mutation isolation, corrupt WAL quarantine, background errors surfaced | `HARDENED-UNVALIDATED` |
+| HSM/KMS* | Interfaces/provider paths present; live hardware/cloud enforcement requires external deployment | `TARGET*` |
+| OpenTelemetry* | Exporter/runtime integration path present; collector endpoint required for live activation | `STATIC-CONFIRMED` / `TARGET*` |
+| PQC* | Scheme abstraction/migration path present; live supported PQC runtime required | `TARGET*` |
+| GitHub remote* | Remote integration path exists; credentialed live activation external | `STATIC-CONFIRMED` / `TARGET*` |
+| Federation/regulator infrastructure* | Normative architecture retained; not represented as live institutional deployment | `TARGET*` |
+| Test depth | New adversarial/privacy/governance/WAL/API/state-isolation/schema tests added in source | `HARDENED-UNVALIDATED` |
 
-## 5. Static Findings Requiring Hardening
+## 5. Closed source findings
 
-### C-001 — Independent verification could previously pass without verification keys
+### C-001 — Silent missing-key verification
 
-**Original behavior:** `LedgerVerifier` silently skipped unknown signing keys. The CLI also exposed `--keys` without actually loading them.
+**Closed in source.** Full signature verification now reports missing verification keys as failure. Hash-only operation is an explicit separate mode.
 
-**Risk:** A command labelled verification could return success after checking only hashes/chain while a reader might infer signatures were verified.
+### C-002 — Duplicate event IDs
 
-**Branch action:**
-- unknown verification key is now a failure when signature verification is requested;
-- hash-only verification is explicit;
-- verify-only public-key registries can be imported/exported;
-- demo output is being aligned to produce public verification material.
+**Closed in source.** Append and verification reject/report duplicate IDs.
 
-**Status:** `HARDENED-UNVALIDATED`.
+### C-003 — Authorization/approval signatures not enforced at decision time
 
-### C-002 — Event-ID uniqueness was implicit rather than enforced
+**Closed in source.** Signed records are reconstructed and verified with key bindings and current policy.
 
-**Original behavior:** `AppendOnlyLedger` checked chain/hash integrity but had no explicit duplicate `event_id` guard.
+### C-004 — Declared but unenforced dual approval
 
-**Branch action:** ledger maintains an event-ID set and rejects duplicate identifiers; verifier also reports duplicates.
+**Closed in source.** Designated actions require two distinct valid approvers.
 
-**Status:** `HARDENED-UNVALIDATED`.
+### C-005 — Operational API bypassed governance
 
-### C-003 — Authorization signatures existed but were not revalidated during policy evaluation
+**Closed in source.** API writes authenticate the acting agent and then cross the governed service before canonical append.
 
-**Original behavior:** authorization and approval records were signed at issuance, but `PolicyEngine.evaluate()` did not verify those signatures or signer bindings.
+### C-006 — Partial delegation-scope enforcement
 
-**Branch action:** signed records are reconstructed and verified; current policy version and signer binding are required.
+**Closed in source.** Task/resource/action/time/geography/tool/model/provider/depth are evaluated; nested child scopes cannot widen parents; complete lineage is verified.
 
-**Status:** `HARDENED-UNVALIDATED`.
+### C-007 — PostgreSQL batch sequence ambiguity
 
-### C-004 — Dual-approval requirement declared but not enforced
+**Closed in source.** Database BIGSERIAL is the sequence authority; batch appends do not restart client sequence values.
 
-**Original behavior:** `DUAL_APPROVAL_REQUIRED` existed as policy data but evaluation accepted a single approval.
+### C-008 — WAL corruption could be skipped/truncated
 
-**Branch action:** designated actions require two valid approvals from distinct approvers. Existing single-approval calls remain compatible for non-dual actions.
+**Closed in source.** Corrupt replay fails closed and preserves a quarantine copy.
 
-**Status:** `HARDENED-UNVALIDATED`.
+### C-009 — Parallel verification flag did not implement parallel verification
 
-### C-005 — Governance services are not yet coupled to every event-ingestion path
+**Closed in source.** Signatures can be verified with a bounded thread pool while ordered chain/hash checks remain sequential.
 
-`EventCollector` proves event integrity and signing-key/actor binding. It does not itself resolve the supplied `authorization_id`, `delegation_id`, or `approval_id` against `PolicyEngine` / `DelegationBroker`. The FastAPI server currently uses this collector directly.
+### C-010 — Public-tier tests did not prove projection/redaction
 
-**Required end-state:** governed material actions must pass authority/delegation/approval enforcement before canonical acceptance, while evidence-only or imported-event verification paths remain explicitly distinguished.
+**Closed in source.** Public projection is a reviewed allow-list; non-public event enumeration, public key scope, public registry attributes, and aggregate verification response have dedicated negative tests.
 
-**Status:** `GAP` — design/implementation work required before claiming the API itself is a complete enforcement boundary.
+### C-011 — Weak mutation/attack assertions
 
-### C-006 — Delegation scope model is broader than current enforcement depth
+**Closed in source.** New tests check signature-preserving tamper cases, duplicate IDs, deletion/reordering, governance bypass, state alias mutation, WAL corruption, replay, exact-approval retargeting, and missing verification keys.
 
-`DelegationScope` contains task, resource, action, time, geography, tool, model, provider and depth fields. Current `encompasses()` actively evaluates action/resource/task/time; the additional dimensions and delegation-depth chain require stronger enforcement at orchestration time.
+### C-012 — Canonical history/state exposed through mutable aliases
 
-**Status:** `GAP`.
+**Found and closed during reconciliation.** Canonical ledger, registry, key, authorization, approval, and delegation service reads now return isolated snapshots.
 
-### C-007 — PostgreSQL batch sequencing semantics require correction
+### C-013 — Approval bound only to action class
 
-The PostgreSQL schema defines `seq BIGSERIAL`, while `append_events_batch()` supplies enumerated sequence values beginning at zero for each provided batch. This can conflict with the intended globally monotonic event order when multiple batches are appended.
+**Found and closed during reconciliation.** Approval records now require `action_digest`, a SHA-256 commitment to the exact canonical action intent. Governed events carry the corresponding `action_intent_digest`. Resource or visibility changes invalidate the approval.
 
-**Required end-state:** one unambiguous globally ordered sequence source, transactionally consistent with canonical event order.
+### C-014 — Remote identifier knowledge could reach server-held signing path
 
-**Status:** `GAP`.
+**Found and closed during reconciliation.** HTTP writes require agent proof-of-possession using a deterministic signed request plus timestamp/nonce checks before governance evaluation.
 
-### C-008 — WAL replay is not fail-closed on corrupted entries
+## 6. Remaining high-assurance deployment dependencies
 
-`BatchedLedger._replay_wal()` currently catches malformed/corrupt entries and continues, then truncates the WAL after replay.
+These are retained as requirements/capabilities, not removed:
 
-**Risk:** a high-assurance recovery path should preserve/quarantine evidence and surface corruption rather than silently discard it.
+1. **Shared durable anti-replay state*** — process-local nonce state demonstrates the contract; replicas/restarts require a shared durable store.
+2. **Distributed transaction semantics*** — in-process locking serializes approval selection/event append/consumption; multi-node production requires equivalent distributed transactional guarantees.
+3. **External approver entitlement source*** — cryptographic approver identity is enforced; organization-specific roles/entitlements require the organization's IAM/governance source.
+4. **Production bootstrap/root authority*** — deployment-specific initialization/administrative trust must be documented and controlled.
+5. **HSM/KMS, PostgreSQL, OTLP, PQC, remote anchoring, federation, regulator vaults*** — require their actual external environments and validation.
+6. **External review/certification/adoption*** — cannot be created by repository source changes.
 
-**Required end-state:** fail-closed recovery, preserved corrupt WAL evidence, explicit recovery report, no silent truncation after partial/corrupt replay.
+## 7. Test-source additions in this reconciliation
 
-**Status:** `GAP`.
+Material source-level test additions/rewrites include:
 
-### C-009 — Parallel verification target is declared but not yet implemented in the batched verifier path
+- authorization exact-digest and dual-approval tests;
+- full delegation-scope and nested-lineage tests;
+- governed execution boundary tests;
+- authenticated/replay-resistant API tests;
+- strict public disclosure/privacy tests;
+- adversarial security tests replacing shallow proxies;
+- canonical state-isolation tests;
+- WAL corruption/mutation/parallel-verification tests;
+- authorization/approval schema conformance tests;
+- strengthened general conformance tests.
 
-`BatchConfig.parallel_verify` and module documentation describe parallel signature verification; current `verify()` delegates to the standard sequential verifier.
+No pass count is assigned to these additions until executed.
 
-**Status:** `TARGET*` / `GAP`.
+## 8. Schema reconciliation
 
-### C-010 — Public-tier privacy tests do not yet prove full redaction/projection
+Current branch schema changes include:
 
-The current tests confirm the PUBLIC visibility tier, but the visible test path does not assert a concrete projection removes all sensitive fields. Similar comments in the conformance suite describe downstream filtering rather than exercising it.
+- explicit bounded authorization scope;
+- `parent_delegation_id` and stricter delegation schema;
+- governance/event fields including approval sets, delegation chain, scope context, governance mode, denial reason, and exact action-intent digest;
+- new `approval.schema.json` with required exact-action digest and single-use state.
 
-**Required end-state:** explicit projection API + negative leakage tests covering sensitive fields, identity resolution, approvals/delegations and evidence payloads.
+Current branch inventory: **15 schemas**. Historical validated baseline: **14 schemas**.
 
-**Status:** `GAP`.
+## 9. Validation gate required before new verified baseline
 
-### C-011 — Some security/conformance tests are weaker than their names imply
+Before merge/release as a new validated state:
 
-Static inspection identified examples where a test contains no final security assertion or checks for the absence of mutation methods rather than proving immutability against all supported paths.
+1. review complete branch diff;
+2. run Ruff as a hard gate;
+3. run MyPy as a hard gate;
+4. run unit tests;
+5. run integration tests;
+6. run security tests;
+7. run privacy tests;
+8. run permanence tests;
+9. run conformance tests;
+10. run governed demo;
+11. run full `verify --keys` against generated public keys;
+12. run negative cases for missing keys, stale/replayed API request, wrong action digest, corrupted WAL, duplicate IDs, delegation widening, and public-data leakage;
+13. exercise optional/live integrations only in appropriate configured environments;
+14. compile paper/release derivatives when producing a new release artifact;
+15. create a **new** validation report/checksum set rather than overwriting 2026-08-02 historical evidence.
 
-**Required end-state:** each normative invariant maps to an executable adversarial assertion with clear pass/fail evidence.
+None of those execution steps is claimed as completed by this static audit.
 
-**Status:** `GAP` in test depth; the historical 113/113 execution result remains valid for the test corpus that existed at that time.
+## 10. Decision
 
-## 6. Advanced Capability Notation
+**Source-level hardening goals identified in the reconciliation pass are now closed in the branch. The branch is not yet a new validated release.**
 
-The project may continue to present the intended high-assurance capabilities prominently. Where live activation/completion depends on an external environment, use an asterisk and a compact note rather than removing the capability:
+`main` remains the historical public baseline until the user authorizes the next repository action and the required validation evidence exists.
 
-- PostgreSQL storage*
-- HSM / cloud-KMS signing*
-- OpenTelemetry export*
-- post-quantum migration/signing*
-- GitHub remote anchoring/publication*
-- regulator-controlled or external federation infrastructure*
-
-Recommended note:
-
-> `*` Target/high-assurance capability represented in the AegisTrace architecture and implementation path. Live production activation and/or final validation depends on the required external service, hardware, credential, runtime library, regulator/institutional infrastructure, or deployment environment. The asterisk describes activation status; it does not reduce the AI-IDP normative target.
-
-## 7. Indigenous Data Governance Reconciliation
-
-The project retains Indigenous data sovereignty and distinctions-based governance as a serious design objective. The former blanket statement that rights-holder consultation is a prerequisite for **every** implementation is being replaced with a context-sensitive requirement:
-
-- meaningful rights-holder engagement is required where Indigenous rights, community data, governance authority or services are materially implicated;
-- public-framework analysis is not a substitute for engagement in those cases;
-- Indigenous committee/rights-holder participation is not a universal gate for unrelated implementations with no material Indigenous nexus.
-
-This change preserves the governance objective while removing an unnecessary universal dependency from unrelated deployments.
-
-## 8. Validation Gate Before Merge
-
-Before this reconciliation branch can be described as validated or merged into the public baseline as a new verified release, the following controlled gate is required:
-
-1. review the complete branch diff;
-2. update affected tests to the new verification/authorization contracts;
-3. run Ruff;
-4. run MyPy as an actual gate, not `|| true`;
-5. run unit, integration, security, privacy, permanence and conformance suites;
-6. run the demo and full `verify --keys` path;
-7. test corrupted/missing key evidence and fail-closed behavior;
-8. if available, exercise optional integration suites separately from core validation;
-9. compile the paper only if material paper sources changed or a new release artifact is being produced;
-10. record results in a new validation report rather than overwriting the 2026-08-02 historical evidence.
-
-No step in this section was executed during this static audit.
-
-## 9. Current Decision
-
-**Keep the standard ambitious. Fix the implementation toward the standard. Do not lower the standard to match temporary implementation gaps.**
-
-The current branch is a controlled hardening/reconciliation branch. `main` remains the last public repository baseline until review and authorization of the final diff.
+> `*` TARGET/high-assurance dependency: required capability remains in the architecture but live completion or validation depends on external infrastructure, deployment topology, hardware/runtime, institutional authority, or independent assurance.
