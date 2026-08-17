@@ -18,12 +18,32 @@ from aegistrace.adapters.filesystem import FilesystemAdapter, file_digest
 from aegistrace.adapters.git import GitAdapter
 from aegistrace.adapters.github import CommitAttestation, GitHubEvidenceAdapter
 from aegistrace.adapters.mcp import MCPAdapter, MCPCall
+from aegistrace.api.replay import InMemoryReplayReservationStore, ReplayReservationStore
+from aegistrace.authorization.consumption import (
+    ApprovalConsumptionStore,
+    InMemoryApprovalConsumptionStore,
+)
 from aegistrace.authorization.engine import Approval, Authorization, PolicyDecision, PolicyEngine
+from aegistrace.authorization.entitlements import (
+    ApproverEntitlementProvider,
+    CompositeApproverEntitlementProvider,
+    PrincipalApproverEntitlementProvider,
+    StaticApproverEntitlementProvider,
+)
+from aegistrace.authorization.intent import ActionIntent
 from aegistrace.authorization.scope import ScopeContext, ScopeDecision, evaluate_child_scope, evaluate_scope
 from aegistrace.delegation.broker import Delegation, DelegationBroker, DelegationScope
 from aegistrace.disclosure.public import PublicEventProjector, PublicProjectionError
 from aegistrace.events.collector import EventCollector
 from aegistrace.events.models import ACTIONS, GOVERNANCE_MODES, VISIBILITY_TIERS, Actor, Event, ExecutionContext
+from aegistrace.federation.gateway import (
+    FederatedRegistryClient,
+    FederationAgreement,
+    FederationBreak,
+    FederationGateway,
+    FederationResolutionError,
+    HTTPFederatedRegistryClient,
+)
 from aegistrace.governance.service import GovernanceDenied, GovernedEventService
 from aegistrace.identity.ids import Identifier, make_event_id, make_identifier
 from aegistrace.identity.keys import KeyRecord, KeyService, SigningKey
@@ -98,10 +118,16 @@ __all__ = [
     "merkle_root", "merkle_proof",
     "EventCollector",
     "Delegation", "DelegationBroker", "DelegationScope",
-    "Authorization", "Approval", "PolicyEngine", "PolicyDecision",
+    "Authorization", "Approval", "PolicyEngine", "PolicyDecision", "ActionIntent",
     "ScopeContext", "ScopeDecision", "evaluate_scope", "evaluate_child_scope",
+    "ApprovalConsumptionStore", "InMemoryApprovalConsumptionStore",
+    "ApproverEntitlementProvider", "PrincipalApproverEntitlementProvider",
+    "StaticApproverEntitlementProvider", "CompositeApproverEntitlementProvider",
+    "ReplayReservationStore", "InMemoryReplayReservationStore",
     "GovernanceDenied", "GovernedEventService",
     "PublicEventProjector", "PublicProjectionError",
+    "FederatedRegistryClient", "FederationAgreement", "FederationBreak",
+    "FederationGateway", "FederationResolutionError", "HTTPFederatedRegistryClient",
     "sha256_hex", "sha256_raw", "blake2b_hex",
     "canonicalize", "canonicalize_for_hash", "canonicalize_for_signature",
     "ResourceManifest", "compute_directory_digest", "write_aitrace_directory",
