@@ -44,6 +44,7 @@ test-full = [
     "opentelemetry-api>=1.40",
     "opentelemetry-sdk>=1.40",
     "opentelemetry-exporter-otlp>=1.40",
+    "liboqs-python>=0.16,<0.17",
 ]
 postgres = ["psycopg2-binary>=2.9"]
 otel = [
@@ -51,7 +52,7 @@ otel = [
     "opentelemetry-sdk>=1.40",
     "opentelemetry-exporter-otlp>=1.40",
 ]
-pqc = ["liboqs-python>=0.10"]
+pqc = ["liboqs-python>=0.16,<0.17"]
 hsm-pkcs11 = ["PyKCS11>=1.5"]
 hsm-aws = ["boto3>=1.30"]
 hsm-azure = ["azure-keyvault-keys>=4.8", "azure-identity>=1.16"]
