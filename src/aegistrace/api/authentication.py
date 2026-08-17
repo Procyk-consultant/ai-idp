@@ -12,10 +12,10 @@ Licence Status: No licence selected unless approved in writing by Pierre-Edward 
 """
 from __future__ import annotations
 
-from datetime import UTC, datetime
-from threading import RLock
+from datetime import UTC, datetime, timedelta
 from typing import Any, Mapping
 
+from aegistrace.api.replay import InMemoryReplayReservationStore, ReplayReservationStore
 from aegistrace.identity.ids import require_identifier_type
 from aegistrace.identity.keys import KeyService
 from aegistrace.signing.canonical import canonicalize
@@ -78,21 +78,25 @@ def action_request_message(payload: Mapping[str, Any]) -> bytes:
 
 
 class ActionRequestAuthenticator:
-    """Verify agent proof-of-possession and reject request replays.
+    """Verify agent proof-of-possession and atomically reserve request nonces.
 
-    The default replay cache is process-local and suitable for the reference
-    server. A high-assurance multi-node deployment must back this contract with
-    shared durable nonce storage so replay protection survives restarts and
-    coordinates across replicas.
+    The replay-reservation backend is injectable. The reference default is
+    process-local; SQLite or PostgreSQL storage can be injected to preserve
+    reservations across restarts and, for PostgreSQL, coordinate replicas.
     """
 
-    def __init__(self, key_service: KeyService, *, max_clock_skew_seconds: int = 300) -> None:
+    def __init__(
+        self,
+        key_service: KeyService,
+        *,
+        max_clock_skew_seconds: int = 300,
+        replay_store: ReplayReservationStore | None = None,
+    ) -> None:
         if max_clock_skew_seconds <= 0:
             raise ValueError("max_clock_skew_seconds must be positive")
         self._keys = key_service
         self._max_clock_skew_seconds = max_clock_skew_seconds
-        self._used_nonces: set[tuple[str, str]] = set()
-        self._lock = RLock()
+        self._replay_store = replay_store or InMemoryReplayReservationStore()
 
     def verify_and_reserve(self, payload: Mapping[str, Any], signature: str) -> None:
         key_id = _required_string(payload, "signing_key_id")
@@ -109,7 +113,8 @@ class ActionRequestAuthenticator:
             timestamp = _parse_timestamp(request_timestamp)
         except ValueError as exc:
             raise RequestAuthenticationError(f"invalid request_timestamp: {exc}") from exc
-        skew = abs((datetime.now(UTC) - timestamp).total_seconds())
+        now = datetime.now(UTC)
+        skew = abs((now - timestamp).total_seconds())
         if skew > self._max_clock_skew_seconds:
             raise RequestAuthenticationError("request_timestamp is outside the accepted clock-skew window")
 
@@ -129,11 +134,25 @@ class ActionRequestAuthenticator:
         if not SigningKey.verify(public_key, action_request_message(payload), signature):
             raise RequestAuthenticationError("request signature is invalid")
 
-        nonce_key = (key_id, nonce)
-        with self._lock:
-            if nonce_key in self._used_nonces:
-                raise RequestAuthenticationError("request nonce has already been used")
-            self._used_nonces.add(nonce_key)
+        expiry = timestamp + timedelta(seconds=self._max_clock_skew_seconds)
+        if expiry <= now:
+            # The timestamp can be just inside the accepted absolute-skew
+            # window when the request clock is ahead/behind. Keep a minimal
+            # reservation until the request can no longer pass freshness.
+            expiry = now + timedelta(seconds=self._max_clock_skew_seconds)
+        expires_at = expiry.strftime("%Y-%m-%dT%H:%M:%SZ")
+        try:
+            reserved = self._replay_store.reserve_nonce(
+                key_id,
+                nonce,
+                expires_at=expires_at,
+            )
+        except Exception as exc:
+            # Replay state is part of the authorization boundary. Storage
+            # ambiguity must fail closed rather than degrade to no replay check.
+            raise RequestAuthenticationError("replay reservation store is unavailable") from exc
+        if not reserved:
+            raise RequestAuthenticationError("request nonce has already been used")
 
 
 def _required_string(payload: Mapping[str, Any], field_name: str) -> str:
