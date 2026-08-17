@@ -6,22 +6,22 @@ Role: Founder / CEO
 Copyright: © 2026 Pierre-Edward Procyk. All rights reserved.
 Contact: p.procyk.media@gmail.com
 Secondary Contact: p.1o9.cognitive@outlook.com
-Telephone: 
+Telephone:
 Location: Saguenay, Québec, Canada
 File: spec/AUTHORIZATION_PROTOCOL.md
 Title: Authorization Protocol
-Purpose: Define how authorizations are issued, verified, and enforced
+Purpose: Define how authorizations are issued, verified, bounded, and enforced
 Audience: Architects, implementers
 Document Classification: Public
 Classification: documentation
 Version: 2.0.0
-Status: Submission-ready
-Last Material Revision: 2026-08-01
-Dependencies: DELEGATION_PROTOCOL.md; APPROVAL_PROTOCOL.md
+Status: Submission-ready / reconciliation hardening
+Last Material Revision: 2026-08-17
+Dependencies: DELEGATION_PROTOCOL.md; APPROVAL_PROTOCOL.md; EVENT_PROTOCOL.md
 Source Basis: Master Execution Prompt; Canadian public-record legal materials; international technical standards
-Invariants: Every action resolves to an authorization
-Failure Behaviour: Unauthorized actions are rejected
-Trace Policy: This specification defines the trace policy
+Invariants: Every governed action resolves to a valid bounded authorization
+Failure Behaviour: Missing, stale, malformed, out-of-scope, or unverifiable authority is denied
+Trace Policy: Authorization and denial evidence are first-class trace records
 Licence Status: No licence selected unless approved in writing by Pierre-Edward Procyk
 ---
 
@@ -29,110 +29,150 @@ Licence Status: No licence selected unless approved in writing by Pierre-Edward 
 
 ## 1. Purpose
 
-Authorization is the record that a principal has authorized a specific action or class of actions, subject to policy. Every action resolves to an authorization.
+Authorization is the signed record that a principal, or an authorized signer acting for the principal/controller, grants an AI agent authority to perform a bounded class of actions for a specific task. Every **governed operational action** must resolve to an authorization before canonical acceptance.
+
+AI-IDP distinguishes the operational governance boundary from evidence ingestion. A low-level evidence collector may be used to import or record evidence explicitly, but it is not itself an authorization decision point. A runtime that executes or accepts operational actions as governed actions must cross the authorization boundary first.
 
 ## 2. Authorization Record
 
-An authorization record contains:
+An authorization contains at least:
 
-- `authorization_id` — unique identifier.
-- `principal_id` — the principal authorizing the action.
-- `controller_id` — the controller accountable for the action.
-- `agent_id` — the agent authorized to perform the action.
-- `task_id` — the task for which the authorization is granted.
-- `delegation_id` — the delegation (if the action is delegated).
-- `scope` — the bounded scope of the authorization (action classes, resource classes, time bounds).
-- `policy_version` — the policy version under which the authorization is evaluated.
-- `issued_at` — issuance timestamp.
-- `expires_at` — optional expiry timestamp.
-- `signature` — cryptographic signature by the principal (or the principal's authorized signer).
+- `authorization_id` — permanently unique authorization identifier;
+- `principal_id` — principal granting authority;
+- `controller_id` — accountable controller;
+- `agent_id` — authorized persistent agent;
+- `task_id` — task for which authority is granted;
+- `delegation_id` — parent delegation where the actor is delegated;
+- `scope` — bounded authority dimensions;
+- `policy_version` — policy version used for evaluation;
+- `state` — active, revoked, or expired;
+- `issued_at` and optional `expires_at`;
+- `signature` and `signing_key_id`.
 
-## 3. Authorization Operations
+The signing key must resolve to the principal or accountable controller authorized to issue the record. A signed record whose key binding, signature, policy version, state, or expiry cannot be verified is invalid.
 
-### 3.1 Issue
+## 3. Scope Model
 
-An authorization is issued by:
+Authorization scope may constrain:
 
-1. The principal (or their authorized signer) submits an authorization request.
-2. The authorization service validates the request.
-3. The authorization is recorded as a signed event in the ledger.
+- action classes;
+- task classes;
+- resource classes;
+- geographic scope;
+- tool classes;
+- model classes;
+- provider classes;
+- time bounds;
+- delegation depth.
 
-### 3.2 Verify
+Scope evaluation is **fail-closed**. If a scope restricts a dimension and the runtime cannot establish the corresponding value, the action is denied rather than treated as unrestricted. Unknown scope fields are non-conformant.
 
-An authorization is verified by:
+For example, an authorization restricted to provider class `approved-provider` cannot authorize an action if the runtime does not know the provider class or if the actual provider class differs.
 
-1. The authorization record exists in the ledger.
-2. The authorization is in an active state (not revoked, not expired).
-3. The authorization's scope encompasses the proposed action.
-4. The principal is authorized.
-5. The signature is valid.
-6. The policy version is current.
+## 4. Authorization Operations
 
-### 3.3 Revoke
+### 4.1 Issue
 
-An authorization may be revoked by the principal (or their authorized signer). Revocation is a new signed event.
+1. Resolve the principal, controller, agent, task, and any parent delegation.
+2. Validate the proposed scope and expiry.
+3. Verify that the signing key is active and bound to an authorized issuer.
+4. Create the authorization identifier.
+5. Canonicalize and sign the authorization record.
+6. Store the canonical record without exposing mutable aliases to callers.
+7. Record issuance in the applicable trace/ledger workflow.
 
-### 3.4 Expire
+### 4.2 Verify
 
-An authorization with `expires_at` automatically expires. Expiry is a new signed event.
+Verification requires all of the following:
 
-## 4. Policy Engine
+1. the authorization exists;
+2. the record is active and unexpired;
+3. the record uses the current required policy version;
+4. the signing key resolves to an authorized issuer;
+5. the cryptographic signature verifies;
+6. the controller, principal, agent, task, and delegation bindings match the proposed action;
+7. the bounded scope encompasses the proposed action and its runtime context.
 
-The policy engine evaluates authorization requests against the current policy. Policy includes:
+A missing or inconclusive check is a denial for fail-closed actions.
 
-- **Action policies** — which actions are permitted, denied, or require approval.
-- **Resource policies** — which resources may be accessed, modified, or deleted.
-- **Principal policies** — which principals may authorize which actions.
-- **Controller policies** — which controllers are accountable for which agents.
-- **Delegation policies** — delegation depth, scope, and revocation rules.
-- **Approval policies** — which actions require human approval, dual approval, or regulator-visible evidence.
-- **Visibility policies** — which events are public, controlled, organization-private, or sealed.
-- **Retention policies** — how long events and evidence are retained.
-- **Conformance policies** — conformance level requirements per context.
+### 4.3 Revoke
 
-Policies have versions. The policy version is recorded in every authorization and event.
+Revocation changes the authority state for future actions. Historical records remain resolvable. The revocation itself is recorded as new signed evidence rather than rewriting the prior authorization.
 
-## 5. Approval
+### 4.4 Expire
 
-Some actions require approval before they can be executed. Approvals are single-use records. The approval protocol is defined in `APPROVAL_PROTOCOL.md`. Actions requiring approval include:
+An authorization with `expires_at` cannot authorize a new action after expiry. Expiry does not erase historical evidence.
 
-- High-impact automated decisions (per the AIA).
-- Production deployments.
-- Destructive actions (DELETE, DESTROY_RESOURCE, DESTROY_KEY).
-- Privilege changes (CHANGE_PERMISSION, CHANGE_POLICY).
-- Cross-organization delegations.
-- External effects (TRIGGER_EXTERNAL_EFFECT, PUBLISH, DEPLOY, RELEASE).
+## 5. Policy Engine
 
-## 6. Enforcement
+The policy engine evaluates:
 
-The authorization engine enforces authorizations before any action:
+- action policies;
+- resource policies;
+- principal/controller bindings;
+- delegation policies;
+- approval requirements;
+- visibility/disclosure rules;
+- retention and conformance policies.
 
-1. The agent requests to perform an action.
-2. The authorization engine retrieves the authorization record.
-3. The engine verifies the authorization (per Section 3.2).
-4. The engine verifies the delegation (if applicable).
-5. The engine evaluates the policy.
-6. The engine checks for required approvals.
-7. If all checks pass, the action is permitted; otherwise, it is denied.
+The policy version is carried into authorization and event evidence so later reconstruction can establish which policy governed the decision.
 
-Denied actions are recorded as DENY events.
+## 6. Approval-Gated Actions
 
-## 7. Fail-Closed
+Some action classes require a separate approval. The authorization permits the class of work; the approval authorizes **one exact proposed action intent**. The approval protocol therefore uses a canonical `action_digest` rather than treating the action verb alone as sufficient.
 
-For high-risk actions (per policy), the engine fails closed: if any check fails or is inconclusive, the action is denied. Fail-closed actions include:
+The exact action intent may bind, as applicable:
 
-- Production deployments
-- Destructive actions
-- Privilege changes
-- Cross-organization delegations
-- External effects
-- Database schema changes
-- Infrastructure modifications
+- controller, principal, agent, and runtime instance;
+- provider/model/deployment execution context;
+- task;
+- action class;
+- visibility/disclosure tier;
+- jurisdiction;
+- delegation reference;
+- resource target;
+- before/after digests;
+- evaluated scope context.
 
-## 8. Invariants
+Changing a bound fact changes the digest and invalidates the approval for that changed action.
 
-- Every action resolves to an authorization.
-- An authorization's scope is enforced.
-- A revoked or expired authorization produces no new valid actions.
-- Policy violations are denied and recorded.
-- Fail-closed actions are denied if any check is inconclusive.
+## 7. Governed Enforcement Sequence
+
+For a governed action, the reference enforcement sequence is:
+
+1. authenticate the submitting actor/request where the action enters through a remote API or similar boundary;
+2. resolve active identity and runtime relationships;
+3. retrieve and cryptographically verify the authorization;
+4. verify exact controller/principal/agent/task/delegation bindings;
+5. evaluate all restricted scope dimensions fail-closed;
+6. verify the complete delegation chain when applicable;
+7. compute the exact canonical action-intent digest;
+8. verify the required approval set against that exact digest;
+9. append the governed event with the authority/delegation/approval evidence;
+10. consume single-use approvals;
+11. if denied, record a `DENY` event where denial evidence can itself be safely produced.
+
+## 8. Remote/API Authentication
+
+Authorization IDs and key IDs are not bearer credentials. A remote requester must prove possession of the acting agent's signing key before a server uses server-held signing capability or accepts the operation as authenticated.
+
+The AegisTrace reference API binds a deterministic request payload to an Ed25519 request signature plus a timestamp and nonce. Replayed nonces and stale timestamps are rejected.
+
+A single-process nonce cache demonstrates the contract. **Shared durable anti-replay state across restarts and replicas is a high-assurance deployment requirement*** for distributed production operation.
+
+## 9. Fail-Closed Classes
+
+High-impact classes include production deployment/release, destructive resource or key operations, permission/policy changes, infrastructure/database-schema modification, external effects, publication, and other policy-designated actions. If required evidence, context, approval, or cryptographic verification is unavailable, the decision is deny.
+
+## 10. Invariants
+
+- Every governed action resolves to an authorization.
+- Authorization identity/task/controller/principal bindings are exact.
+- Restricted scope dimensions are fail-closed.
+- A revoked, expired, stale, or unverifiable authorization produces no new valid governed action.
+- Approval-gated actions require approval of the exact canonical action intent.
+- Denied actions do not become permitted because denial evidence could not be recorded.
+- Historical authority evidence remains resolvable after revocation/expiry.
+- Remote possession of an identifier alone is not authentication.
+
+> `*` Distributed nonce persistence, external HSM/KMS enforcement, regulator infrastructure, and other production integrations retain the AI-IDP target requirement while depending on deployment-specific infrastructure and validation.
