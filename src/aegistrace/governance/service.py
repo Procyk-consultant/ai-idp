@@ -36,8 +36,9 @@ class GovernedEventService:
 
     The low-level EventCollector remains available for evidence import and
     explicit evidence-only workflows. Operational writes cross this service.
-    The in-process lock serializes approval selection, append, and consumption;
-    distributed deployments require a transactional/shared enforcement layer.
+    The local lock serializes approval selection, append, and consumption;
+    a PolicyEngine may additionally use a shared transactional consumption
+    store for multi-process single-use approval coordination.
     """
 
     def __init__(
@@ -85,6 +86,7 @@ class GovernedEventService:
             deployment_id=execution_context.deployment_id,
             task_id=task_id,
             action=action,
+            visibility=visibility,
             jurisdiction_id=jurisdiction_id,
             delegation_id=delegation_id,
             resource_id=resource_id,
