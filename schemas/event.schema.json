@@ -71,6 +71,7 @@
       },
       "additionalProperties": false
     },
+    "action_intent_digest": {"$ref": "#/$defs/sha256"},
     "governance_mode": {"type": "string", "enum": ["GOVERNED", "EVIDENCE_ONLY", "DENIAL"]},
     "decision_reason": {"type": "string", "minLength": 1},
     "action": {
