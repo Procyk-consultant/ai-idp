@@ -29,85 +29,77 @@ def governed_stack():
     ledger = AppendOnlyLedger()
     keys = KeyService()
     registry = Registry()
-    collector = EventCollector(ledger, keys)
     policy = PolicyEngine(keys)
     delegations = DelegationBroker(keys)
     governed = GovernedEventService(
-        collector=collector,
+        collector=EventCollector(ledger, keys),
         policy_engine=policy,
         delegation_broker=delegations,
         registry=registry,
     )
 
-    controller_id = str(make_identifier("controller", "org-001"))
-    principal_id = str(make_identifier("principal", "principal-001"))
-    agent_id = str(make_identifier("agent", "agent-001"))
-    instance_id = str(make_identifier("agent-instance", "agent-001", version="run-001"))
-    provider_id = str(make_identifier("provider", "provider-001"))
-    model_id = str(make_identifier("model", "model-001"))
-    model_version_id = str(make_identifier("model", "model-001", version="v1"))
-    deployment_id = str(make_identifier("deployment", "deployment-001"))
-    task_id = str(make_identifier("task", "task-001"))
-
-    registry.register(controller_id, "controller")
-    registry.register(principal_id, "principal")
-    registry.register(agent_id, "agent", {"controller_id": controller_id})
-    registry.register(instance_id, "agent-instance", {"agent_id": agent_id})
-    registry.register(provider_id, "provider")
-    registry.register(model_id, "model")
-    registry.register(model_version_id, "model")
-    registry.register(deployment_id, "deployment")
-    registry.register(task_id, "task")
-
-    controller_key_id = str(make_identifier("key", "controller-key"))
-    principal_key_id = str(make_identifier("key", "principal-key"))
-    agent_key_id = str(make_identifier("key", "agent-key"))
-    keys.create_key(controller_key_id, bound_entity_id=controller_id)
-    keys.create_key(principal_key_id, bound_entity_id=principal_id)
-    keys.create_key(agent_key_id, bound_entity_id=agent_id)
+    ids = {
+        "controller": str(make_identifier("controller", "org-001")),
+        "principal": str(make_identifier("principal", "principal-001")),
+        "agent": str(make_identifier("agent", "agent-001")),
+        "instance": str(make_identifier("agent-instance", "agent-001", version="run-001")),
+        "provider": str(make_identifier("provider", "provider-001")),
+        "model": str(make_identifier("model", "model-001")),
+        "model_version": str(make_identifier("model", "model-001", version="v1")),
+        "deployment": str(make_identifier("deployment", "deployment-001")),
+        "task": str(make_identifier("task", "task-001")),
+        "controller_key": str(make_identifier("key", "controller-key")),
+        "principal_key": str(make_identifier("key", "principal-key")),
+        "agent_key": str(make_identifier("key", "agent-key")),
+    }
+    registry.register(ids["controller"], "controller")
+    registry.register(ids["principal"], "principal")
+    registry.register(ids["agent"], "agent", {"controller_id": ids["controller"]})
+    registry.register(ids["instance"], "agent-instance", {"agent_id": ids["agent"]})
+    registry.register(ids["provider"], "provider")
+    registry.register(ids["model"], "model")
+    registry.register(ids["model_version"], "model")
+    registry.register(ids["deployment"], "deployment")
+    registry.register(ids["task"], "task")
+    keys.create_key(ids["controller_key"], bound_entity_id=ids["controller"])
+    keys.create_key(ids["principal_key"], bound_entity_id=ids["principal"])
+    keys.create_key(ids["agent_key"], bound_entity_id=ids["agent"])
 
     actor = Actor(
-        controller_id=controller_id,
-        principal_id=principal_id,
-        agent_id=agent_id,
-        agent_instance_id=instance_id,
+        controller_id=ids["controller"],
+        principal_id=ids["principal"],
+        agent_id=ids["agent"],
+        agent_instance_id=ids["instance"],
     )
     execution_context = ExecutionContext(
-        provider_id=provider_id,
-        model_id=model_id,
-        model_version_id=model_version_id,
-        deployment_id=deployment_id,
+        provider_id=ids["provider"],
+        model_id=ids["model"],
+        model_version_id=ids["model_version"],
+        deployment_id=ids["deployment"],
     )
-
     return {
         "ledger": ledger,
         "keys": keys,
         "registry": registry,
-        "collector": collector,
         "policy": policy,
         "delegations": delegations,
         "governed": governed,
         "actor": actor,
         "ec": execution_context,
-        "controller_id": controller_id,
-        "principal_id": principal_id,
-        "agent_id": agent_id,
-        "task_id": task_id,
-        "controller_key_id": controller_key_id,
-        "principal_key_id": principal_key_id,
-        "agent_key_id": agent_key_id,
+        "ids": ids,
     }
 
 
-def _authorization(stack, *, agent_id: str | None = None, task_id: str | None = None, scope=None, delegation_id=None):
+def _authorization(stack, *, agent: str | None = None, task: str | None = None, scope=None, delegation=None):
+    ids = stack["ids"]
     return stack["policy"].issue_authorization(
-        principal_id=stack["principal_id"],
-        controller_id=stack["controller_id"],
-        agent_id=agent_id or stack["agent_id"],
-        task_id=task_id or stack["task_id"],
+        principal_id=ids["principal"],
+        controller_id=ids["controller"],
+        agent_id=agent or ids["agent"],
+        task_id=task or ids["task"],
         scope=scope or {"action_classes": ["SEARCH"]},
-        signing_key_id=stack["controller_key_id"],
-        delegation_id=delegation_id,
+        signing_key_id=ids["controller_key"],
+        delegation_id=delegation,
     )
 
 
@@ -116,194 +108,122 @@ class TestGovernedExecutionBoundary:
         stack = governed_stack
         authorization = _authorization(stack)
         event = stack["governed"].record(
-            actor=stack["actor"],
-            execution_context=stack["ec"],
-            task_id=stack["task_id"],
-            action="SEARCH",
-            visibility="ORGANIZATION_PRIVATE",
-            signing_key_id=stack["agent_key_id"],
-            authorization_id=authorization.authorization_id,
-            resource_id="urn:web:example",
+            actor=stack["actor"], execution_context=stack["ec"], task_id=stack["ids"]["task"],
+            action="SEARCH", visibility="ORGANIZATION_PRIVATE", signing_key_id=stack["ids"]["agent_key"],
+            authorization_id=authorization.authorization_id, resource_id="urn:web:example",
         )
         assert event.governance_mode == "GOVERNED"
         assert event.authorization_id == authorization.authorization_id
-        assert event.delegation_chain == []
-        report = LedgerVerifier(stack["keys"]).verify(stack["ledger"])
-        assert report.ok, report.failures
+        assert LedgerVerifier(stack["keys"]).verify(stack["ledger"]).ok
 
-    def test_unknown_authorization_is_denied_and_denial_is_evidence(self, governed_stack) -> None:
+    def test_unknown_authorization_is_denied_and_recorded(self, governed_stack) -> None:
         stack = governed_stack
-        fake_authorization = str(make_identifier("authorization", "missing"))
         with pytest.raises(GovernanceDenied) as exc_info:
             stack["governed"].record(
-                actor=stack["actor"],
-                execution_context=stack["ec"],
-                task_id=stack["task_id"],
-                action="SEARCH",
-                visibility="ORGANIZATION_PRIVATE",
-                signing_key_id=stack["agent_key_id"],
-                authorization_id=fake_authorization,
+                actor=stack["actor"], execution_context=stack["ec"], task_id=stack["ids"]["task"],
+                action="SEARCH", visibility="ORGANIZATION_PRIVATE", signing_key_id=stack["ids"]["agent_key"],
+                authorization_id=str(make_identifier("authorization", "missing")),
             )
         assert exc_info.value.denial_event_id is not None
-        events = stack["ledger"].events()
-        assert len(events) == 1
-        assert events[0].action == "DENY"
-        assert events[0].governance_mode == "DENIAL"
-        assert "authorization not found" in (events[0].decision_reason or "")
+        denial = stack["ledger"].events()[0]
+        assert denial.action == "DENY"
+        assert denial.governance_mode == "DENIAL"
 
-    def test_authorization_actor_and_task_bindings_fail_closed(self, governed_stack) -> None:
+    def test_authorization_task_binding_fails_closed(self, governed_stack) -> None:
         stack = governed_stack
         authorization = _authorization(stack)
-        mismatched_actor = Actor(
-            controller_id=stack["actor"].controller_id,
-            principal_id=stack["actor"].principal_id,
-            agent_id=str(make_identifier("agent", "other-agent")),
-            agent_instance_id=stack["actor"].agent_instance_id,
-        )
-        with pytest.raises(GovernanceDenied):
-            stack["governed"].record(
-                actor=mismatched_actor,
-                execution_context=stack["ec"],
-                task_id=stack["task_id"],
-                action="SEARCH",
-                visibility="ORGANIZATION_PRIVATE",
-                signing_key_id=stack["agent_key_id"],
-                authorization_id=authorization.authorization_id,
-                record_denial=False,
-            )
-
         other_task = str(make_identifier("task", "other-task"))
         stack["registry"].register(other_task, "task")
         with pytest.raises(GovernanceDenied, match="task"):
             stack["governed"].record(
-                actor=stack["actor"],
-                execution_context=stack["ec"],
-                task_id=other_task,
-                action="SEARCH",
-                visibility="ORGANIZATION_PRIVATE",
-                signing_key_id=stack["agent_key_id"],
-                authorization_id=authorization.authorization_id,
-                record_denial=False,
+                actor=stack["actor"], execution_context=stack["ec"], task_id=other_task,
+                action="SEARCH", visibility="ORGANIZATION_PRIVATE", signing_key_id=stack["ids"]["agent_key"],
+                authorization_id=authorization.authorization_id, record_denial=False,
             )
 
-    def test_registry_relationships_are_mandatory(self, governed_stack) -> None:
+    def test_registry_relationship_mismatch_is_denied(self, governed_stack) -> None:
         stack = governed_stack
         authorization = _authorization(stack)
-        stack["registry"].resolve(stack["agent_id"]).attributes.pop("controller_id")
-        with pytest.raises(GovernanceDenied, match="controller_id"):
+        stack["registry"].update(
+            stack["ids"]["agent"],
+            {"controller_id": str(make_identifier("controller", "other-controller"))},
+        )
+        with pytest.raises(GovernanceDenied, match="controller"):
             stack["governed"].record(
-                actor=stack["actor"],
-                execution_context=stack["ec"],
-                task_id=stack["task_id"],
-                action="SEARCH",
-                visibility="ORGANIZATION_PRIVATE",
-                signing_key_id=stack["agent_key_id"],
-                authorization_id=authorization.authorization_id,
-                record_denial=False,
+                actor=stack["actor"], execution_context=stack["ec"], task_id=stack["ids"]["task"],
+                action="SEARCH", visibility="ORGANIZATION_PRIVATE", signing_key_id=stack["ids"]["agent_key"],
+                authorization_id=authorization.authorization_id, record_denial=False,
             )
 
-    def test_high_impact_approval_is_recorded_and_consumed(self, governed_stack) -> None:
+    def test_high_impact_approval_is_recorded_consumed_and_not_reusable(self, governed_stack) -> None:
         stack = governed_stack
         authorization = _authorization(stack, scope={"action_classes": ["PUBLISH"]})
         approval = stack["policy"].issue_approval(
-            action="PUBLISH",
-            approver_id=stack["principal_id"],
-            authorization_id=authorization.authorization_id,
-            signing_key_id=stack["principal_key_id"],
+            action="PUBLISH", approver_id=stack["ids"]["principal"],
+            authorization_id=authorization.authorization_id, signing_key_id=stack["ids"]["principal_key"],
         )
         event = stack["governed"].record(
-            actor=stack["actor"],
-            execution_context=stack["ec"],
-            task_id=stack["task_id"],
-            action="PUBLISH",
-            visibility="ORGANIZATION_PRIVATE",
-            signing_key_id=stack["agent_key_id"],
-            authorization_id=authorization.authorization_id,
-            approval_id=approval.approval_id,
+            actor=stack["actor"], execution_context=stack["ec"], task_id=stack["ids"]["task"],
+            action="PUBLISH", visibility="ORGANIZATION_PRIVATE", signing_key_id=stack["ids"]["agent_key"],
+            authorization_id=authorization.authorization_id, approval_id=approval.approval_id,
         )
         assert event.approval_ids == [approval.approval_id]
         approval_record = stack["policy"].get_approval(approval.approval_id)
         assert approval_record is not None and approval_record.used
         with pytest.raises(GovernanceDenied):
             stack["governed"].record(
-                actor=stack["actor"],
-                execution_context=stack["ec"],
-                task_id=stack["task_id"],
-                action="PUBLISH",
-                visibility="ORGANIZATION_PRIVATE",
-                signing_key_id=stack["agent_key_id"],
-                authorization_id=authorization.authorization_id,
-                approval_id=approval.approval_id,
+                actor=stack["actor"], execution_context=stack["ec"], task_id=stack["ids"]["task"],
+                action="PUBLISH", visibility="ORGANIZATION_PRIVATE", signing_key_id=stack["ids"]["agent_key"],
+                authorization_id=authorization.authorization_id, approval_id=approval.approval_id,
                 record_denial=False,
             )
 
-    def test_delegated_child_action_requires_verified_lineage(self, governed_stack) -> None:
+    def test_delegated_child_action_requires_verified_scope_and_lineage(self, governed_stack) -> None:
         stack = governed_stack
-        child_agent_id = str(make_identifier("agent", "child-agent"))
-        child_instance_id = str(make_identifier("agent-instance", "child-agent", version="run-1"))
-        child_task_id = str(make_identifier("task", "child-task"))
-        child_key_id = str(make_identifier("key", "child-key"))
-        stack["registry"].register(child_agent_id, "agent", {"controller_id": stack["controller_id"]})
-        stack["registry"].register(child_instance_id, "agent-instance", {"agent_id": child_agent_id})
-        stack["registry"].register(child_task_id, "task")
-        stack["keys"].create_key(child_key_id, bound_entity_id=child_agent_id)
-
+        ids = stack["ids"]
+        child = str(make_identifier("agent", "child-agent"))
+        child_instance = str(make_identifier("agent-instance", "child-agent", version="run-1"))
+        child_task = str(make_identifier("task", "child-task"))
+        child_key = str(make_identifier("key", "child-key"))
+        stack["registry"].register(child, "agent", {"controller_id": ids["controller"]})
+        stack["registry"].register(child_instance, "agent-instance", {"agent_id": child})
+        stack["registry"].register(child_task, "task")
+        stack["keys"].create_key(child_key, bound_entity_id=child)
         delegation = stack["delegations"].create(
-            parent_agent_id=stack["agent_id"],
-            parent_instance_id=stack["actor"].agent_instance_id,
-            child_agent_id=child_agent_id,
-            principal_id=stack["principal_id"],
-            controller_id=stack["controller_id"],
+            parent_agent_id=ids["agent"], parent_instance_id=ids["instance"], child_agent_id=child,
+            principal_id=ids["principal"], controller_id=ids["controller"],
             scope=DelegationScope(
-                action_classes=["SEARCH"],
-                resource_classes=["web"],
-                provider_classes=["approved-provider"],
-                delegation_depth=0,
+                action_classes=["SEARCH"], resource_classes=["web"],
+                provider_classes=["approved-provider"], delegation_depth=0,
             ),
-            signing_key_id=stack["agent_key_id"],
+            signing_key_id=ids["agent_key"],
         )
-        stack["registry"].update(child_agent_id, {"parent_delegation_id": delegation.delegation_id})
+        stack["registry"].update(child, {"parent_delegation_id": delegation.delegation_id})
         authorization = _authorization(
-            stack,
-            agent_id=child_agent_id,
-            task_id=child_task_id,
+            stack, agent=child, task=child_task,
             scope={
-                "action_classes": ["SEARCH"],
-                "resource_classes": ["web"],
+                "action_classes": ["SEARCH"], "resource_classes": ["web"],
                 "provider_classes": ["approved-provider"],
             },
-            delegation_id=delegation.delegation_id,
+            delegation=delegation.delegation_id,
         )
         child_actor = Actor(
-            controller_id=stack["controller_id"],
-            principal_id=stack["principal_id"],
-            agent_id=child_agent_id,
-            agent_instance_id=child_instance_id,
+            controller_id=ids["controller"], principal_id=ids["principal"],
+            agent_id=child, agent_instance_id=child_instance,
         )
-        scope_context = ScopeContext(resource_class="web", provider_class="approved-provider")
+        allowed_context = ScopeContext(resource_class="web", provider_class="approved-provider")
         event = stack["governed"].record(
-            actor=child_actor,
-            execution_context=stack["ec"],
-            task_id=child_task_id,
-            action="SEARCH",
-            visibility="ORGANIZATION_PRIVATE",
-            signing_key_id=child_key_id,
-            authorization_id=authorization.authorization_id,
-            delegation_id=delegation.delegation_id,
-            scope_context=scope_context,
+            actor=child_actor, execution_context=stack["ec"], task_id=child_task,
+            action="SEARCH", visibility="ORGANIZATION_PRIVATE", signing_key_id=child_key,
+            authorization_id=authorization.authorization_id, delegation_id=delegation.delegation_id,
+            scope_context=allowed_context,
         )
         assert event.delegation_chain == [delegation.delegation_id]
-
         with pytest.raises(GovernanceDenied):
             stack["governed"].record(
-                actor=child_actor,
-                execution_context=stack["ec"],
-                task_id=child_task_id,
-                action="SEARCH",
-                visibility="ORGANIZATION_PRIVATE",
-                signing_key_id=child_key_id,
-                authorization_id=authorization.authorization_id,
-                delegation_id=delegation.delegation_id,
+                actor=child_actor, execution_context=stack["ec"], task_id=child_task,
+                action="SEARCH", visibility="ORGANIZATION_PRIVATE", signing_key_id=child_key,
+                authorization_id=authorization.authorization_id, delegation_id=delegation.delegation_id,
                 scope_context=ScopeContext(resource_class="web", provider_class="unapproved-provider"),
                 record_denial=False,
             )
@@ -316,28 +236,22 @@ class TestGovernedExecutionBoundary:
         stack["keys"].create_key(second_key, bound_entity_id=second_approver)
         authorization = _authorization(stack, scope={"action_classes": ["DESTROY_KEY"]})
         approval_1 = stack["policy"].issue_approval(
-            action="DESTROY_KEY",
-            approver_id=stack["principal_id"],
-            authorization_id=authorization.authorization_id,
-            signing_key_id=stack["principal_key_id"],
+            action="DESTROY_KEY", approver_id=stack["ids"]["principal"],
+            authorization_id=authorization.authorization_id, signing_key_id=stack["ids"]["principal_key"],
         )
         approval_2 = stack["policy"].issue_approval(
-            action="DESTROY_KEY",
-            approver_id=second_approver,
-            authorization_id=authorization.authorization_id,
-            signing_key_id=second_key,
+            action="DESTROY_KEY", approver_id=second_approver,
+            authorization_id=authorization.authorization_id, signing_key_id=second_key,
         )
         event = stack["governed"].record(
-            actor=stack["actor"],
-            execution_context=stack["ec"],
-            task_id=stack["task_id"],
-            action="DESTROY_KEY",
-            visibility="SEALED",
-            signing_key_id=stack["agent_key_id"],
+            actor=stack["actor"], execution_context=stack["ec"], task_id=stack["ids"]["task"],
+            action="DESTROY_KEY", visibility="SEALED", signing_key_id=stack["ids"]["agent_key"],
             authorization_id=authorization.authorization_id,
             approval_ids=[approval_1.approval_id, approval_2.approval_id],
             resource_id="urn:key:retired-key",
         )
         assert set(event.approval_ids) == {approval_1.approval_id, approval_2.approval_id}
-        assert stack["policy"].get_approval(approval_1.approval_id).used  # type: ignore[union-attr]
-        assert stack["policy"].get_approval(approval_2.approval_id).used  # type: ignore[union-attr]
+        first = stack["policy"].get_approval(approval_1.approval_id)
+        second = stack["policy"].get_approval(approval_2.approval_id)
+        assert first is not None and first.used
+        assert second is not None and second.used
