@@ -18,6 +18,14 @@ from datetime import UTC, datetime
 from threading import RLock
 from typing import Any
 
+from aegistrace.authorization.consumption import (
+    ApprovalConsumptionStore,
+    InMemoryApprovalConsumptionStore,
+)
+from aegistrace.authorization.entitlements import (
+    ApproverEntitlementProvider,
+    PrincipalApproverEntitlementProvider,
+)
 from aegistrace.authorization.scope import ScopeContext, evaluate_scope
 from aegistrace.events.models import ACTIONS
 from aegistrace.identity.ids import make_identifier, make_slug
@@ -101,13 +109,32 @@ class PolicyDecision:
 
 
 class PolicyEngine:
-    """Evaluate signed authorizations and exact-action approvals against policy."""
+    """Evaluate signed authorizations and exact-action approvals against policy.
 
-    def __init__(self, key_service: KeyService, policy_version: str = "1.0.0") -> None:
+    Approval entitlement and single-use consumption are pluggable contracts.
+    The default providers are fail-closed and process-local. High-assurance
+    deployments can inject an organizational IAM entitlement provider plus a
+    shared transactional consumption store such as PostgreSQL.
+    """
+
+    def __init__(
+        self,
+        key_service: KeyService,
+        policy_version: str = "1.0.0",
+        *,
+        approval_consumption_store: ApprovalConsumptionStore | None = None,
+        approver_entitlements: ApproverEntitlementProvider | None = None,
+    ) -> None:
         self._keys = key_service
         self.policy_version = policy_version
         self._authorizations: dict[str, Authorization] = {}
         self._approvals: dict[str, Approval] = {}
+        self._approval_consumption = (
+            approval_consumption_store or InMemoryApprovalConsumptionStore()
+        )
+        self._approver_entitlements = (
+            approver_entitlements or PrincipalApproverEntitlementProvider()
+        )
         self._lock = RLock()
 
     def _key_is_bound_to(self, signing_key_id: str, allowed_entity_ids: set[str]) -> bool:
@@ -188,10 +215,19 @@ class PolicyEngine:
                 return False
             if not usable or approval.policy_version != self.policy_version:
                 return False
+            if not self._approval_consumption.approvals_available((approval_id,)):
+                return False
             if not _DIGEST_PATTERN.fullmatch(approval.action_digest):
                 return False
             authorization = self._authorizations.get(approval.authorization_id)
             if authorization is None or not self.verify_authorization(authorization.authorization_id):
+                return False
+            if not self._approver_entitlements.can_approve(
+                approver_id=approval.approver_id,
+                action=approval.action,
+                authorization_principal_id=authorization.principal_id,
+                authorization_controller_id=authorization.controller_id,
+            ):
                 return False
             if not self._key_is_bound_to(approval.signing_key_id, {approval.approver_id}):
                 return False
@@ -225,7 +261,9 @@ class PolicyEngine:
         if not self._keys.is_active(signing_key_id):
             raise PermissionError(f"signing key not active: {signing_key_id}")
         if not self._key_is_bound_to(signing_key_id, {principal_id, controller_id}):
-            raise PermissionError("authorization signing key is not bound to the principal or accountable controller")
+            raise PermissionError(
+                "authorization signing key is not bound to the principal or accountable controller"
+            )
         authorization = Authorization(
             authorization_id=str(make_identifier("authorization", make_slug("auth"))),
             principal_id=principal_id,
@@ -283,8 +321,16 @@ class PolicyEngine:
             authorization = self._authorizations.get(authorization_id)
             if authorization is None:
                 raise KeyError(f"authorization not found: {authorization_id}")
+            authorization_snapshot = copy.deepcopy(authorization)
         if not self.verify_authorization(authorization_id):
             raise PermissionError("authorization is not valid")
+        if not self._approver_entitlements.can_approve(
+            approver_id=approver_id,
+            action=action,
+            authorization_principal_id=authorization_snapshot.principal_id,
+            authorization_controller_id=authorization_snapshot.controller_id,
+        ):
+            raise PermissionError("approver is not entitled to approve this action")
         if not self._keys.is_active(signing_key_id):
             raise PermissionError(f"signing key not active: {signing_key_id}")
         if not self._key_is_bound_to(signing_key_id, {approver_id}):
@@ -338,7 +384,9 @@ class PolicyEngine:
             )
         try:
             scope_decision = evaluate_scope(
-                authorization_snapshot.scope, action=action, context=scope_context
+                authorization_snapshot.scope,
+                action=action,
+                context=scope_context,
             )
         except (TypeError, ValueError) as exc:
             return PolicyDecision(deny=True, reason=f"authorization scope is malformed: {exc}")
@@ -363,7 +411,9 @@ class PolicyEngine:
             candidate_ids.append(approval_id)
         if not candidate_ids:
             return PolicyDecision(
-                deny=True, reason=f"approval required for {action}", approval_required=True
+                deny=True,
+                reason=f"approval required for {action}",
+                approval_required=True,
             )
 
         valid_approvals: list[Approval] = []
@@ -386,7 +436,11 @@ class PolicyEngine:
             distinct.setdefault(approval.approver_id, approval)
         selected = list(distinct.values())[:required_count]
         if len(selected) < required_count:
-            requirement = "two distinct exact-action approvals" if required_count == 2 else "a valid exact-action approval"
+            requirement = (
+                "two distinct exact-action approvals"
+                if required_count == 2
+                else "a valid exact-action approval"
+            )
             return PolicyDecision(
                 deny=True,
                 reason=f"{requirement} required for {action}",
@@ -406,6 +460,15 @@ class PolicyEngine:
             if not all(self.verify_approval(approval_id) for approval_id in unique_ids):
                 return False
             used_at = _now()
+            try:
+                consumed = self._approval_consumption.consume_approvals(
+                    unique_ids,
+                    used_at=used_at,
+                )
+            except Exception:
+                return False
+            if not consumed:
+                return False
             for approval_id in unique_ids:
                 approval = self._approvals[approval_id]
                 approval.used = True
@@ -429,6 +492,11 @@ def _parse_timestamp(value: str) -> datetime:
 
 
 __all__ = [
-    "APPROVAL_REQUIRED", "DUAL_APPROVAL_REQUIRED", "FAIL_CLOSED",
-    "Authorization", "Approval", "PolicyEngine", "PolicyDecision",
+    "APPROVAL_REQUIRED",
+    "DUAL_APPROVAL_REQUIRED",
+    "FAIL_CLOSED",
+    "Authorization",
+    "Approval",
+    "PolicyEngine",
+    "PolicyDecision",
 ]
