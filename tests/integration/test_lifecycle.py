@@ -18,6 +18,7 @@ import pytest
 from aegistrace.adapters.filesystem import FilesystemAdapter
 from aegistrace.adapters.github import GitHubEvidenceAdapter
 from aegistrace.authorization.engine import PolicyEngine
+from aegistrace.authorization.intent import ActionIntent
 from aegistrace.delegation.broker import DelegationBroker, DelegationScope
 from aegistrace.events.collector import EventCollector
 from aegistrace.events.models import Actor, ExecutionContext
@@ -36,47 +37,46 @@ def stack():
     policy = PolicyEngine(keys)
     delegations = DelegationBroker(keys)
 
-    controller_id = str(make_identifier("controller", "org-001"))
-    principal_id = str(make_identifier("principal", "user-012"))
-    agent_id = str(make_identifier("agent", "research-agent", version="v3"))
-    instance_id = str(make_identifier("agent-instance", "research-agent", version="run-0042"))
-    provider_id = str(make_identifier("provider", "provider-001"))
-    model_id = str(make_identifier("model", "example-llm"))
-    model_version_id = str(make_identifier("model", "example-llm", version="v1.2"))
-    deployment_id = str(make_identifier("deployment", "deployment-001"))
-
-    for entity_id in [
-        controller_id,
-        principal_id,
-        agent_id,
-        instance_id,
-        provider_id,
-        model_id,
-        model_version_id,
-        deployment_id,
-    ]:
-        registry.register(entity_id, entity_id.split("/")[3].split("#")[0])
-
-    controller_key_id = "aitrace://ca/key/ctrl-001"
-    keys.create_key(controller_key_id, bound_entity_id=controller_id)
-    principal_key_id = "aitrace://ca/key/principal-001"
-    keys.create_key(principal_key_id, bound_entity_id=principal_id)
-    agent_key_id = "aitrace://ca/key/agent-001"
-    keys.create_key(agent_key_id, bound_entity_id=agent_id)
+    ids = {
+        "controller": str(make_identifier("controller", "org-001")),
+        "principal": str(make_identifier("principal", "user-012")),
+        "agent": str(make_identifier("agent", "research-agent", version="v3")),
+        "instance": str(make_identifier("agent-instance", "research-agent", version="run-0042")),
+        "provider": str(make_identifier("provider", "provider-001")),
+        "model": str(make_identifier("model", "example-llm")),
+        "model_version": str(make_identifier("model", "example-llm", version="v1.2")),
+        "deployment": str(make_identifier("deployment", "deployment-001")),
+        "controller_key": str(make_identifier("key", "ctrl-001")),
+        "principal_key": str(make_identifier("key", "principal-001")),
+        "agent_key": str(make_identifier("key", "agent-001")),
+    }
+    for entity_id, entity_type in (
+        (ids["controller"], "controller"),
+        (ids["principal"], "principal"),
+        (ids["agent"], "agent"),
+        (ids["instance"], "agent-instance"),
+        (ids["provider"], "provider"),
+        (ids["model"], "model"),
+        (ids["model_version"], "model"),
+        (ids["deployment"], "deployment"),
+    ):
+        registry.register(entity_id, entity_type)
+    keys.create_key(ids["controller_key"], bound_entity_id=ids["controller"])
+    keys.create_key(ids["principal_key"], bound_entity_id=ids["principal"])
+    keys.create_key(ids["agent_key"], bound_entity_id=ids["agent"])
 
     actor = Actor(
-        controller_id=controller_id,
-        principal_id=principal_id,
-        agent_id=agent_id,
-        agent_instance_id=instance_id,
+        controller_id=ids["controller"],
+        principal_id=ids["principal"],
+        agent_id=ids["agent"],
+        agent_instance_id=ids["instance"],
     )
     execution_context = ExecutionContext(
-        provider_id=provider_id,
-        model_id=model_id,
-        model_version_id=model_version_id,
-        deployment_id=deployment_id,
+        provider_id=ids["provider"],
+        model_id=ids["model"],
+        model_version_id=ids["model_version"],
+        deployment_id=ids["deployment"],
     )
-
     return {
         "ledger": ledger,
         "keys": keys,
@@ -86,35 +86,51 @@ def stack():
         "delegations": delegations,
         "actor": actor,
         "ec": execution_context,
-        "ctrl_key_id": controller_key_id,
-        "principal_key_id": principal_key_id,
-        "agent_key_id": agent_key_id,
-        "controller_id": controller_id,
-        "principal_id": principal_id,
-        "agent_id": agent_id,
+        "ids": ids,
     }
 
 
 class TestLifecycle:
     def test_complete_task_lifecycle(self, stack) -> None:
-        """Authorization, approval, evidence recording, and verification compose correctly."""
+        """Authorization, exact approval, evidence, and verification compose correctly."""
+        ids = stack["ids"]
         task_id = str(make_identifier("task", "t1"))
         authorization = stack["policy"].issue_authorization(
-            principal_id=stack["principal_id"],
-            controller_id=stack["controller_id"],
-            agent_id=stack["agent_id"],
+            principal_id=ids["principal"],
+            controller_id=ids["controller"],
+            agent_id=ids["agent"],
             task_id=task_id,
             scope={"action_classes": ["SEARCH", "READ", "PUBLISH"]},
-            signing_key_id=stack["ctrl_key_id"],
+            signing_key_id=ids["controller_key"],
+        )
+        before_digest = "sha256:" + "a" * 64
+        after_digest = "sha256:" + "b" * 64
+        publish_intent = ActionIntent(
+            controller_id=ids["controller"],
+            principal_id=ids["principal"],
+            agent_id=ids["agent"],
+            agent_instance_id=ids["instance"],
+            provider_id=ids["provider"],
+            model_id=ids["model"],
+            model_version_id=ids["model_version"],
+            deployment_id=ids["deployment"],
+            task_id=task_id,
+            action="PUBLISH",
+            jurisdiction_id="ca",
+            visibility="ORGANIZATION_PRIVATE",
+            resource_id="urn:artifact:report",
+            before_digest=before_digest,
+            after_digest=after_digest,
         )
         approval = stack["policy"].issue_approval(
             action="PUBLISH",
-            approver_id=stack["principal_id"],
+            action_digest=publish_intent.digest(),
+            approver_id=ids["principal"],
             authorization_id=authorization.authorization_id,
-            signing_key_id=stack["principal_key_id"],
+            signing_key_id=ids["principal_key"],
         )
 
-        for action in ["SEARCH", "READ"]:
+        for action in ("SEARCH", "READ"):
             decision = stack["policy"].evaluate(
                 action=action,
                 authorization_id=authorization.authorization_id,
@@ -126,7 +142,7 @@ class TestLifecycle:
                 task_id=task_id,
                 action=action,
                 visibility="ORGANIZATION_PRIVATE",
-                signing_key_id=stack["agent_key_id"],
+                signing_key_id=ids["agent_key"],
                 authorization_id=authorization.authorization_id,
                 resource_id=f"urn:example:{action}",
             )
@@ -134,6 +150,7 @@ class TestLifecycle:
         publish_decision = stack["policy"].evaluate(
             action="PUBLISH",
             authorization_id=authorization.authorization_id,
+            action_digest=publish_intent.digest(),
             approval_id=approval.approval_id,
         )
         assert publish_decision.permitted
@@ -144,32 +161,31 @@ class TestLifecycle:
             task_id=task_id,
             action="PUBLISH",
             visibility="ORGANIZATION_PRIVATE",
-            signing_key_id=stack["agent_key_id"],
+            signing_key_id=ids["agent_key"],
             authorization_id=authorization.authorization_id,
             approval_id=approval.approval_id,
+            action_intent_digest=publish_intent.digest(),
             resource_id="urn:artifact:report",
-            before_digest="sha256:" + "a" * 64,
-            after_digest="sha256:" + "b" * 64,
+            before_digest=before_digest,
+            after_digest=after_digest,
         )
-
         assert len(stack["ledger"]) == 3
-        report = LedgerVerifier(stack["keys"]).verify(stack["ledger"])
-        assert report.ok, report.failures
+        assert LedgerVerifier(stack["keys"]).verify(stack["ledger"]).ok
 
-    def test_parent_child_delegation(self, stack) -> None:
-        """Delegation evidence and child evidence remain cryptographically verifiable."""
+    def test_parent_child_delegation_evidence(self, stack) -> None:
+        ids = stack["ids"]
         child_agent_id = str(make_identifier("agent", "child"))
+        child_key_id = str(make_identifier("key", "child-001"))
         stack["registry"].register(child_agent_id, "agent")
-        child_key_id = "aitrace://ca/key/child-001"
         stack["keys"].create_key(child_key_id, bound_entity_id=child_agent_id)
         delegation = stack["delegations"].create(
-            parent_agent_id=stack["agent_id"],
-            parent_instance_id=stack["actor"].agent_instance_id,
+            parent_agent_id=ids["agent"],
+            parent_instance_id=ids["instance"],
             child_agent_id=child_agent_id,
-            principal_id=stack["principal_id"],
-            controller_id=stack["controller_id"],
+            principal_id=ids["principal"],
+            controller_id=ids["controller"],
             scope=DelegationScope(action_classes=["SEARCH"], delegation_depth=0),
-            signing_key_id=stack["agent_key_id"],
+            signing_key_id=ids["agent_key"],
         )
         stack["collector"].record(
             actor=stack["actor"],
@@ -177,14 +193,12 @@ class TestLifecycle:
             task_id=str(make_identifier("task", "t-delegate")),
             action="DELEGATE",
             visibility="ORGANIZATION_PRIVATE",
-            signing_key_id=stack["agent_key_id"],
+            signing_key_id=ids["agent_key"],
             resource_id=delegation.delegation_id,
-            authorization_id=str(make_identifier("authorization", "auth-parent")),
         )
-
         child_actor = Actor(
-            controller_id=stack["controller_id"],
-            principal_id=stack["principal_id"],
+            controller_id=ids["controller"],
+            principal_id=ids["principal"],
             agent_id=child_agent_id,
             agent_instance_id=str(make_identifier("agent-instance", "child", version="r1")),
         )
@@ -197,143 +211,86 @@ class TestLifecycle:
             signing_key_id=child_key_id,
             delegation_id=delegation.delegation_id,
             resource_id="urn:web:example",
-            authorization_id=str(make_identifier("authorization", "auth-child")),
         )
         assert len(stack["ledger"]) == 2
         assert LedgerVerifier(stack["keys"]).verify(stack["ledger"]).ok
 
-    def test_model_switch_preserves_agent_identity(self, stack) -> None:
+    def test_model_and_provider_switch_preserve_agent_identity(self, stack) -> None:
+        ids = stack["ids"]
         stack["collector"].record(
             actor=stack["actor"],
             execution_context=stack["ec"],
             task_id=str(make_identifier("task", "t1")),
             action="SEARCH",
             visibility="ORGANIZATION_PRIVATE",
-            signing_key_id=stack["agent_key_id"],
-            resource_id="urn:web:1",
+            signing_key_id=ids["agent_key"],
         )
-        execution_context_2 = ExecutionContext(
-            provider_id=stack["ec"].provider_id,
-            model_id=stack["ec"].model_id,
-            model_version_id=str(make_identifier("model", "example-llm", version="v2.0")),
-            deployment_id=stack["ec"].deployment_id,
-        )
-        stack["collector"].record(
-            actor=stack["actor"],
-            execution_context=execution_context_2,
-            task_id=str(make_identifier("task", "t2")),
-            action="SEARCH",
-            visibility="ORGANIZATION_PRIVATE",
-            signing_key_id=stack["agent_key_id"],
-            resource_id="urn:web:2",
-        )
-        events = stack["ledger"].events()
-        assert events[0].actor.agent_id == events[1].actor.agent_id
-        assert events[0].execution_context.model_version_id != events[1].execution_context.model_version_id
-
-    def test_provider_switch_preserves_agent_identity(self, stack) -> None:
-        stack["collector"].record(
-            actor=stack["actor"],
-            execution_context=stack["ec"],
-            task_id=str(make_identifier("task", "t1")),
-            action="SEARCH",
-            visibility="ORGANIZATION_PRIVATE",
-            signing_key_id=stack["agent_key_id"],
-            resource_id="urn:web:1",
-        )
-        execution_context_2 = ExecutionContext(
+        changed = ExecutionContext(
             provider_id=str(make_identifier("provider", "provider-002")),
-            model_id=stack["ec"].model_id,
-            model_version_id=stack["ec"].model_version_id,
+            model_id=ids["model"],
+            model_version_id=str(make_identifier("model", "example-llm", version="v2.0")),
             deployment_id=str(make_identifier("deployment", "dep-002")),
         )
         stack["collector"].record(
             actor=stack["actor"],
-            execution_context=execution_context_2,
+            execution_context=changed,
             task_id=str(make_identifier("task", "t2")),
             action="SEARCH",
             visibility="ORGANIZATION_PRIVATE",
-            signing_key_id=stack["agent_key_id"],
-            resource_id="urn:web:2",
+            signing_key_id=ids["agent_key"],
         )
-        events = stack["ledger"].events()
-        assert events[0].actor.agent_id == events[1].actor.agent_id
-        assert events[0].execution_context.provider_id != events[1].execution_context.provider_id
+        first, second = stack["ledger"].events()
+        assert first.actor.agent_id == second.actor.agent_id
+        assert first.execution_context.provider_id != second.execution_context.provider_id
+        assert first.execution_context.model_version_id != second.execution_context.model_version_id
 
     def test_filesystem_adapter(self, tmp_path: Path, stack) -> None:
         adapter = FilesystemAdapter(tmp_path)
         path = Path("test.txt")
-        result = adapter.create(path, b"hello")
-        assert result["after_digest"].startswith("sha256:")
-        assert result["before_digest"] is None
-        result_2 = adapter.modify(path, b"world")
-        assert result_2["before_digest"] != result_2["after_digest"]
+        created = adapter.create(path, b"hello")
+        modified = adapter.modify(path, b"world")
+        assert created["before_digest"] is None
+        assert created["after_digest"].startswith("sha256:")
+        assert modified["before_digest"] != modified["after_digest"]
 
     def test_github_evidence_adapter(self, stack) -> None:
+        ids = stack["ids"]
         stack["collector"].record(
             actor=stack["actor"],
             execution_context=stack["ec"],
             task_id=str(make_identifier("task", "t1")),
             action="SEARCH",
             visibility="ORGANIZATION_PRIVATE",
-            signing_key_id=stack["agent_key_id"],
-            resource_id="urn:web:1",
+            signing_key_id=ids["agent_key"],
         )
-        signing_key = stack["keys"].get_signing_key(stack["agent_key_id"])
-        adapter = GitHubEvidenceAdapter(stack["agent_key_id"], signing_key.public_pem())
+        signing_key = stack["keys"].get_signing_key(ids["agent_key"])
+        adapter = GitHubEvidenceAdapter(ids["agent_key"], signing_key.public_pem())
         anchor = adapter.make_merkle_root_anchor(stack["ledger"].events())
         assert anchor["schema"] == "aegistrace.merkle_root.v1"
         assert anchor["root"].startswith("sha256:")
         assert anchor["event_count"] == 1
 
-    def test_ledger_persistence_and_reload(self, tmp_path: Path, stack) -> None:
-        for index in range(3):
+    def test_ledger_persistence_reload_and_cli_paths(self, tmp_path: Path, stack) -> None:
+        from aegistrace.cli.audit import main as audit_main
+        from aegistrace.cli.verify import main as verify_main
+
+        ids = stack["ids"]
+        for index, action in enumerate(("SEARCH", "READ", "SEARCH")):
             stack["collector"].record(
                 actor=stack["actor"],
                 execution_context=stack["ec"],
                 task_id=str(make_identifier("task", f"t{index}")),
-                action="SEARCH",
+                action=action,
                 visibility="ORGANIZATION_PRIVATE",
-                signing_key_id=stack["agent_key_id"],
-                resource_id=f"urn:web:{index}",
+                signing_key_id=ids["agent_key"],
             )
         path = tmp_path / "ledger.jsonl"
         stack["ledger"].save(path)
         reloaded = AppendOnlyLedger.load(path)
         assert len(reloaded) == 3
         assert LedgerVerifier(stack["keys"]).verify(reloaded).ok
-
-    def test_cli_verify_hash_only_compatibility(self, tmp_path: Path, stack) -> None:
-        from aegistrace.cli.verify import main as verify_main
-
-        stack["collector"].record(
-            actor=stack["actor"],
-            execution_context=stack["ec"],
-            task_id=str(make_identifier("task", "t1")),
-            action="SEARCH",
-            visibility="ORGANIZATION_PRIVATE",
-            signing_key_id=stack["agent_key_id"],
-            resource_id="urn:web:1",
-        )
-        path = tmp_path / "ledger.jsonl"
-        stack["ledger"].save(path)
         assert verify_main(["--ledger", str(path), "--hash-only"]) == 0
 
-    def test_cli_audit(self, tmp_path: Path, stack) -> None:
-        from aegistrace.cli.audit import main as audit_main
-
-        for action in ["SEARCH", "READ", "SEARCH"]:
-            stack["collector"].record(
-                actor=stack["actor"],
-                execution_context=stack["ec"],
-                task_id=str(make_identifier("task", "t1")),
-                action=action,
-                visibility="ORGANIZATION_PRIVATE",
-                signing_key_id=stack["agent_key_id"],
-                resource_id="urn:web:1",
-            )
-        path = tmp_path / "ledger.jsonl"
-        stack["ledger"].save(path)
         output = tmp_path / "audit.json"
         assert audit_main(["--ledger", str(path), "--output", str(output)]) == 0
         report = json.loads(output.read_text())
