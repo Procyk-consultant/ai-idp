@@ -97,7 +97,7 @@ This rule is corroborated by the 2.1.0 French synthesis PDF, the current README/
 - Public reconciliation branch: `e148cf484b782872416121704a7887935a21bc71`; it was 124 commits ahead of the pre-publication `main` and 0 behind at the inspected merge base.
 - Public update branch: `54c8367bb62b68a1a7b36ecd54428183365367ee`.
 - Current authoritative branch: GitHub `main`; the consumer/code payload was published by non-force fast-forward.
-- Latest public CI run inspected: run `34154350019`, job `101842947804`, 0 workflow steps, runner ID 0. GitHub's annotation says the job was not started because the account is locked due to a billing issue.
+- Payload-publication CI run inspected: run `34154350019`, job `101842947804`, 0 workflow steps, runner ID 0. GitHub's annotation says the job was not started because the account is locked due to a billing issue.
 
 The CI evidence proves a pre-execution GitHub account/billing lock, not a code failure. Because GitHub documents standard hosted runners as free for public repositories, an erroneous or stale account/subscription billing state is plausible. Proving that it is specifically a GitHub subscription bug requires authenticated billing/support evidence that was not available to this local inspection.
 
