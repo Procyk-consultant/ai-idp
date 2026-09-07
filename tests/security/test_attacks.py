@@ -61,7 +61,7 @@ class TestAttacks:
         # Attacker creates a key bound to a different agent
         attacker_agent = str(make_identifier("agent", "attacker"))
         stack["keys"].create_key("aitrace://ca/key/attacker", bound_entity_id=attacker_agent)
-        attacker_actor = Actor(
+        _attacker_actor = Actor(
             controller_id=stack["actor"].controller_id,
             principal_id=stack["actor"].principal_id,
             agent_id=attacker_agent,  # attacker's agent, not victim's
@@ -108,7 +108,7 @@ class TestAttacks:
         tampered_ledger = AppendOnlyLedger()
         tampered_ledger.append(Event.from_dict(tampered_dict))
         verifier = LedgerVerifier(stack["keys"])
-        report = verifier.verify(tampered_ledger)
+        _report = verifier.verify(tampered_ledger)
         # The hash check fails because the tampered event's previous_event_hash is None (first event)
         # but its event_hash no longer matches the original chain.
         # Actually with a single event, the hash chain still works. The signature would also verify.

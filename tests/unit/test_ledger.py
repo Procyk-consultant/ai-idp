@@ -42,7 +42,7 @@ def make_ec():
 def make_collector():
     ledger = AppendOnlyLedger()
     keys = KeyService()
-    registry = Registry()
+    _registry = Registry()
     collector = EventCollector(ledger, keys)
     # Register entities and create signing key
     actor = make_actor()

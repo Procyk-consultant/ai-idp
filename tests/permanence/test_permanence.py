@@ -81,7 +81,7 @@ class TestPermanence:
             resource_id="urn:web:1",
         )
         # Rotate
-        new_sk = stack["keys"].rotate("aitrace://ca/key/k1", "aitrace://ca/key/k2")
+        stack["keys"].rotate("aitrace://ca/key/k1", "aitrace://ca/key/k2")
         # Sign a new event with the new key
         stack["collector"].record(
             actor=stack["actor"], execution_context=stack["ec"], task_id=str(make_identifier("task", "t2")),

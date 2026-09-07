@@ -36,7 +36,7 @@ lint:
 	$(PYTHON) -m ruff check src tests
 
 type:
-	$(PYTHON) -m mypy src/aegistrace || true
+	$(PYTHON) -m mypy src/aegistrace
 
 test:
 	$(PYTHON) -m pytest tests/unit tests/integration -v

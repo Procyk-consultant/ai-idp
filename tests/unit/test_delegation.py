@@ -45,7 +45,7 @@ class TestDelegation:
         keys, broker, parent = make_broker()
         child = str(make_identifier("agent", "child"))
         scope = DelegationScope(action_classes=["SEARCH", "READ"])
-        dlg = broker.create(
+        broker.create(
             parent_agent_id=parent,
             parent_instance_id=str(make_identifier("agent-instance", "parent", version="r1")),
             child_agent_id=child,

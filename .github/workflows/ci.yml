@@ -20,7 +20,7 @@ jobs:
       - name: Lint
         run: ruff check src tests
       - name: Type check
-        run: mypy src/aegistrace || true
+        run: mypy src/aegistrace
       - name: Unit tests
         run: pytest tests/unit -v
       - name: Integration tests
