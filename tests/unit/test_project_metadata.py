@@ -15,6 +15,8 @@ from __future__ import annotations
 import tomllib
 from pathlib import Path
 
+from scripts import reconcile_release_checksums
+
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 
@@ -46,3 +48,16 @@ def test_test_full_extra_contains_complete_validation_stack() -> None:
     }
     for prefix in expected_prefixes:
         assert any(requirement.startswith(prefix) for requirement in requirements), prefix
+
+
+def test_release_checksum_manifest_matches_git_controlled_public_corpus() -> None:
+    assert reconcile_release_checksums.verify() > 0
+
+
+def test_release_checksum_membership_excludes_untracked_files() -> None:
+    scratch = PROJECT_ROOT / ".checksum-untracked-membership-test"
+    scratch.write_text("not part of the Git-controlled public corpus\n", encoding="utf-8")
+    try:
+        assert scratch not in reconcile_release_checksums.canonical_files()
+    finally:
+        scratch.unlink(missing_ok=True)
