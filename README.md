@@ -131,7 +131,7 @@ ai-idp-aegistrace/
 - **Merkle trees** for public verification anchoring
 - **FastAPI** for the HTTP API
 - **SQLite** for local storage; **PostgreSQL** for production
-- **pytest** for testing (113 passing tests)
+- **pytest** for testing (115 passing tests)
 - **Tectonic** for LaTeX compilation
 
 ### Production-oriented components (v2.0.0)
