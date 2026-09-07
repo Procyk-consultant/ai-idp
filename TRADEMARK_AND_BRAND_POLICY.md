@@ -14,10 +14,10 @@ Purpose: Protect Cognitive Industries trademarks and brand assets
 Audience: All readers
 Document Classification: Public
 Classification: policy
-Version: 2.0.0
+Version: 2.1.0
 Status: Approved
-Last Material Revision: 2026-08-01
-Dependencies: brand/originals/SHA256SUMS.txt
+Last Material Revision: 2026-09-07
+Dependencies: brand/originals/SHA256SUMS.txt; brand/project-marks/SHA256SUMS.txt; docs/media/MEDIA_MANIFEST.md
 Source Basis: Master Execution Prompt
 Invariants: Brand assets are never modified or regenerated
 Failure Behaviour: Brand violations are escalated
@@ -35,9 +35,13 @@ Cognitive Industries and Les Industries Cognitives are trade names of Pierre-Edw
 
 Three official Cognitive Industries brand assets are preserved in `brand/originals/` with SHA-256 checksums in `brand/originals/SHA256SUMS.txt`: the 3D hexagonal logo (1024x1024 PNG RGBA), the bilingual horizontal lockup (1536x1024 PNG RGBA), and the brand-guidelines reference card (1024x1536 PNG RGB).
 
+The official AI-IDP and AegisTrace project marks are preserved as byte-for-byte archive copies in `brand/project-marks/`. This set contains the full AI-IDP lockup, AI-IDP icon, full AegisTrace lockup, AegisTrace icon, project colour reference, and project typography reference. Their SHA-256 digests are recorded in `brand/project-marks/SHA256SUMS.txt` and `docs/media/MEDIA_MANIFEST.md`.
+
+The curated AI-IDP/AegisTrace article and social-media visuals in `docs/media/social/` are explanatory project media, not certification marks or proof of live deployment. Their provenance, selection limits, dimensions, sizes, and checksums are recorded in the media manifest.
+
 ## Usage Rules
 
-Preserve originals verbatim. Calculate checksums before any use. Derivatives (resized, cropped) go only in `brand/derivatives/`. Do not expose protected brand files through any automatic open-source licence. Bilingual lockup retains its bilingual identity in all uses. No generative image tools may recreate, approximate, or replace the official logo. No unapproved text may be added to the logo. No unofficial logo copies may be used. No fake governmental seals, university marks, partner logos, certification marks, or emblems may be created.
+Preserve originals and project marks verbatim. Calculate checksums before use. Derivatives (resized, cropped) go only in `brand/derivatives/` and require written authorization. Do not expose protected brand or media files through any automatic open-source licence. The bilingual lockup retains its bilingual identity in all uses. No generative image tool may recreate, approximate, or replace an official logo. No unapproved text may be added to a logo. No unofficial logo copy may be used. No fake governmental seal, university mark, partner logo, certification mark, or emblem may be created.
 
 ## Palette
 
@@ -49,4 +53,4 @@ Suisse International: preferred only when properly licensed and locally availabl
 
 ## Prohibited
 
-Generating a replacement logo. Redesigning the official logo. Inventing a new slogan or motto. Applying brand assets to unrelated products or services. Distributing brand assets under an open-source licence.
+Generating a replacement logo. Redesigning an official logo. Inventing a new slogan or motto. Applying brand assets to unrelated products or services. Distributing brand assets or article/post graphics under an open-source licence. Using repository display as implied permission for reproduction, model training, endorsement, sublicensing, or commercial use.

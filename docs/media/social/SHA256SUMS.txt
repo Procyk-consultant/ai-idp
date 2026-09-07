@@ -1,0 +1,8 @@
+8dc8a8ac3f2a791788eb233d276de31154745b5791f32f5ca05fbdbe77be79d5  01-identity-before-autonomy-hero-fr.png
+243933fc7b9418e3ee735dded3c2f8cb53c0e93ef54d88ed4a64e0bca5159b42  02-ai-idp-aegistrace-overview-fr.png
+26ebc6d83f5dbdf4aeec3d95d946791463e9915e69252d009dfe571b57cf333b  03-who-carries-responsibility-fr.png
+a0c471d3bcdc34b6a13eb7844aa871510fc6ddbd34a9d92f474216db9ba73fc4  04-more-autonomy-more-accountability-fr.png
+af196bb46990822bb6cc9b4443901a06ec374cb3e6e8a42394d40454b59d0725  05-governance-before-autonomy-fr.png
+f369b3f991803ddb92c055aa2264df2a261ea5e97ba31984548c15b7a469370f  06-end-to-end-accountability-fr.png
+1ad00fdfad68eeac07cbb70399f01fb5c39dc4f1b7900212f5a92041f3086509  07-proof-after-action-fr.png
+2a94aa7e8f42bb3b95f4621500f34eb1169c44963622a7e873d15bc95e448878  08-four-steps-to-accountability-fr.png

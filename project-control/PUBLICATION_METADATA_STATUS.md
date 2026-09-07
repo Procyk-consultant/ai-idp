@@ -9,13 +9,13 @@ File: project-control/PUBLICATION_METADATA_STATUS.md
 Title: Publication Metadata Status
 Purpose: Track verified external publication identifiers and forbid fabrication
 Version: 2.1.0
-Status: Public Metadata Verified / Outreach Sends User-Confirmed
+Status: GitHub Main Update Authorized / Remote Verification Pending
 Last Material Revision: 2026-09-07
 ---
 
 # Publication Metadata Status
 
-This record distinguishes verified public availability, user-confirmed outreach, and independently unverified dispatch details. It does not authorize any new publication, government submission, email, public licence, or external service deployment.
+This record distinguishes verified public availability, user-confirmed outreach, and independently unverified dispatch details. The current instruction authorizes the GitHub `main` update only. It does not authorize a GitHub release, tag, DOI/Zenodo update, government submission, email, social post, public licence, or external service deployment.
 
 ## Current Status
 
@@ -24,7 +24,7 @@ This record distinguishes verified public availability, user-confirmed outreach,
 | arXiv identifier | NOT ASSIGNED | No external submission performed |
 | DOI | https://doi.org/10.5281/zenodo.21769036 | Zenodo record `21769036`; version 2.0.0; published 2026-08-02; updated 2026-08-08 |
 | ISBN | NOT APPLICABLE | Not a book |
-| Official repository URL | https://github.com/Procyk-consultant/ai-idp | Public `main`; live state is verified separately before any claim of current head |
+| Official repository URL | https://github.com/Procyk-consultant/ai-idp | Version 2.1.0 `main` update authorized; exact remote head must be read back before publication is marked complete |
 | Zenodo publication date | 2026-08-02 | Public archival record; do not describe this as peer review, endorsement, or arXiv publication |
 | LinkedIn launch article | Published 2026-08-08 | Existing article URL is recorded in `CURRENT_PUBLICATION_AND_OUTREACH_RECONCILIATION_2026-08-09.md` |
 | Government/official outreach emails | USER-CONFIRMED SENT / RECEIPTS NOT INSPECTED | Pierre-Edward Procyk reports emails sent and contacts completed; exact dates, recipients, attachments, delivery, and replies require mailbox or receipt evidence |

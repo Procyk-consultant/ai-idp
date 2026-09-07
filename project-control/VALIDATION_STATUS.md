@@ -5,11 +5,11 @@ Author: Pierre-Edward Procyk
 Copyright: © 2026 Pierre-Edward Procyk. All rights reserved.
 File: project-control/VALIDATION_STATUS.md
 Title: Validation Status
-Purpose: Separate verified local 2.1.0 evidence from historical and external claims
+Purpose: Separate verified 2.1.0 evidence from historical, publication, and external-activation claims
 Version: 2.1.0
 Status: Local Engineering Gates Passed / External Activation Not Verified
 Last Material Revision: 2026-09-07
-Branch: local/2.1.0-reconciliation
+Branch: publish/2.1.0-consumer-main
 Historical Public Baseline: b13e51baa51c9e2bb0a5bff4f3911a6902b51206
 ---
 
@@ -35,16 +35,20 @@ These terms are not interchangeable.
 | Test collection | Pytest | 164 collected |
 | Test execution | Full tracked suite | PASS: 162 passed, 2 opt-in native-PQC skips |
 | Package install | Editable install without dependency mutation | PASS; package 2.1.0 |
-| Wheel build | PEP 517 wheel | PASS; 115,507 bytes; SHA-256 `70f908c90b400f2a35358fc30ac297e2c71fcf31d9feb927fabe34017e3956a6` |
+| Test dependency profile | Starlette TestClient with `httpx2>=2,<3` | PASS; final suite emitted no warnings |
+| Package metadata | PEP 639 licence and rights-file declarations | PASS; targeted metadata tests passed |
+| Wheel build | PEP 517 wheel | PASS; 114,572 bytes; SHA-256 `e8d6a56ae539ef26e7819cdec58b88ca889c65f9d8c3111c10ca44cbbaf97929` |
 | Governed demo | AegisTrace admin demo | PASS; 4 events; `GOVERNED`; `verification: OK` |
 | Ledger verification | Independent verify CLI with exported public keys | PASS; 4 event hashes, chain links, and signatures |
+| Consumer document targets | Local Markdown links and image paths | PASS; 44 references resolved |
+| Included media integrity | Project and social-media SHA-256 manifests | PASS; 14 files verified |
+| Included media decoding | PNG decoder over project and social images | PASS; 14 images decoded |
 | Paper build | Tectonic 0.16.9 | PASS; exit 0; 13 pages |
 | Container | Docker Desktop Linux engine | NOT EXECUTED; engine unavailable |
 
 Warnings disclosed:
 
-- FastAPI test-client dependency reports a Starlette deprecation warning about the current `httpx` integration.
-- Starlette reports an AnyIO alias deprecation warning.
+- Earlier reconciliation runs reported Starlette `httpx` and AnyIO-alias deprecations. The publication candidate moved the test profile to `httpx2`; the final suite emitted no warnings.
 - Tectonic reports Fontconfig configuration and underfull-box warnings; compilation completes successfully.
 
 ## Explicitly unactivated or unverified targets

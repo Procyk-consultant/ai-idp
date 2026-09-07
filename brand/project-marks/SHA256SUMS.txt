@@ -1,0 +1,6 @@
+da9906a90c5a97467eff35732cf82a496e3f2fcfb657996a62b6db8359b6d2cd  ai-idp-official-logo-full.png
+b22aa48a089f4694c1bb1c4e6bff32bd5b62dadbd319646a457dfb033e0adfa8  ai-idp-logo-icon.png
+b3a654a9e2a57523a11fd3c0151e52131f814f2b89dbcfe41890b284ba7a12a4  aegistrace-official-logo-full.png
+adf6ca05d10ff186126555ce1092ae8d0b658449d52b8dc23787ee24b549a374  aegistrace-logo-icon.png
+524a081a18ff7a1e166513d52140a83d61884ee6a16eb285c3e05a071879b871  ai-idp-aegistrace-brand-colours.png
+d4e1de25fb4e5067f3df6ff14d5322fdec4b217c8880b5dbb708d3bac9795615  ai-idp-aegistrace-typography.png

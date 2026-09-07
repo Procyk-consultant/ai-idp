@@ -5,11 +5,11 @@ Author: Pierre-Edward Procyk
 Copyright: © 2026 Pierre-Edward Procyk. All rights reserved.
 File: project-control/PROJECT_STATUS.md
 Title: Project Status
-Purpose: Controlling local project status and evidence boundaries
+Purpose: Controlling project status and evidence boundaries
 Version: 2.1.0
-Status: Authoritative Locally / Not Published Online
+Status: GitHub Main Publication Candidate / Explicitly Authorized
 Last Material Revision: 2026-09-07
-Branch: local/2.1.0-reconciliation
+Branch: publish/2.1.0-consumer-main
 Source Branch: reconcile-2026-08-14
 Historical Public Baseline: b13e51baa51c9e2bb0a5bff4f3911a6902b51206
 Licence Status: All Rights Reserved; no public licence granted
@@ -19,9 +19,9 @@ Licence Status: All Rights Reserved; no public licence granted
 
 ## Controlling state
 
-The authoritative current project state is **local version 2.1.0**. It is based on the 124-commit `reconcile-2026-08-14` line plus the 2026-09-07 evidence repair and verification pass on `local/2.1.0-reconciliation`.
+The authoritative current project state is **version 2.1.0**. It is based on the 124-commit `reconcile-2026-08-14` line, the 2026-09-07 evidence repair and verification pass on `local/2.1.0-reconciliation`, and the consumer/brand publication package on `publish/2.1.0-consumer-main`.
 
-Version 2.1.0 has **not** been merged to public `main`, tagged, released, deployed, or published online. Public GitHub `main` and the Zenodo DOI remain the historical v2.0.0 baseline. Historical v2.0.0 release records remain intact and must not be relabelled as 2.1.0 evidence.
+Publication of this package to GitHub `main` is explicitly authorized. Remote confirmation is pending until the publication commit is pushed and independently read back. Tagging, GitHub release creation, DOI/Zenodo changes, deployment, and third-party publication remain separate actions. Historical archived release records remain intact and must not be relabelled as 2.1.0 evidence.
 
 ## Current verified implementation
 
@@ -40,6 +40,7 @@ The local 2.1.0 source includes:
 - OpenTelemetry and GitHub adapter paths;
 - signed federation agreements and disclosed-chain verification;
 - 25 specification documents, 15 JSON schemas, 58 Python source files, and 22 Python test/support files.
+- a consumer-first README, bilingual plain-language guide, official project marks, and a checksum-verified eight-image public visual gallery.
 
 External services, hardware, credentials, independent operators, and target-environment activation remain separate from implemented source.
 
@@ -54,13 +55,13 @@ External services, hardware, credentials, independent operators, and target-envi
 | Pytest | PASS: 162 passed, 2 skipped, 164 collected |
 | Native PQC | 2 live liboqs tests intentionally skipped unless `AEGISTRACE_RUN_LIBOQS_TESTS=1` |
 | Package metadata | PASS: installed package and runtime both report 2.1.0 |
-| Wheel | PASS: `aegistrace-2.1.0-py3-none-any.whl`, 115,507 bytes, SHA-256 `70f908c90b400f2a35358fc30ac297e2c71fcf31d9feb927fabe34017e3956a6` |
+| Wheel | PASS: `aegistrace-2.1.0-py3-none-any.whl`, 114,572 bytes, SHA-256 `e8d6a56ae539ef26e7819cdec58b88ca889c65f9d8c3111c10ca44cbbaf97929` |
 | Governed demo | PASS: 4 events, governance mode `GOVERNED`, verification `OK` |
 | Independent ledger verification | PASS: event hashes, hash chain, and 4 signatures verified |
 | Paper | PASS: Tectonic 0.16.9 exit 0; 13-page PDF; disclosed underfull-box/fontconfig warnings |
 | Container | BLOCKED BY ENVIRONMENT: Docker CLI present, Docker Desktop Linux engine unavailable |
 
-Two dependency deprecation warnings were emitted by the FastAPI/Starlette test client. They did not fail the suite and remain dependency-maintenance items.
+The earlier FastAPI/Starlette TestClient deprecation warnings were removed by adopting Starlette's current `httpx2` test dependency. The final publication-candidate test run emitted no warnings.
 
 ## Defects found and repaired in this pass
 
@@ -70,6 +71,9 @@ Two dependency deprecation warnings were emitted by the FastAPI/Starlette test c
 4. A leaf delegation returned a scope-widening reason before enforcing the leaf boundary. Delegation depth is now validated first.
 5. The standard `test-full` extra installed `liboqs-python`; importing it can download and compile a native liboqs tree when the library is absent. Native PQC tests are now explicit opt-in and the dependency remains available through the separate `pqc` extra.
 6. Current package/API/container metadata still identified the reconciled code as 2.0.0. Current-facing runtime metadata now identifies version 2.1.0 while historical 2.0.0 records remain historical.
+7. The test profile still selected the deprecated `httpx` compatibility path. The declared test extras now use `httpx2>=2,<3`, matching Starlette's current TestClient dependency.
+8. The test profile did not declare the PEP 517 build frontend used by the validation procedure. `build>=1.2` is now declared in the applicable test/development extras.
+9. Packaging metadata used the deprecated table form for the proprietary licence declaration. The package now uses PEP 639 `LicenseRef-Proprietary` metadata and explicitly lists its rights files.
 
 ## Indigenous data-governance decision
 
@@ -91,11 +95,11 @@ This rule is corroborated by the 2.1.0 French synthesis PDF, the current README/
 - Public `main`: `b13e51baa51c9e2bb0a5bff4f3911a6902b51206`.
 - Public reconciliation branch: `e148cf484b782872416121704a7887935a21bc71`, 124 commits ahead of public `main` and 0 behind at the inspected merge base.
 - Public update branch: `54c8367bb62b68a1a7b36ecd54428183365367ee`.
-- Current authoritative 2.1.0 branch: local only; no remote push performed in this pass.
+- Current 2.1.0 publication branch: `publish/2.1.0-consumer-main`; GitHub `main` update explicitly authorized and pending remote verification.
 - Latest public CI run inspected: run `31344416895`, job `93323578720`, 0 workflow steps, runner ID 0. GitHub's annotation says the job was not started because the account is locked due to a billing issue.
 
 The CI evidence proves a pre-execution GitHub account/billing lock, not a code failure. Because GitHub documents standard hosted runners as free for public repositories, an erroneous or stale account/subscription billing state is plausible. Proving that it is specifically a GitHub subscription bug requires authenticated billing/support evidence that was not available to this local inspection.
 
 ## External action boundary
 
-No public merge, push, tag, release, deployment, publication, post, email, account change, billing change, or licence change was performed by the 2026-09-07 local reconciliation. Any later GitHub update must name the exact branch/commit and receive explicit action-time authorization.
+The rights holder explicitly authorized updating GitHub `main` with the current files, README, consumer-level text, branding, official logos, design, and selected existing AI-IDP/AegisTrace article/post images. That authorization does not extend to a version tag, GitHub release object, DOI/Zenodo change, deployment, public social post, new email, third-party submission, account/billing change, or licence change.

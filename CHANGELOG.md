@@ -15,7 +15,7 @@ Audience: All readers
 Document Classification: Public
 Classification: documentation
 Version: 2.1.0
-Status: Local authoritative version; not published
+Status: GitHub main publication candidate; publication explicitly authorized
 Last Material Revision: 2026-09-07
 Dependencies: release metadata
 Source Basis: Master Execution Prompt
@@ -29,7 +29,7 @@ Licence Status: No licence selected unless approved in writing by Pierre-Edward 
 
 All material revisions are recorded here. Semantic versioning is used.
 
-## [2.1.0] — 2026-09-07 — Local reconciliation and evidence repair
+## [2.1.0] — 2026-09-07 — Reconciliation, evidence repair, and consumer publication
 
 - Established v2.1.0 as the authoritative local project version while retaining v2.0.0 as the historical public GitHub/Zenodo baseline.
 - Integrated the 124-commit post-v2.0.0 reconciliation line containing authorization, authenticated API writes, replay resistance, durable approval state, public disclosure controls, federation, storage, signing, and test hardening.
@@ -39,7 +39,14 @@ All material revisions are recorded here. Semantic versioning is used.
 - Made native liboqs validation opt-in and removed it from the standard full-test extra because importing the package can download and compile native code when liboqs is absent.
 - Reconciled the Indigenous engagement rule as contextual: meaningful rights-holder engagement remains required where Indigenous rights, community data, governance authority, or services are materially implicated; it is not a universal gate for unrelated implementations.
 - Preserved the historical v2.0.0 release corpus and DOI metadata without rewriting them as v2.1.0 evidence.
-- No merge to public `main`, tag, GitHub release, deployment, publication, post, or email send was performed by this reconciliation.
+- Added a consumer-first GitHub README and a bilingual English/Canadian French plain-language guide.
+- Added the official AI-IDP and AegisTrace logo set, colour and typography references, and a checksum-verified brand index without altering the source assets.
+- Added eight previously generated AI-IDP/AegisTrace article and social-media visuals, a public gallery, and an evidence-separated media manifest.
+- Excluded a duplicate visual and an illustrative payment graphic that could be mistaken for a real transaction.
+- Updated the declared test-client dependency from deprecated `httpx` to Starlette's current `httpx2` path and added a metadata regression check.
+- Added the Python `build` frontend to the development and full-validation profiles because wheel creation is a documented release gate.
+- Modernized package licence metadata to PEP 639 using `LicenseRef-Proprietary` and explicit legal files without changing the All Rights Reserved terms.
+- Publication to GitHub `main` was explicitly authorized on 2026-09-07; tagging, GitHub release creation, DOI/Zenodo changes, deployment, and third-party publication remain separate actions.
 
 ## [2.0.0] — 2026-08-01 — Coherence alignment pass
 

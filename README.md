@@ -1,285 +1,264 @@
-# AI-IDP
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21769036.svg)](https://doi.org/10.5281/zenodo.21769036) / AegisTrace
+<!--
+© 2026 Pierre-Edward Procyk. All rights reserved.
+IP_HEADER: Public project overview for AI-IDP and AegisTrace.
+DATA_HEADER: Consumer explanations are separated from verified implementation and external-activation claims.
+CODE_ANNOTATION: v2.1.0 | 2026-09-07 | Consumer-first GitHub presentation.
+-->
 
-Last Material Revision: 2026-09-07
+<p align="center">
+  <img src="brand/originals/CI-Logo-Brand-Lockup-Horizontal_Cognitive-Industries-Bilingual-Gold-Text-Transparent.png" alt="Cognitive Industries — Les Industries Cognitives" width="520">
+</p>
 
-**A Universal Canadian Framework for Persistent AI Actor Identity, Permanent Traceability, Delegation, Quality Assurance, and Accountable AI Operation**
+<table>
+  <tr>
+    <td width="50%" align="center">
+      <img src="brand/project-marks/ai-idp-official-logo-full.png" alt="AI-IDP — Universal Identity and Delegation Protocol" width="520">
+    </td>
+    <td width="50%" align="center">
+      <img src="brand/project-marks/aegistrace-official-logo-full.png" alt="AegisTrace — Cryptographic Accountability Engine" width="520">
+    </td>
+  </tr>
+</table>
 
-© 2026 Pierre-Edward Procyk. Cognitive Industries — Les Industries Cognitives. All rights reserved.
+# AI-IDP + AegisTrace
 
-> **Authoritative current state:** v2.1.0 is the local working version. It incorporates the post-v2.0.0 reconciliation source and the 2026-09-07 verification/repair pass. It has not been merged to public `main`, tagged, released, deployed, or published online. The public GitHub/Zenodo v2.0.0 record remains a historical public baseline, not the current local authority. The project remains All Rights Reserved; no public licence has been granted.
+**Identity before autonomy. Proof after action.**
 
----
+AI-IDP and AegisTrace are a proposed governance framework and a working reference implementation for a practical question:
 
-## Repository
+> When an AI system takes an action, can we determine which AI actor acted, who authorized it, what limits applied, and what evidence remains afterward?
 
-**GitHub:** https://github.com/Procyk-consultant/ai-idp
+**Current version:** 2.1.0<br>
+**Implementation:** Functional Python reference implementation<br>
+**Legal status:** Proposed framework; not current Canadian law<br>
+**Licence status:** All Rights Reserved; no public software, logo, or media licence is granted<br>
+**Archived DOI:** [10.5281/zenodo.21769036](https://doi.org/10.5281/zenodo.21769036) records the earlier archived release and does not by itself certify version 2.1.0
 
----
-
-## Project Originator
-
-**Pierre-Edward Procyk**  
-Founder / CEO  
-Cognitive Industries — Les Industries Cognitives  
-Saguenay, Québec, Canada  
-p.procyk.media@gmail.com  
-LinkedIn: [linkedin.com/in/pierre-edward-procyk-223b75305](https://www.linkedin.com/in/pierre-edward-procyk-223b75305)
-
----
-
-## What This Project Is
-
-AI-IDP is a proposed universal Canadian legal and technical standard under which every operational AI agent used, created, deployed, distributed, controlled, executed, or made available in Canada must possess:
-
-1. A unique persistent AI Actor Identifier.
-2. A unique identifier for every runtime agent instance.
-3. Traceable relationships to its provider, model, deployment, controller, principal, parent agent, delegated sub-agents, tasks, actions, tools, and resources.
-4. A permanent, append-only, tamper-evident history.
-5. Quality evidence for all AI-created or AI-modified code and systems.
-6. A public, semi-public, private, and offline registry model.
-7. Independent auditability, incident-reconstruction capability, legal accountability, and conformity evidence.
-
-The intended Canadian normative principle is:
-
-> **NO VALID AI ACTOR IDENTITY, NO LAWFUL AGENT OPERATION.**
-
-This is the **proposed** standard and legal objective. It is **not** current Canadian law. The project intentionally states the full target standard and expected end-state so that implementation, regulatory review, conformity assessment, and future adoption can be measured against a clear destination.
-
-**AegisTrace** is the reference implementation: a functional Python software system designed to implement and demonstrate the standard end-to-end.
+[Plain-language guide](docs/consumer-guide.md) · [Visual gallery](docs/media/README.md) · [Technical quick start](docs/quickstart.md) · [Verified status](project-control/PROJECT_STATUS.md) · [Validation evidence](project-control/VALIDATION_STATUS.md)
 
 ---
 
-## Quick Start
+## The idea in one minute
+
+AI systems are moving from answering questions to carrying out tasks. They can prepare decisions, call tools, modify records, trigger workflows, and interact with other systems. Once an AI can act, a simple activity log is not enough.
+
+A trustworthy record should answer six questions:
+
+1. **Which AI actor acted?**
+2. **Which running instance performed the action?**
+3. **Who had authority over it?**
+4. **What delegation, approval, and limits applied?**
+5. **What action occurred, in what context?**
+6. **What signed evidence remains for independent verification?**
+
+AI-IDP governs the questions that must be answered **before** an AI action. AegisTrace records and verifies the evidence **after** the action.
+
+![AI-IDP and AegisTrace: identity before autonomy](docs/media/social/01-identity-before-autonomy-hero-fr.png)
+
+---
+
+## Two parts, one accountability chain
+
+| Before an action: AI-IDP | After an action: AegisTrace |
+|---|---|
+| Identifies the AI actor and runtime instance | Creates a signed event record |
+| Connects the actor to a principal and controller | Links the event to the previous event |
+| Defines authority, delegation, scope, and limits | Preserves hashes, timestamps, and signatures |
+| Supports approval and policy decisions | Verifies integrity and reconstructs the sequence |
+| Fails closed when required authority is missing | Produces public-safe or restricted evidence views |
+
+The goal is not to make AI infallible. The goal is to make authorized AI action **bounded, attributable, reviewable, and reconstructible**.
+
+## A familiar example
+
+Imagine an AI assistant that can prepare and submit a purchase request.
+
+Before submission, an organization should be able to establish:
+
+- which registered AI actor and instance is operating;
+- who controls it and on whose behalf it acts;
+- what spending category and limit were delegated;
+- whether a person or policy approved this exact action;
+- which data and tools the AI was permitted to use.
+
+After submission, an auditor should be able to verify:
+
+- the action that was requested and executed;
+- the authorization and approval that covered it;
+- the exact action intent, including important parameters;
+- the event sequence and cryptographic signatures;
+- whether the evidence was altered or the chain was broken.
+
+That before-and-after relationship is the core of AI-IDP and AegisTrace.
+
+---
+
+## What version 2.1.0 implements
+
+The repository contains working source and tests for:
+
+- persistent identifiers for principals, controllers, AI actors, runtime instances, tasks, delegations, authorizations, approvals, resources, and events;
+- fail-closed authorization with multidimensional scope and exact-action approval binding;
+- bounded recursive delegation and verifiable lineage;
+- authenticated governed API writes with proof-of-possession and replay resistance;
+- append-only, hash-chained ledgers with signed events and Merkle evidence;
+- public-safe disclosure projections that exclude restricted fields by default;
+- SQLite and PostgreSQL persistence paths;
+- software signing, PKCS#11/HSM adapters, and managed-cloud KMS adapters;
+- post-quantum signing paths through an explicitly provisioned liboqs runtime;
+- signed federation agreements and cross-registry verification;
+- OpenTelemetry and GitHub integration adapters;
+- specifications, JSON Schemas, threat modelling, policy analysis, and conformance tests.
+
+Implemented source does not automatically mean that every external service, cloud credential, hardware token, registry operator, or production environment has been activated. See [Validation status](project-control/VALIDATION_STATUS.md) for that boundary.
+
+## What this project does not claim
+
+- AI-IDP is **not current Canadian law**.
+- AegisTrace is a reference implementation, **not proof of a production deployment**.
+- A local or CI test is **not external certification or regulatory acceptance**.
+- A cloud, HSM, PostgreSQL, telemetry, federation, or GitHub adapter in source is **not proof that a live external service was exercised**.
+- Indigenous rights-holder engagement is **not a universal gate for unrelated deployments**; it is required where applicable rights, community data, governance authority, agreements, or services are materially involved.
+- The project does not grant a public licence to source, logos, media, documents, or trademarks by implication.
+
+---
+
+## Verified engineering snapshot
+
+The 2026-09-07 local verification of version 2.1.0 recorded:
+
+| Gate | Result |
+|---|---|
+| Python | 3.12.10 |
+| Ruff | Passed over `src` and `tests` |
+| MyPy | Passed; 80 source/test files |
+| Pytest | 162 passed; 2 explicitly opt-in native-PQC tests skipped |
+| Windows build | All seven stages passed; exit code 0 |
+| Governed demo | 4 events; `GOVERNED`; verification `OK` |
+| Ledger verification | Event hashes, hash chain, and 4 signatures verified |
+| Wheel | `aegistrace-2.1.0-py3-none-any.whl` |
+| Paper | Tectonic 0.16.9 completed; 13-page PDF |
+| Container | Not executed because the Docker Desktop Linux engine was unavailable |
+
+The wheel built from the publication candidate was 114,572 bytes with SHA-256 `e8d6a56ae539ef26e7819cdec58b88ca889c65f9d8c3111c10ca44cbbaf97929`.
+
+Earlier verification disclosed a Starlette TestClient deprecation warning; the publication candidate adopts Starlette’s current `httpx2` test dependency. Paper-layout/fontconfig warnings remain disclosed and did not fail compilation. Native post-quantum round trips remain explicit opt-in because importing liboqs-python can download and compile native code when liboqs is absent.
+
+---
+
+## Try the reference implementation
+
+### Windows
+
+The guided path is:
 
 ```powershell
-# 1. Install
-pip install -e .
+.\BUILD_WINDOWS.bat
+```
 
-# 2. Run the governed demo (creates ledger.jsonl + public_keys.json)
+The manual path is:
+
+```powershell
+py -3.12 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -e ".[test-full]"
+python -m pytest tests -q
 python -m aegistrace.cli admin demo --out .aitrace-demo
-
-# 3. Run the test suite
-pytest tests/ -v
-
-# 4. Fully verify a ledger: hash chain + Ed25519 signatures
 python -m aegistrace.cli verify --ledger .aitrace-demo\ledger.jsonl --keys .aitrace-demo\public_keys.json
-
-# Optional: integrity-only verification when public keys are intentionally unavailable
-python -m aegistrace.cli verify --ledger .aitrace-demo\ledger.jsonl --hash-only
-
-# 5. Compile the research paper
-Set-Location -LiteralPath 'paper'
-tectonic main.tex
 ```
 
----
-
-## Repository Structure
-
-```text
-ai-idp-aegistrace/
-├── README.md
-├── FILING_INSTRUCTIONS.md
-├── project-control/                   ← Control records, status, decisions
-├── brand/                             ← Official brand assets
-├── research/                          ← Research protocol, registers, evidence, synthesis
-├── university/                        ← University research package
-├── science/                           ← Scientific method, hypotheses, results, limitations
-├── government/                        ← Canadian government proposal package
-├── administration/                    ← Administrative implementation
-├── impact/                            ← Business, HR, societal impact reports
-├── spec/                              ← Formal technical specifications (25 documents)
-├── schemas/                           ← JSON Schemas (15 current schemas)
-├── src/aegistrace/                    ← Functional reference implementation
-│   ├── api/                           ← Authenticated governed HTTP boundary + replay state contract
-│   ├── authorization/                 ← Scope, approvals, entitlements, transactional consumption
-│   ├── delegation/                    ← Bounded delegation and lineage
-│   ├── disclosure/                    ← Public-safe projections
-│   ├── federation/                    ← Signed inter-registry federation gateway
-│   ├── ledger/                        ← Append-only/WAL/parallel verification
-│   ├── signing/                       ← Ed25519, HSM/KMS and PQC paths
-│   └── storage/                       ← SQLite/PostgreSQL persistence + durable security state
-├── tests/                             ← Unit, integration, security, privacy, permanence, conformance
-├── examples/                          ← Worked examples
-├── threat-model/                      ← Threat model and attack trees
-├── docs/                              ← Developer, auditor, regulator documentation
-├── paper/                             ← Research-paper LaTeX project + compiled historical PDF
-├── release/                           ← Release metadata, checksums, completion/validation records
-└── .github/workflows/                 ← CI workflow definitions
-```
-
----
-
-## Key Documents
-
-| Audience | Start here |
-|----------|-----------|
-| **Government of Canada** | `government/CANADIAN_NATIONAL_PROJECT_PROPOSAL.pdf` |
-| **Gouvernement du Québec** | `government/NOTE_DE_SYNTHESE_FR.pdf` |
-| **Policy makers** | `government/CANADIAN_NATIONAL_PROJECT_PROPOSAL.pdf` |
-| **Policy analysts** | `government/CANADIAN_POLICY_WHITE_PAPER.pdf` |
-| **Legal reviewers** | `government/PROPOSED_AI_ACTOR_IDENTITY_AND_TRACEABILITY_ACT.md`, `government/FEDERAL_PROVINCIAL_JURISDICTION_ANALYSIS.pdf`, `government/CHARTER_ANALYSIS.pdf` |
-| **Academic reviewers** | `paper/main.pdf` (research paper; Zenodo archival record) |
-| **University supervisors** | `university/UNIVERSITY_RESEARCH_REPORT.pdf` |
-| **Architects** | `spec/AI-IDP-CORE.md`, `technical/AEGISTRACE_TECHNICAL_ARCHITECTURE.pdf` |
-| **Implementers** | `docs/quickstart.md`, `docs/developer-guide.md`, `src/aegistrace/` |
-| **Auditors** | `docs/auditor-guide.md`, `spec/AUDIT_PROTOCOL.md` |
-| **Regulators** | `docs/regulator-guide.md`, `spec/REGISTRY_PROTOCOL.md` |
-| **Francophone audiences** | `government/NOTE_DE_SYNTHESE_FR.pdf`, `technical/ARCHITECTURE_TECHNIQUE_FR.pdf`, `impact/IMPACT_CANADIEN_FR.pdf` |
-
----
-
-## Technical Stack
-
-- **Python 3.12**
-- **Ed25519 signatures** via `cryptography`
-- **SHA-256** for content digests, action-intent commitments and event hashes
-- **JSONL** append-only ledger with hash chaining
-- **Merkle trees** for verification anchoring
-- **FastAPI** governed HTTP boundary with agent proof-of-possession and anti-replay controls
-- **SQLite / PostgreSQL** durable nonce reservation and atomic approval-consumption stores
-- **Pluggable approver entitlement policy** with fail-closed default and external IAM extension point
-- **Signed federation agreements** and fail-closed cross-registry public resolution
-- **liboqs*** for ML-DSA-65 and SLH-DSA SHA2-128s signing/verification
-- **pytest** for executable engineering/conformance evidence
-- **Tectonic** for LaTeX compilation
-
-### Production / High-Assurance Implementation
-
-- **PostgreSQL storage backend*** with JSONB, BIGSERIAL, SSL-by-default, shared replay reservation and atomic approval consumption
-- **PKCS#11 Ed25519 HSM signing*** using token-generated non-extractable private keys
-- **AWS KMS signing*** with provider-side asymmetric keys, including Ed25519 by default and configurable key specs
-- **Azure Key Vault signing*** using EC signing keys
-- **Google Cloud KMS signing*** using asymmetric signing keys and optional HSM protection
-- **Batched high-throughput ledger** with fail-closed write-ahead-log recovery
-- **Parallel ledger verification** with deterministic report ordering
-- **OpenTelemetry runtime exporter*** for observability
-- **Post-quantum signatures***: ML-DSA-65 and SLH-DSA SHA2-128s live code paths through liboqs
-- **Signed federation gateway** with bilateral key-bound agreements, TTL-bounded cache, public-safe resolution, federation-break detection and disclosed-chain verification
-- **Live GitHub remote integration*** for Merkle anchor/status/evidence publication paths
-
-> * **Capability-status note:** starred capabilities are implemented source paths whose live operation depends on an external service, credential, hardware/token, runtime library or endpoint. The historical 2026-08-02 validation corpus exercised the earlier v2.0.0 state; the additional 2026-08-17 implementation and hardening changes have **not yet been rerun** and therefore are not represented as newly validated production activations.
-
----
-
-## Test Suite
+### macOS or Linux
 
 ```bash
-pytest tests/ -v
+python3.12 -m venv .venv
+source .venv/bin/activate
+python -m pip install -e '.[test-full]'
+python -m pytest tests -q
+python -m aegistrace.cli admin demo --out .aitrace-demo
+python -m aegistrace.cli verify --ledger .aitrace-demo/ledger.jsonl --keys .aitrace-demo/public_keys.json
 ```
 
-**Last recorded full validation: 113/113 tests passed on 2026-08-02** across the then-current v2.0.0 corpus.
-
-The reconciliation branch adds or strengthens source tests for:
-
-- governed execution boundaries;
-- authorization, approver entitlement and exact-action approval integrity;
-- action-intent retargeting prevention, including visibility changes;
-- atomic/durable approval consumption;
-- delegation scope/lineage enforcement;
-- API proof-of-possession and durable replay resistance;
-- public-disclosure leakage prevention;
-- canonical-state isolation;
-- WAL recovery, duplicate detection and ledger hardening;
-- signed federation agreements and cross-registry disclosed-chain verification;
-- production cryptographic backend behavior;
-- live liboqs ML-DSA / SLH-DSA round trips when the PQC runtime is installed.
-
-**Current reconciliation status:** source implementation/hardening has moved beyond the historical validated baseline. A fresh controlled validation pass is still required before this branch can inherit a new test count or be represented as the next validated release.
-
-**GitHub CI note:** the latest observed GitHub Actions failure on the historical public baseline did not execute workflow steps because GitHub reported the account locked due to a billing issue; it is therefore not evidence of a code, test or compilation failure.
+For native ML-DSA and SLH-DSA verification, provision a compatible liboqs environment and use the separate `pqc` dependency extra. Those tests are deliberately not part of an ordinary validation run.
 
 ---
 
-## Conformance Levels
+## Explore the project
 
-AI-IDP defines four conformance levels (L1–L4) as the target implementation and regulatory standard:
+| If you are… | Start here |
+|---|---|
+| New to AI accountability | [Plain-language guide](docs/consumer-guide.md) |
+| Looking for the visual explanation | [AI-IDP/AegisTrace gallery](docs/media/README.md) |
+| Evaluating the current evidence | [Project status](project-control/PROJECT_STATUS.md) and [validation status](project-control/VALIDATION_STATUS.md) |
+| Implementing or testing the code | [Quick start](docs/quickstart.md), [developer guide](docs/developer-guide.md), and `src/aegistrace/` |
+| Reviewing the standard | [Core specification](spec/AI-IDP-CORE.md) and `spec/` |
+| Auditing evidence | [Auditor guide](docs/auditor-guide.md) and [audit protocol](spec/AUDIT_PROTOCOL.md) |
+| Reviewing public disclosure | [Privacy policy](PRIVACY.md) and `src/aegistrace/disclosure/` |
+| Reviewing security | [Security policy](SECURITY.md) and [threat model](threat-model/THREAT_MODEL.md) |
+| Reviewing Canadian policy work | `government/`, `research/`, `university/`, and `impact/` |
+| Reusing project media | Read [brand and media rights](TRADEMARK_AND_BRAND_POLICY.md) first |
 
-- **L1 (Baseline):** Persistent identifiers, signed events, local ledger.
-- **L2 (Standard):** L1 + public verification, private evidence, delegation, authorization, approval, resource manifests.
-- **L3 (High Assurance):** L2 + independent archival replication, signed federation, database/CI-CD adapters, annual audit.
-- **L4 (Maximum Assurance):** L3 + dual approval, regulator-controlled vault, real-time transparency log, PQC readiness.
+## Repository map
 
-These levels define the intended conformity destination of the standard; adoption or legal enforceability depends on the applicable standards, administrative, contractual, procurement or legislative route.
-
----
-
-## Privacy Safeguards
-
-- **Pseudonymous identifiers** by default (`aitrace://ca/principal/user-XXX`)
-- **Sealed records** for sensitive information
-- **Content separation** between durable evidence metadata and sensitive payloads
-- **Allow-listed public projections** rather than raw event disclosure
-- **Scoped public verification-key export**
-- **Access logging** for non-public record access paths
-- **Recourse mechanisms** for affected persons
-
----
-
-## Indigenous Data Governance
-
-The framework recognizes Indigenous data sovereignty as an important design objective where Indigenous rights, data, communities, or governance contexts are materially involved:
-- **OCAP® principles** — First Nations Information Governance Centre
-- **Distinctions-based approach** — First Nations, Inuit, and Métis
-- **TRC Calls to Action** alignment as a policy/design objective where relevant
-- **Community-controlled access** for Indigenous community data where applicable
-- **Meaningful rights-holder engagement before deployments that materially affect Indigenous rights, community data, or governance**
-
-This is **not a universal implementation gate for unrelated deployments**. AI-IDP preserves the objective of strong Indigenous data governance while applying engagement requirements contextually to deployments where those rights or data are actually implicated.
+```text
+ai-idp/
+├── brand/                 Official Cognitive Industries and project marks
+├── docs/                  Consumer, developer, auditor, and regulator guidance
+│   └── media/             Public visual gallery and provenance records
+├── government/            Canadian policy and legal-analysis package
+├── impact/                Business, workforce, societal, and environmental analysis
+├── paper/                 Research-paper source
+├── project-control/       Current status, validation, decisions, and checkpoints
+├── research/              Research protocol, sources, contradictions, and synthesis
+├── schemas/               Machine-readable contracts
+├── spec/                  AI-IDP technical and governance specifications
+├── src/aegistrace/        Python reference implementation
+├── tests/                 Unit, integration, security, privacy, permanence, and conformance tests
+└── threat-model/          Security model and attack analysis
+```
 
 ---
 
-## Copyright and IP
+## Privacy, rights, and responsible use
 
-© 2026 Pierre-Edward Procyk. Cognitive Industries — Les Industries Cognitives. All rights reserved.
+AegisTrace is designed to preserve accountability evidence without making sensitive content public by default. Its public projections are allow-listed, identifiers can be pseudonymous, sensitive records can remain sealed, and restricted evidence can be separated from public verification data.
 
-No licence, assignment, reproduction right, modification right, publication right, implementation right, commercial-use right, derivative-work right, or redistribution right is granted by implication. Any external use, implementation, adaptation, reproduction, publication, distribution, or commercialization requires prior written authorization from the rights holder.
+Where a deployment materially involves Indigenous rights, community data, governance authority, agreements, or services, meaningful distinctions-based rights-holder engagement remains part of responsible implementation. That responsibility is contextual rather than a universal prerequisite for unrelated deployments.
 
-Third-party rights, standards, laws, research, and software remain the property of their respective rights holders. See `NOTICE.md`.
+Implementers remain responsible for the laws, contracts, policies, human-rights obligations, privacy requirements, and community-governance duties that apply to their actual deployment.
+
+---
+
+## Brand, copyright, and media
+
+The Cognitive Industries, AI-IDP, and AegisTrace names, official marks, visual system, article/post graphics, source code, specifications, and documentation are proprietary works of Pierre-Edward Procyk and Cognitive Industries — Les Industries Cognitives.
+
+The assets are displayed in this repository to identify and explain the project. Their presence does not grant permission to reproduce, modify, redistribute, sublicense, train on, endorse with, or use them commercially. See [Trademark and Brand Policy](TRADEMARK_AND_BRAND_POLICY.md), [Authorship and IP](AUTHORSHIP_AND_IP.md), and [Notice](NOTICE.md).
+
+© 2026 Pierre-Edward Procyk. All rights reserved.
 
 ---
 
 ## Contact
 
-Pierre-Edward Procyk  
-Founder / CEO  
-Cognitive Industries — Les Industries Cognitives  
-Saguenay, Québec, Canada  
-p.procyk.media@gmail.com  
-p.1o9.cognitive@outlook.com  
-LinkedIn: [linkedin.com/in/pierre-edward-procyk-223b75305](https://www.linkedin.com/in/pierre-edward-procyk-223b75305)
-
----
+**Pierre-Edward Procyk**<br>
+Founder / CEO<br>
+Cognitive Industries — Les Industries Cognitives<br>
+Saguenay, Québec, Canada<br>
+[p.procyk.media@gmail.com](mailto:p.procyk.media@gmail.com)<br>
+[LinkedIn](https://www.linkedin.com/in/pierre-edward-procyk-223b75305)
 
 ## Citation
 
-Historical public v2.0.0 citation:
+For the current GitHub version:
 
 ```bibtex
-@misc{aegistrace2026,
-  author = {Pierre-Edward Procyk},
-  title = {AI-IDP / AegisTrace: A Universal Framework for Persistent AI Actor Identity, Permanent Traceability, Delegation, Quality Assurance, and Accountable AI Operation},
-  year = {2026},
-  month = {August},
-  version = {2.0.0},
-  doi = {10.5281/zenodo.21769036},
-  url = {https://doi.org/10.5281/zenodo.21769036},
-  howpublished = {Code and specifications: https://github.com/Procyk-consultant/ai-idp}
+@software{procyk_ai_idp_aegistrace_2026,
+  author  = {Pierre-Edward Procyk},
+  title   = {AI-IDP / AegisTrace: Identity, Delegation, Traceability, and Accountable AI Operation},
+  year    = {2026},
+  version = {2.1.0},
+  url     = {https://github.com/Procyk-consultant/ai-idp}
 }
 ```
 
----
-
-## Status
-
-See `project-control/PROJECT_STATUS.md`, `project-control/VALIDATION_STATUS.md`, `project-control/SOURCE_HARDENING_COMPLETION_2026-08-17.md`, `project-control/CRYPTO_BACKEND_COMPLETION_2026-08-17.md`, `project-control/STATIC_CONFORMANCE_PATCH_LOG_2026-08-17.md`, `release/RECONCILIATION_VALIDATION_STATUS_2026-08-17.md`, and `release/VALIDATION_REPORT.md`.
-
-**Historical validated baseline:** v2.0.0 / 2026-08-02 — 113/113 tests recorded
-
-**Current authoritative local version:** v2.1.0 — based on the 2026-08-17 reconciliation line plus the 2026-09-07 repair and verification pass
-
-**Online/public version:** v2.0.0 historical baseline; local v2.1.0 is not published
-
-**Version:** 2.1.0
-**Research paper:** last recorded clean Tectonic compile passed on 2026-08-02; public archival record at https://doi.org/10.5281/zenodo.21769036
+The DOI currently points to the earlier archived release. Do not cite it as evidence of version 2.1.0 unless its archival record is separately updated and verified.

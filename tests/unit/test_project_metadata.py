@@ -28,6 +28,13 @@ def test_project_release_metadata_is_canonical() -> None:
     project = data["project"]
     assert project["version"] == "2.1.0"
     assert project["requires-python"] == ">=3.12"
+    assert project["license"] == "LicenseRef-Proprietary"
+    assert set(project["license-files"]) == {
+        "LICENSE",
+        "NOTICE.md",
+        "AUTHORS.md",
+        "AUTHORSHIP_AND_IP.md",
+    }
 
 
 def test_runtime_version_matches_project_metadata() -> None:
@@ -45,6 +52,8 @@ def test_test_full_extra_contains_complete_validation_stack() -> None:
         "pytest-cov>=",
         "ruff>=",
         "mypy>=",
+        "build>=",
+        "httpx2>=",
         "psycopg2-binary>=",
         "opentelemetry-api>=",
         "opentelemetry-sdk>=",
@@ -52,3 +61,4 @@ def test_test_full_extra_contains_complete_validation_stack() -> None:
     }
     for prefix in expected_prefixes:
         assert any(requirement.startswith(prefix) for requirement in requirements), prefix
+    assert not any(requirement.startswith("httpx>=") for requirement in requirements)
