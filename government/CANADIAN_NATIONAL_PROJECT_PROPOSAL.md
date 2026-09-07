@@ -14,9 +14,9 @@ Purpose: Official proposal to the Government of Canada for adoption of AI-IDP as
 Audience: Government of Canada, parliamentarians, regulators, Standards Council of Canada
 Document Classification: Public
 Classification: documentation
-Version: 2.0.0
+Version: 2.1.0
 Status: Submission-ready (not submitted)
-Last Material Revision: 2026-08-01
+Last Material Revision: 2026-09-07
 Dependencies: All AI-IDP specifications, reports, and impact analyses
 Source Basis: Master Execution Prompt; Canadian public-record legal materials
 Invariants: Distinguishes current law from proposed law; no fabricated government contacts
@@ -123,7 +123,7 @@ The human-rights safeguards include: Charter compliance (ss. 2(b), 7, 8, 15 — 
 
 ## 16. Indigenous Data-Governance Considerations
 
-Indigenous data-governance considerations include: recognition of Indigenous data sovereignty; OCAP®-aligned handling (Ownership, Control, Access, Possession); First Nations, Inuit, and Métis distinctions-based approach; TRC Calls to Action (particularly Calls to Action 43–44 on UNDRIP adoption and Calls to Action 7, 18, 19 on aboriginal health and reconciliation); community-controlled access for Indigenous community data; consultation with rights-holders as a precondition for implementation. The Indigenous data-governance analysis is grounded in public frameworks. Consultation with rights-holders is a precondition for implementation but not performed in this proposal.
+Indigenous data-governance considerations include: recognition of Indigenous data sovereignty; OCAP®-aligned handling (Ownership, Control, Access, Possession); First Nations, Inuit, and Métis distinctions-based approaches; TRC Calls to Action (particularly Calls to Action 43–44 on UNDRIP adoption and Calls to Action 7, 18, 19 on aboriginal health and reconciliation); and community-controlled access for Indigenous community data. Meaningful rights-holder engagement is required before a deployment that materially affects Indigenous rights, community data, governance authority, or services. The analysis is grounded in public frameworks and does not substitute for engagement where that material nexus exists. The requirement is contextual, not a universal gate for unrelated implementations.
 
 ## 17. Business and Economic Impact
 
@@ -167,7 +167,7 @@ The enforcement options (`government/ENFORCEMENT_OPTIONS.md`) include: civil pen
 
 ## 27. Risk Analysis
 
-The risk analysis (`project-control/RISK_REGISTER.md`) identifies 15 material risks with mitigations. Key risks include: permanent identifiers becoming surveillance enablers (mitigated by pseudonymous identifiers and sealed identity resolution); cryptographic obsolescence (mitigated by interface-isolated signing and PQC migration documentation); provider foreign-hosting avoidance (mitigated by jurisdictional nexus test and controlling-organization liability); provincial jurisdiction conflict (mitigated by cooperative-federalism model); small-developer/open-source burden (mitigated by tiered conformance and compliance profiles); registry compromise (mitigated by tamper-evidence and independent replication); malicious administrator erasure (mitigated by independent archival replication and Git history rewriting detection); privacy-vs-permanence legal conflict (mitigated by encrypted evidence payloads and content separation); employee surveillance abuse (mitigated by labour-impact report and worker recourse mechanism); Indigenous data sovereignty conflict (mitigated by OCAP-aligned handling and consultation precondition); compliance market concentration effect (mitigated by open standard and small-developer profile); false confidence in AI-generated code quality (mitigated by quality-evidence protocol and explicit completion language); foreign-provider non-cooperation (mitigated by controlling-organization liability and enforcement options); scope creep (mitigated by scope-lock document and extension policy); project execution drift (mitigated by authority guardian role and decision log).
+The risk analysis (`project-control/RISK_REGISTER.md`) identifies 15 material risks with mitigations. Key risks include: permanent identifiers becoming surveillance enablers (mitigated by pseudonymous identifiers and sealed identity resolution); cryptographic obsolescence (mitigated by interface-isolated signing and PQC migration documentation); provider foreign-hosting avoidance (mitigated by jurisdictional nexus test and controlling-organization liability); provincial jurisdiction conflict (mitigated by cooperative-federalism model); small-developer/open-source burden (mitigated by tiered conformance and compliance profiles); registry compromise (mitigated by tamper-evidence and independent replication); malicious administrator erasure (mitigated by independent archival replication and Git history rewriting detection); privacy-vs-permanence legal conflict (mitigated by encrypted evidence payloads and content separation); employee surveillance abuse (mitigated by labour-impact report and worker recourse mechanism); Indigenous data sovereignty conflict (mitigated by OCAP-aligned handling and context-specific rights-holder engagement where materially implicated); compliance market concentration effect (mitigated by open standard and small-developer profile); false confidence in AI-generated code quality (mitigated by quality-evidence protocol and explicit completion language); foreign-provider non-cooperation (mitigated by controlling-organization liability and enforcement options); scope creep (mitigated by scope-lock document and extension policy); project execution drift (mitigated by authority guardian role and decision log).
 
 ## 28. Pilot Proposal
 

@@ -5,8 +5,8 @@ Author: Pierre-Edward Procyk
 Copyright: © 2026 Pierre-Edward Procyk. All rights reserved.
 File: project-control/BLOCKER_REGISTER.md
 Title: Blocker Register
-Version: 2.0.0
-Last Material Revision: 2026-08-01
+Version: 2.1.0
+Last Material Revision: 2026-09-07
 ---
 
 # Blocker Register
@@ -55,4 +55,4 @@ None. External actions remain approval gates, not unresolved local-corpus blocke
 | AIDA legislative state changes | If AIDA is enacted, replaced, or withdrawn, legal analysis must be updated | Maintain `PUBLICATION_METADATA_STATUS.md`; review before any external submission |
 | Cryptographic obsolescence | Ed25519 may require migration to post-quantum scheme within planning horizon | Signing interface is abstract; migration is a documented future-work item |
 | Provincial AI regulation divergence | Provinces may enact parallel regimes that interact with the proposed national standard | Federal-provincial jurisdiction analysis is documented; future work item to monitor provincial developments |
-| Indigenous data-governance consultation outcomes | Public-framework analysis is not a substitute for rights-holder consultation | Documented in `ASSUMPTION_REGISTER.md` A-010; consultation remains precondition for implementation |
+| Context-specific Indigenous rights-holder engagement outcomes | Public-framework analysis is not a substitute for rights-holder engagement where Indigenous rights, community data, governance authority, or services are materially implicated | Documented in `ASSUMPTION_REGISTER.md` A-010; not a universal blocker for unrelated implementations |

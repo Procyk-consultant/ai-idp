@@ -5,8 +5,8 @@ Copyright: © 2026 Pierre-Edward Procyk. All rights reserved.
 File: src/aegistrace/api/server.py
 Purpose: Public-safe FastAPI server exposing authenticated governed AegisTrace operations
 Classification: presentation
-Version: 2.0.0
-Last Material Revision: 2026-08-17
+Version: 2.1.0
+Last Material Revision: 2026-09-07
 Licence Status: No licence selected unless approved in writing by Pierre-Edward Procyk.
 """
 from __future__ import annotations
@@ -30,6 +30,7 @@ from aegistrace.governance.service import GovernanceDenied, GovernedEventService
 from aegistrace.identity.keys import KeyService
 from aegistrace.identity.lifecycle import Registry
 from aegistrace.ledger.append_only import AppendOnlyLedger, LedgerVerifier
+from aegistrace.version import __version__
 
 
 class ScopeContextRequest(BaseModel):
@@ -112,7 +113,9 @@ def create_app(
 
     keys = key_service or KeyService()
     entity_registry = registry or Registry()
-    event_ledger = ledger or AppendOnlyLedger()
+    # AppendOnlyLedger implements ``__len__``. An injected empty ledger is
+    # therefore falsey and must be distinguished from no ledger being supplied.
+    event_ledger = ledger if ledger is not None else AppendOnlyLedger()
     policy = policy_engine or PolicyEngine(
         keys,
         approval_consumption_store=approval_consumption_store,
@@ -136,7 +139,7 @@ def create_app(
     app = FastAPI(
         title="AegisTrace",
         description="Reference HTTP API for the proposed AI-IDP standard",
-        version="2.0.0",
+        version=__version__,
     )
     app.state.aegistrace = {
         "registry": entity_registry,
@@ -155,7 +158,7 @@ def create_app(
     def health() -> dict[str, str]:
         return {
             "status": "ok",
-            "version": "2.0.0",
+            "version": __version__,
             "write_boundary": "authenticated+governed",
         }
 

@@ -5,13 +5,11 @@ Copyright: © 2026 Pierre-Edward Procyk. All rights reserved.
 File: src/aegistrace/__init__.py
 Purpose: Top-level package
 Classification: domain
-Version: 2.0.0
-Last Material Revision: 2026-08-17
+Version: 2.1.0
+Last Material Revision: 2026-09-07
 Licence Status: No licence selected unless approved in writing by Pierre-Edward Procyk.
 """
 from __future__ import annotations
-
-__version__ = "2.0.0"
 
 from aegistrace.adapters.database import DatabaseAdapter, DatabaseOperation
 from aegistrace.adapters.filesystem import FilesystemAdapter, file_digest
@@ -61,6 +59,7 @@ from aegistrace.manifests.resource import ResourceManifest, compute_directory_di
 from aegistrace.signing.canonical import canonicalize, canonicalize_for_hash, canonicalize_for_signature
 from aegistrace.signing.ed25519 import blake2b_hex, sha256_hex, sha256_raw
 from aegistrace.storage.sqlite import SQLiteStorage
+from aegistrace.version import __version__
 
 try:
     from aegistrace.storage.postgres import PostgresConfig, PostgresStorage

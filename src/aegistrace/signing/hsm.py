@@ -6,8 +6,8 @@ File: src/aegistrace/signing/hsm.py
 Purpose: Hardware and managed-KMS signing backends
 Classification: infrastructure
 Security Classification: confidential
-Version: 2.0.0
-Last Material Revision: 2026-08-17
+Version: 2.1.0
+Last Material Revision: 2026-09-07
 Licence Status: No licence selected unless approved in writing by Pierre-Edward Procyk.
 """
 from __future__ import annotations
@@ -449,7 +449,7 @@ class CloudKMSKeyBackend:
             if self._config.get("hardware_protected", True)
             else kms_v1.ProtectionLevel.SOFTWARE
         )
-        crypto_key = self._client.create_crypto_key(
+        self._client.create_crypto_key(
             request={
                 "parent": parent,
                 "crypto_key_id": name,
@@ -560,6 +560,8 @@ class CloudKMSKeyBackend:
 
         try:
             public_key = serialization.load_pem_public_key(self._public_pems[key_id].encode("ascii"))
+            if not isinstance(public_key, ec.EllipticCurvePublicKey):
+                return False
             public_key.verify(
                 signature_bytes,
                 digest,

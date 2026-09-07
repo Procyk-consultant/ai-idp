@@ -14,9 +14,9 @@ Purpose: Record material revisions
 Audience: All readers
 Document Classification: Public
 Classification: documentation
-Version: 2.0.0
-Status: Approved
-Last Material Revision: 2026-08-01
+Version: 2.1.0
+Status: Local authoritative version; not published
+Last Material Revision: 2026-09-07
 Dependencies: release metadata
 Source Basis: Master Execution Prompt
 Invariants: Revisions are append-only
@@ -28,6 +28,18 @@ Licence Status: No licence selected unless approved in writing by Pierre-Edward 
 # Changelog
 
 All material revisions are recorded here. Semantic versioning is used.
+
+## [2.1.0] — 2026-09-07 — Local reconciliation and evidence repair
+
+- Established v2.1.0 as the authoritative local project version while retaining v2.0.0 as the historical public GitHub/Zenodo baseline.
+- Integrated the 124-commit post-v2.0.0 reconciliation line containing authorization, authenticated API writes, replay resistance, durable approval state, public disclosure controls, federation, storage, signing, and test hardening.
+- Fixed dependency injection of an empty append-only ledger in the API; the former falsey-value fallback discarded the caller-supplied ledger.
+- Added a narrow ledger protocol at the event-collection boundary so both append-only and batched ledgers satisfy the typed contract.
+- Hardened GCP KMS public-key verification to reject non-EC keys explicitly.
+- Made native liboqs validation opt-in and removed it from the standard full-test extra because importing the package can download and compile native code when liboqs is absent.
+- Reconciled the Indigenous engagement rule as contextual: meaningful rights-holder engagement remains required where Indigenous rights, community data, governance authority, or services are materially implicated; it is not a universal gate for unrelated implementations.
+- Preserved the historical v2.0.0 release corpus and DOI metadata without rewriting them as v2.1.0 evidence.
+- No merge to public `main`, tag, GitHub release, deployment, publication, post, or email send was performed by this reconciliation.
 
 ## [2.0.0] — 2026-08-01 — Coherence alignment pass
 

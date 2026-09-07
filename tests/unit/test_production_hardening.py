@@ -4,8 +4,8 @@ Author and Intellectual Property Owner: Pierre-Edward Procyk
 Copyright: © 2026 Pierre-Edward Procyk. All rights reserved.
 File: tests/unit/test_production_hardening.py
 Purpose: Unit tests for production-hardening modules
-Version: 2.0.0
-Last Material Revision: 2026-08-17
+Version: 2.1.0
+Last Material Revision: 2026-09-07
 Licence Status: No licence selected unless approved in writing by Pierre-Edward Procyk.
 """
 from __future__ import annotations
@@ -190,6 +190,10 @@ class TestBatchedLedger:
 class TestPQC:
     @staticmethod
     def _oqs():
+        if os.environ.get("AEGISTRACE_RUN_LIBOQS_TESTS") != "1":
+            pytest.skip(
+                "live liboqs tests are opt-in because importing liboqs-python may build native code"
+            )
         return pytest.importorskip("oqs", reason="liboqs-python not installed")
 
     def test_scheme_registry(self) -> None:

@@ -5,8 +5,8 @@ Author: Pierre-Edward Procyk
 Copyright: © 2026 Pierre-Edward Procyk. All rights reserved.
 File: project-control/RISK_REGISTER.md
 Title: Risk Register
-Version: 2.0.0
-Last Material Revision: 2026-08-01
+Version: 2.1.0
+Last Material Revision: 2026-09-07
 ---
 
 # Risk Register
@@ -24,7 +24,7 @@ Material risks to the project objective, with severity, likelihood, mitigation, 
 | R-007 | Malicious administrator erases evidence | High | Medium | Independent archival replication; sealed records; Git history rewriting detection; distributed anchoring | A09 security / A23 db |
 | R-008 | Privacy-vs-permanence legal conflict | High | Medium | Encrypted evidence payloads; content separation; minimal permanent metadata; access-controlled vaults; judicial access pattern | A10 privacy / A04 constitutional |
 | R-009 | Employee surveillance abuse | Medium | High | Labour-impact report; worker recourse mechanism; collective agreement interface; disciplinary-use limits | A15 HR |
-| R-010 | Indigenous data sovereignty conflict | Medium | Medium | Indigenous data-governance analysis; OCAP-aligned handling; consultation precondition; community-controlled access where applicable | A11 Indigenous |
+| R-010 | Indigenous data sovereignty conflict | Medium | Medium | Indigenous data-governance analysis; OCAP-aligned handling; context-specific rights-holder engagement where materially implicated; community-controlled access where applicable | A11 Indigenous |
 | R-011 | Compliance market concentration effect | Medium | Medium | Open standard; small-developer profile; conformity body neutrality; open-source reference implementation | A14 business / A16 societal |
 | R-012 | False confidence in AI-generated code quality | Medium | Medium | Quality-evidence protocol; conformance levels; explicit "tested" vs "verified" language (§37); audit-ready vs publication-ready distinction | A13 quality |
 | R-013 | Foreign-provider non-cooperation | High | Medium | Controlling-organization liability; provider-duty framework; procurement controls; data-localization for evidence; enforcement options including service suspension | A04 / A14 |

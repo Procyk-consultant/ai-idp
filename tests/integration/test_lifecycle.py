@@ -4,8 +4,8 @@ Author and Intellectual Property Owner: Pierre-Edward Procyk
 Copyright: © 2026 Pierre-Edward Procyk. All rights reserved.
 File: tests/integration/test_lifecycle.py
 Purpose: Integration tests for the AegisTrace evidence lifecycle
-Version: 2.0.0
-Last Material Revision: 2026-08-17
+Version: 2.1.0
+Last Material Revision: 2026-09-07
 Licence Status: No licence selected unless approved in writing by Pierre-Edward Procyk.
 """
 from __future__ import annotations
@@ -250,6 +250,7 @@ class TestLifecycle:
         created = adapter.create(path, b"hello")
         modified = adapter.modify(path, b"world")
         assert created["before_digest"] is None
+        assert isinstance(created["after_digest"], str)
         assert created["after_digest"].startswith("sha256:")
         assert modified["before_digest"] != modified["after_digest"]
 

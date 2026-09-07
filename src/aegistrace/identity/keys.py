@@ -6,16 +6,17 @@ File: src/aegistrace/identity/keys.py
 Purpose: Key service for AI-IDP signing keys
 Classification: domain
 Security Classification: internal
-Version: 2.0.0
-Last Material Revision: 2026-08-17
+Version: 2.1.0
+Last Material Revision: 2026-09-07
 Licence Status: No licence selected unless approved in writing by Pierre-Edward Procyk.
 """
 from __future__ import annotations
 
 import copy
+from collections.abc import Iterable
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from typing import Any, Iterable
+from typing import Any
 
 from aegistrace.signing.ed25519 import SigningKey
 

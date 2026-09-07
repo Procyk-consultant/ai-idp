@@ -1,6 +1,6 @@
 # Prior Art and Novelty Analysis
 
-Last Material Revision: 2026-08-01
+Last Material Revision: 2026-09-07
 
 ## Prior Art
 
@@ -30,7 +30,7 @@ AI-IDP's novelty lies in the integration of:
 2. Permanent identifier permanence across termination, revocation, provider closure, model retirement, repository transfer, and organizational restructuring.
 3. Tiered registry visibility (PUBLIC, CONTROLLED, ORGANIZATION-PRIVATE, SEALED).
 4. Cooperative-federalism enforcement (national minimum standard with provincial equivalent-or-stronger regimes).
-5. Indigenous data governance integration (OCAP® principles, distinctions-based approach, TRC Calls to Action alignment, consultation precondition).
+5. Indigenous data governance integration (OCAP® principles, distinctions-based approach, TRC Calls to Action alignment, and context-specific rights-holder engagement where materially implicated).
 6. Tiered conformance (L1-L4) with small-developer and open-source profiles.
 7. The comprehensive set of 23 invariants.
 8. The complete reference implementation (AegisTrace) with 113 passing tests under the test-full profile, including targeted security, privacy, permanence, and conformance tests.

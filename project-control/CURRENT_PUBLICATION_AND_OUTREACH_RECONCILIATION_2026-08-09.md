@@ -5,14 +5,16 @@ Author: Pierre-Edward Procyk
 File: project-control/CURRENT_PUBLICATION_AND_OUTREACH_RECONCILIATION_2026-08-09.md
 Title: Current Publication and Outreach Reconciliation
 Purpose: Establish a source-grounded current-state baseline before repository, outreach, or official-directory changes.
-Version: 2.0.0
-Status: Read-only audit record; implementation pending Pierre-Edward Procyk approval.
+Version: 2.1.0
+Status: Historical 2026-08-09 audit; superseded for current outreach status.
 Date: 2026-08-09
 Copyright: © 2026 Pierre-Edward Procyk. All rights reserved.
 Licence Status: No public licence is granted.
 ---
 
 # Current Publication and Outreach Reconciliation
+
+> **Current-status notice (2026-09-07):** This file preserves the 2026-08-09 audit. It is not the controlling record for later outreach. Pierre-Edward Procyk has since confirmed that emails were sent and contacts completed; exact send receipts were not present in the inspected local files. Use `project-control/PUBLICATION_METADATA_STATUS.md` and `project-control/PROJECT_STATUS.md` for the current evidence classification.
 
 ## Scope and method
 

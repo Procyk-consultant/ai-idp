@@ -6,8 +6,8 @@ File: src/aegistrace/ledger/batched.py
 Purpose: Higher-throughput batched ledger with evidence-preserving write-ahead log
 Classification: infrastructure
 Security Classification: internal
-Version: 2.0.0
-Last Material Revision: 2026-08-17
+Version: 2.1.0
+Last Material Revision: 2026-09-07
 Licence Status: No licence selected unless approved in writing by Pierre-Edward Procyk.
 """
 from __future__ import annotations
@@ -123,11 +123,11 @@ class BatchedLedger:
         except WALRecoveryError:
             raise
         except Exception as exc:
-            quarantine = self._quarantine_wal(path) if path.exists() else None
+            quarantine_path = self._quarantine_wal(path) if path.exists() else None
             raise WALRecoveryError(
                 f"WAL recovery failed: {exc}",
                 wal_path=path,
-                quarantine_path=quarantine,
+                quarantine_path=quarantine_path,
             ) from exc
         self._canonical = recovered
 

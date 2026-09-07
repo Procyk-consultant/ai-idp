@@ -3,8 +3,8 @@
 # Author: Pierre-Edward Procyk
 # Copyright: © 2026 Pierre-Edward Procyk. All rights reserved.
 # File: .gitignore
-# Version: 2.0.0
-# Last Material Revision: 2026-07-30
+# Version: 2.1.0
+# Last Material Revision: 2026-09-07
 
 # Python
 __pycache__/
@@ -36,6 +36,7 @@ ENV/
 env.bak/
 venv.bak/
 .venv/
+.venv*/
 
 # Testing
 .tox/

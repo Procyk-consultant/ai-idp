@@ -1,6 +1,6 @@
 # Contradiction Register
 
-Last Material Revision: 2026-08-01
+Last Material Revision: 2026-09-07
 
 This register documents contradictions and opposing arguments found during research, with responses and mitigations.
 
@@ -82,9 +82,9 @@ This register documents contradictions and opposing arguments found during resea
 
 **Source:** Indigenous data-governance literature.
 
-**Response:** The framework's Indigenous data-governance provisions respect Indigenous data sovereignty: recognition of Indigenous data sovereignty; OCAP®-aligned handling; First Nations, Inuit, and Métis distinctions-based approach; TRC Calls to Action alignment; community-controlled access for Indigenous community data; consultation with rights-holders as a precondition for implementation.
+**Response:** The framework's Indigenous data-governance provisions recognize Indigenous data sovereignty through OCAP®-aligned handling, First Nations, Inuit, and Métis distinctions-based approaches, TRC Calls to Action alignment, community-controlled access where applicable, and meaningful rights-holder engagement for deployments that materially affect Indigenous rights, community data, governance authority, or services. This is not a universal precondition for unrelated implementations.
 
-**Mitigation:** OCAP®-aligned handling; consultation precondition.
+**Mitigation:** OCAP®-aligned handling and context-specific rights-holder engagement where materially implicated.
 
 **Status:** Mitigated (requires consultation with rights-holders).
 

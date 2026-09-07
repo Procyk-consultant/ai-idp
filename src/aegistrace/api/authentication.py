@@ -6,14 +6,15 @@ File: src/aegistrace/api/authentication.py
 Purpose: Cryptographic authentication and replay resistance for action requests
 Classification: service
 Security Classification: internal
-Version: 2.0.0
-Last Material Revision: 2026-08-17
+Version: 2.1.0
+Last Material Revision: 2026-09-07
 Licence Status: No licence selected unless approved in writing by Pierre-Edward Procyk.
 """
 from __future__ import annotations
 
+from collections.abc import Mapping
 from datetime import UTC, datetime, timedelta
-from typing import Any, Mapping
+from typing import Any
 
 from aegistrace.api.replay import InMemoryReplayReservationStore, ReplayReservationStore
 from aegistrace.identity.ids import require_identifier_type

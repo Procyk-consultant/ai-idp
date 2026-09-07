@@ -1,7 +1,7 @@
 # Cognitive Industries — Les Industries Cognitives
 # Project: AI-IDP / AegisTrace
-# Version: 2.0.0
-# Last Material Revision: 2026-08-17
+# Version: 2.1.0
+# Last Material Revision: 2026-09-07
 
 [build-system]
 requires = ["setuptools>=68", "wheel"]
@@ -9,7 +9,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "aegistrace"
-version = "2.0.0"
+version = "2.1.0"
 description = "Reference implementation of the AI-IDP standard: Universal AI Identity, Delegation, Provenance, Traceability, Quality, Accountability, and Permanent Audit"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -44,7 +44,6 @@ test-full = [
     "opentelemetry-api>=1.40",
     "opentelemetry-sdk>=1.40",
     "opentelemetry-exporter-otlp>=1.40",
-    "liboqs-python>=0.16,<0.17",
 ]
 postgres = ["psycopg2-binary>=2.9"]
 otel = [

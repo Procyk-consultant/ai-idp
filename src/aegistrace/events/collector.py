@@ -5,27 +5,40 @@ Copyright: © 2026 Pierre-Edward Procyk. All rights reserved.
 File: src/aegistrace/events/collector.py
 Purpose: Event collector that builds, signs, and appends evidence records
 Classification: domain
-Version: 2.0.0
-Last Material Revision: 2026-08-17
+Version: 2.1.0
+Last Material Revision: 2026-09-07
 Licence Status: No licence selected unless approved in writing by Pierre-Edward Procyk.
 """
 from __future__ import annotations
 
 import re
 from datetime import UTC, datetime
-from typing import Any
+from typing import Any, Protocol
 
 from aegistrace.authorization.scope import ScopeContext
 from aegistrace.events.models import (
-    ACTIONS, GOVERNANCE_MODES, SCHEMA_VERSION, VISIBILITY_TIERS, Actor, Event, ExecutionContext,
+    ACTIONS,
+    GOVERNANCE_MODES,
+    SCHEMA_VERSION,
+    VISIBILITY_TIERS,
+    Actor,
+    Event,
+    ExecutionContext,
 )
 from aegistrace.identity.ids import VALID_JURISDICTIONS, make_event_id, require_identifier_type
 from aegistrace.identity.keys import KeyService
-from aegistrace.ledger.append_only import AppendOnlyLedger
 from aegistrace.signing.canonical import canonicalize_for_hash, canonicalize_for_signature
 from aegistrace.signing.ed25519 import sha256_hex
 
 _DIGEST_PATTERN = re.compile(r"^sha256:[0-9a-f]{64}$")
+
+
+class EventLedger(Protocol):
+    """Minimal append-only contract required by the event collector."""
+
+    def append(self, event: Event) -> None: ...
+
+    def last_event_hash(self) -> str | None: ...
 
 
 class EventCollector:
@@ -36,7 +49,7 @@ class EventCollector:
     ``GovernedEventService`` before it invokes this collector.
     """
 
-    def __init__(self, ledger: AppendOnlyLedger, key_service: KeyService) -> None:
+    def __init__(self, ledger: EventLedger, key_service: KeyService) -> None:
         self._ledger = ledger
         self._keys = key_service
 

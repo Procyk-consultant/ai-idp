@@ -5,57 +5,27 @@ Author: Pierre-Edward Procyk
 Copyright: © 2026 Pierre-Edward Procyk. All rights reserved.
 File: project-control/HANDOFF.md
 Title: Handoff
-Version: 2.0.0
-Last Material Revision: 2026-08-01
+Version: 2.1.0
+Status: Authoritative Locally / Not Published Online
+Last Material Revision: 2026-09-07
 ---
 
-# Handoff
+# Handoff — AI-IDP / AegisTrace 2.1.0
 
-## Project
+## Current state
 
-AI-IDP — Universal AI Identity, Delegation, Provenance, Traceability, Quality, Accountability, and Permanent Audit Standard. Reference implementation: AegisTrace.
+- Local authoritative branch: `local/2.1.0-reconciliation`.
+- Source line: public `reconcile-2026-08-14` at `e148cf484b782872416121704a7887935a21bc71`, plus the local repair/verification commit(s).
+- Historical public `main`: `b13e51baa51c9e2bb0a5bff4f3911a6902b51206`.
+- External state: local 2.1.0 not merged, tagged, released, deployed, or published.
+- Local verification: Ruff pass; MyPy pass; 162 tests passed; 2 native-PQC tests explicitly skipped; wheel/demo/ledger/paper gates passed; container gate unavailable because Docker Desktop's Linux engine is not running.
 
-## Originator
+## Scope decisions
 
-Pierre-Edward Procyk, Founder / CEO, Cognitive Industries — Les Industries Cognitives, Saguenay, Québec, Canada.
+- The Indigenous rights-holder engagement requirement is contextual to deployments that materially affect Indigenous rights, community data, governance authority, or services; it is not a universal gate for unrelated implementations.
+- Outreach sends and completed contacts are user-confirmed. Exact send receipts were not present in the inspected local archive and must not be invented.
+- Historical v2.0.0 release evidence remains historical; it is not current local version metadata.
 
-## State at Handoff
+## Continue safely
 
-The project is delivered as a locally reconciled v2.0.0 corpus at `C:\Cognitive Industries\AI-IDP-AegisTrace`. The canonical documents, generated derivatives, release records, checksums, and ten numbered ZIP packages have been reconciled. Validation gates are passed or partial with documented limits in `project-control/VALIDATION_STATUS.md`. No external submission, push, publication, post, or email send has been performed.
-
-## Key Files to Read First
-
-1. `README.md` — repository entry point
-2. `project-control/PROJECT_STATUS.md` — living status
-3. `project-control/VALIDATION_STATUS.md` — gate state
-4. `project-control/DECISION_LOG.md` — autonomous decisions
-5. `release/FINAL_COMPLETION_REPORT.md` — consolidated completion and limitations
-6. `project-control/VERIFIED_AUTHOR_DATA.md` — authoritative identity record
-7. `AI-IDP-NEXT-AI-HANDOFF-2026-08-02.zip` — evidence-backed next-provider continuity package
-
-## Authority
-
-Pierre-Edward Procyk is the final authority for external publication, licensing, submission, and release. No package may leave the local repository without his separate explicit written authorization.
-
-## Continuation Procedure
-
-If a new agent context resumes work:
-
-1. Verify and extract `AI-IDP-NEXT-AI-HANDOFF-2026-08-02.zip`.
-2. Read its `CORPUS_AUDIT_REPORT.md`, `CURRENT_STATE.json`, and `NEXT_AI_EXECUTION_PLAN.md`.
-3. Run the 113-test suite, demo/ledger verification, Tectonic paper build, canonical checksum verification, and numbered-archive verification recorded there.
-4. If any gate fails, stop and reconcile the evidence before deployment.
-5. If all gates pass, report them to Pierre-Edward Procyk and wait for his explicit confirmation before beginning arXiv or any other external action.
-
-## Forbidden Actions Without Authorization
-
-- External publication of any artifact
-- arXiv submission
-- Government submission
-- Public repository release
-- Applying any public licence
-- Generating a replacement logo
-- Modifying brand originals
-- Inventing author, organization, contact, or business data
-- Releasing synthetic data as empirical observation
-- Suppressing criticism, contradictions, or negative findings
+Read `project-control/Now.md`, `project-control/PROJECT_STATUS.md`, `project-control/VALIDATION_STATUS.md`, and `project-control/ENVIRONMENT_REPORT.md`. Re-run local gates after future code changes. Do not push, merge, tag, release, deploy, publish, send, modify billing, or change licensing without exact action-time authorization.

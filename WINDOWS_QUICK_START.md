@@ -2,7 +2,7 @@
 
 Last Material Revision: 2026-08-01
 
-**Version:** 2.0.0  
+**Version:** 2.1.0
 **Date:** 2026-08-01  
 **Author:** Pierre-Edward Procyk  
 **Organization:** Cognitive Industries — Les Industries Cognitives

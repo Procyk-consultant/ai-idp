@@ -6,8 +6,8 @@ File: tests/unit/test_project_metadata.py
 Purpose: Verify release metadata and documented full-validation dependency profile
 Classification: test
 Security Classification: internal
-Version: 2.0.0
-Last Material Revision: 2026-08-01
+Version: 2.1.0
+Last Material Revision: 2026-09-07
 Licence Status: No licence selected unless approved in writing by Pierre-Edward Procyk.
 """
 from __future__ import annotations
@@ -26,8 +26,14 @@ def _pyproject() -> dict:
 def test_project_release_metadata_is_canonical() -> None:
     data = _pyproject()
     project = data["project"]
-    assert project["version"] == "2.0.0"
+    assert project["version"] == "2.1.0"
     assert project["requires-python"] == ">=3.12"
+
+
+def test_runtime_version_matches_project_metadata() -> None:
+    from aegistrace import __version__
+
+    assert __version__ == _pyproject()["project"]["version"]
 
 
 def test_test_full_extra_contains_complete_validation_stack() -> None:

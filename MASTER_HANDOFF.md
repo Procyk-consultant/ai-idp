@@ -2,41 +2,31 @@
 Organization: Cognitive Industries — Les Industries Cognitives
 Project: AI-IDP / AegisTrace
 Author: Pierre-Edward Procyk
-Role: Founder / CEO
 Copyright: © 2026 Pierre-Edward Procyk. All rights reserved.
-Contact: p.procyk.media@gmail.com
-Secondary Contact: p.1o9.cognitive@outlook.com
-Telephone: 
-Location: Saguenay, Québec, Canada
 File: MASTER_HANDOFF.md
 Title: Master Handoff
-Purpose: Consolidate handoff state
-Audience: Future agents and maintainers
-Document Classification: Internal
-Classification: documentation
-Version: 2.0.0
-Status: Approved
-Last Material Revision: 2026-08-01
-Dependencies: project-control/HANDOFF.md
-Source Basis: Master Execution Prompt
-Invariants: Handoff state matches project-control/HANDOFF.md
-Failure Behaviour: Handoff inconsistencies are escalated
-Trace Policy: No AegisTrace event record required
-Licence Status: No licence selected unless approved in writing by Pierre-Edward Procyk
+Purpose: Point to the controlling local handoff state
+Version: 2.1.0
+Status: Authoritative Locally / Not Published Online
+Last Material Revision: 2026-09-07
+Licence Status: All Rights Reserved; no public licence granted
 ---
 
-# Master Handoff
+# Master Handoff — 2.1.0
 
-See `project-control/HANDOFF.md` for the authoritative handoff record. This file is a top-level pointer.
+The authoritative current state is **AI-IDP / AegisTrace 2.1.0, local only**, on `local/2.1.0-reconciliation`. The public GitHub/Zenodo v2.0.0 state is historical and has not been overwritten or relabelled.
 
-## State
+Read in this order:
 
-The AI-IDP / AegisTrace project is delivered as a locally reconciled v2.0.0 corpus at `C:\Cognitive Industries\AI-IDP-AegisTrace`. Canonical files, generated derivatives, release records, checksums, and ten numbered ZIP packages are reconciled, subject to the documented validation limits. No external submission, push, publication, post, or email send has been performed.
+1. `project-control/Now.md`
+2. `project-control/PROJECT_STATUS.md`
+3. `project-control/VALIDATION_STATUS.md`
+4. `project-control/ENVIRONMENT_REPORT.md`
+5. `project-control/CHECKPOINTS.md`
+6. `project-control/ACTION_TICKETS_2_1_0_LOCAL_RECONCILIATION_2026-09-07.md`
 
-## Authority
+Pierre-Edward Procyk reports that outreach emails were sent and contacts completed. No sent-mail receipt or communications log was available in the inspected local evidence, so exact recipients, dates, attachments, delivery, and replies are not independently claimed here.
 
-Pierre-Edward Procyk is the final authority for external publication, licensing, submission, and release.
+No merge to public `main`, push of the local 2.1.0 branch, tag, GitHub release, deployment, publication, post, email send, billing change, or licence change was performed during the 2026-09-07 reconciliation.
 
-## Next Steps
-
-Read `project-control/HANDOFF.md`, `release/FINAL_COMPLETION_REPORT.md`, and the evidence-backed `AI-IDP-NEXT-AI-HANDOFF-2026-08-02.zip`. Reproduce the recorded local gates, then obtain Pierre-Edward Procyk's explicit confirmation before every external publish, push, submit, post, or email-send action.
+Pierre-Edward Procyk remains the final authority for each external publication, licensing, submission, release, or account action.

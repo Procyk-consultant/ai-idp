@@ -10,7 +10,7 @@
 services:
   aegistrace:
     build: .
-    image: aegistrace:2.0.0
+    image: aegistrace:2.1.0
     container_name: aegistrace
     volumes:
       - ./:/app
@@ -20,7 +20,7 @@ services:
 
   api:
     build: .
-    image: aegistrace:2.0.0
+    image: aegistrace:2.1.0
     container_name: aegistrace-api
     ports:
       - "127.0.0.1:8765:8000"

@@ -5,15 +5,16 @@ Copyright: © 2026 Pierre-Edward Procyk. All rights reserved.
 File: src/aegistrace/authorization/scope.py
 Purpose: Typed scope evaluation for authorization and delegation
 Classification: domain
-Version: 2.0.0
-Last Material Revision: 2026-08-17
+Version: 2.1.0
+Last Material Revision: 2026-09-07
 Licence Status: No licence selected unless approved in writing by Pierre-Edward Procyk.
 """
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from typing import Any, Mapping
+from typing import Any
 
 _SCOPE_LIST_FIELDS = (
     ("task_classes", "task_class"),
@@ -143,6 +144,16 @@ def evaluate_child_scope(parent_scope: Mapping[str, Any], child_scope: Mapping[s
     that is present on its parent. Each nested delegation consumes one unit of
     delegation depth.
     """
+    try:
+        parent_depth = int(parent_scope.get("delegation_depth", 0))
+        child_depth = int(child_scope.get("delegation_depth", 0))
+    except (TypeError, ValueError):
+        return ScopeDecision(False, "delegation_depth is malformed")
+    if parent_depth <= 0:
+        return ScopeDecision(False, "parent delegation is a leaf and cannot delegate further")
+    if child_depth < 0:
+        return ScopeDecision(False, "child delegation_depth cannot be negative")
+
     parent_actions = _normalized_str_set(parent_scope.get("action_classes"))
     child_actions = _normalized_str_set(child_scope.get("action_classes"))
     decision = _subset_decision(parent_actions, child_actions, "action_classes")
@@ -169,15 +180,6 @@ def evaluate_child_scope(parent_scope: Mapping[str, Any], child_scope: Mapping[s
         if child_not_after is None or child_not_after > parent_not_after:
             return ScopeDecision(False, "child time window ends outside the parent scope")
 
-    try:
-        parent_depth = int(parent_scope.get("delegation_depth", 0))
-        child_depth = int(child_scope.get("delegation_depth", 0))
-    except (TypeError, ValueError):
-        return ScopeDecision(False, "delegation_depth is malformed")
-    if parent_depth <= 0:
-        return ScopeDecision(False, "parent delegation is a leaf and cannot delegate further")
-    if child_depth < 0:
-        return ScopeDecision(False, "child delegation_depth cannot be negative")
     if child_depth > parent_depth - 1:
         return ScopeDecision(
             False,

@@ -1,6 +1,6 @@
 # AegisTrace API Guide
 
-Last Material Revision: 2026-08-01
+Last Material Revision: 2026-09-07
 
 ## Base URL
 
@@ -12,7 +12,7 @@ http://127.0.0.1:8000/
 
 ### GET /health
 
-Returns `{"status": "ok", "version": "2.0.0"}`.
+Returns `{"status": "ok", "version": "2.1.0"}`.
 
 ### GET /actions
 

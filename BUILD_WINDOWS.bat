@@ -6,8 +6,8 @@ REM  Author: Pierre-Edward Procyk
 REM  Copyright: (c) 2026 Pierre-Edward Procyk. All rights reserved.
 REM  File: BUILD_WINDOWS.bat
 REM  Purpose: One-click Windows build and verification script
-REM  Version: 2.0.0
-REM  Date: 2026-08-01
+REM  Version: 2.1.0
+REM  Date: 2026-09-07
 REM  Licence Status: No licence selected unless approved in writing by Pierre-Edward Procyk
 REM ============================================================================
 REM
@@ -20,7 +20,7 @@ REM
 REM  This script will:
 REM    - Create a virtual environment
 REM    - Install all dependencies (including test-full)
-REM    - Run the test suite (113 tests)
+REM    - Run the complete discovered test suite
 REM    - Run the demo scenario
 REM    - Verify the ledger
 REM    - Compile the arXiv paper (if Tectonic is installed)
@@ -33,7 +33,7 @@ cd /d "%~dp0"
 
 echo.
 echo  ============================================================================
-echo   AI-IDP / AegisTrace — Windows Build Script v2.0.0
+echo   AI-IDP / AegisTrace — Windows Build Script v2.1.0
 echo   Cognitive Industries — Les Industries Cognitives
 echo   (c) 2026 Pierre-Edward Procyk. All rights reserved.
 echo  ============================================================================
@@ -50,6 +50,12 @@ if errorlevel 1 (
     exit /b 1
 )
 for /f "tokens=2" %%i in ('python --version 2^>^&1') do set PYVER=%%i
+python -c "import sys; raise SystemExit(0 if sys.version_info >= (3, 12) else 1)"
+if errorlevel 1 (
+    echo ERROR: AegisTrace 2.1.0 requires Python 3.12 or newer.
+    pause
+    exit /b 1
+)
 echo OK: Python %PYVER%
 
 REM --- Check Git ---
@@ -60,8 +66,7 @@ if errorlevel 1 (
     echo WARNING: Git is not installed. Git push will not be available.
     echo Install Git from https://git-scm.com
 ) else (
-    for /f "tokens=3" %%i in ('git --version 2^>^&1') do set GITVER=%%i
-    echo OK: Git %GITVER%
+    for /f "tokens=*" %%i in ('git --version 2^>^&1') do echo OK: %%i
 )
 
 REM --- Create virtual environment ---
@@ -95,10 +100,12 @@ echo OK: All dependencies installed
 
 REM --- Run tests ---
 echo.
-echo [5/7] Running test suite (113 tests expected)...
-python -m pytest tests/ -v --tb=short
+echo [5/7] Running the discovered test suite...
+python -m pytest tests/ -q --tb=short
 if errorlevel 1 (
-    echo WARNING: Some tests failed. Check the output above.
+    echo ERROR: Some tests failed. Check the output above.
+    pause
+    exit /b 1
 ) else (
     echo OK: All tests passed
 )
@@ -108,12 +115,19 @@ echo.
 echo [6/7] Running demo scenario...
 python -m aegistrace.cli admin demo --out .aitrace-demo
 if errorlevel 1 (
-    echo WARNING: Demo failed. Check the output above.
+    echo ERROR: Demo failed. Check the output above.
+    pause
+    exit /b 1
 ) else (
     echo OK: Demo completed successfully
     echo.
     echo Verifying ledger...
-    python -m aegistrace.cli verify --ledger .aitrace-demo\ledger.jsonl
+    python -m aegistrace.cli verify --ledger .aitrace-demo\ledger.jsonl --keys .aitrace-demo\public_keys.json
+    if errorlevel 1 (
+        echo ERROR: Ledger verification failed.
+        pause
+        exit /b 1
+    )
 )
 
 REM --- Check Tectonic (optional) ---
@@ -124,13 +138,16 @@ if errorlevel 1 (
     echo SKIPPED: Tectonic not installed.
     echo To compile the paper, install Tectonic from https://tectonic-typesetting.github.io
 ) else (
+    if not exist tmp\paper-build mkdir tmp\paper-build
     cd paper
-    tectonic main.tex
+    tectonic --outdir ..\tmp\paper-build main.tex
     if errorlevel 1 (
-        echo WARNING: Paper compilation failed.
+        echo ERROR: Paper compilation failed.
+        cd ..
+        pause
+        exit /b 1
     ) else (
         echo OK: Paper compiled successfully
-        copy main.pdf aegis-trace-arxiv.pdf >nul
     )
     cd ..
 )
@@ -141,13 +158,13 @@ echo  ==========================================================================
 echo   BUILD COMPLETE
 echo  ============================================================================
 echo.
-echo   Version:    2.0.0
-echo   Date:       2026-08-01
+echo   Version:    2.1.0
+echo   Date:       2026-09-07
 echo   Python:     %PYVER%
-echo   Tests:      113 (with test-full profile)
+echo   Tests:      Complete discovered suite (2026-09-07 baseline: 162 passed, 2 opt-in PQC skips)
 echo   Spec docs:  25
-echo   JSON schemas: 14
-echo   Python source files: 57
+echo   JSON schemas: 15
+echo   Python source files: 58
 echo   Bibliography: 57 entries
 echo.
 echo   Project root: %CD%
@@ -155,10 +172,9 @@ echo   Virtual env:  %CD%\.venv
 echo   Demo output:  %CD%\.aitrace-demo
 echo.
 echo   Next steps:
-echo     1. Read FILING_INSTRUCTIONS.md
-echo     2. Read GITHUB_PUSH_INSTRUCTIONS.md (to push to GitHub)
-echo     3. Read ARXIV_SUBMISSION_INSTRUCTIONS.md (to submit to arXiv)
-echo     4. Read OFFICIAL_EMAIL_TEMPLATES.md (for government communications)
+echo     1. Read project-control\Now.md
+echo     2. Read project-control\PROJECT_STATUS.md
+echo     3. Obtain exact action-time authorization before any push, release, or publication
 echo.
 echo  ============================================================================
 echo.

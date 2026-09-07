@@ -1,6 +1,6 @@
 # Cross-Domain Synthesis
 
-Last Material Revision: 2026-08-01
+Last Material Revision: 2026-09-07
 
 ## Integrated Causal Model
 
@@ -36,7 +36,7 @@ The integrated governance model combines: (1) national standard (Standards Counc
 | Permanence vs cryptographic obsolescence | Interface-isolated signing; documented PQC migration path; long-term signature migration |
 | Public verification vs sealed records | Visibility tiers; PUBLIC tier for non-sensitive fields; SEALED tier for sensitive records |
 | Canadian framework vs international interoperation | Federation protocol; standards crosswalk (W3C PROV, DID, VC; SPIFFE; in-toto; SLSA; Sigstore; OpenTelemetry) |
-| AI-IDP vs Indigenous data sovereignty | OCAP®-aligned handling; distinctions-based approach; TRC Calls to Action alignment; consultation precondition |
+| AI-IDP vs Indigenous data sovereignty | OCAP®-aligned handling; distinctions-based approach; TRC Calls to Action alignment; context-specific rights-holder engagement where materially implicated |
 
 ## Design Constraints
 

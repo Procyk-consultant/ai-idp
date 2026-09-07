@@ -14,9 +14,9 @@ Purpose: Analyze privacy and human-rights implications of AI-IDP
 Audience: Privacy officers, human-rights analysts, regulators
 Document Classification: Public
 Classification: legal
-Version: 2.0.0
+Version: 2.1.0
 Status: Submission-ready
-Last Material Revision: 2026-08-01
+Last Material Revision: 2026-09-07
 Dependencies: spec/AI-IDP-CORE.md; AI-IDP-CANADA.md
 Source Basis: Master Execution Prompt; Canadian public-record legal materials
 Invariants: Distinguishes current law from proposed law
@@ -53,7 +53,7 @@ AI-IDP affects human rights under the Canadian Charter of Rights and Freedoms (s
 
 ## 7. Indigenous Data Governance
 
-AI-IDP's Indigenous data-governance provisions respect Indigenous data sovereignty. The analysis is grounded in: OCAP® principles (First Nations Information Governance Centre) — Ownership, Control, Access, Possession; First Nations, Inuit, and Métis distinctions (different nations have different governance authority); TRC Calls to Action (particularly Calls to Action 43-44 on UNDRIP adoption and Calls to Action 7, 18, 19 on aboriginal health and reconciliation); community-controlled access for Indigenous community data. Consultation with rights-holders is a precondition for implementation.
+AI-IDP's Indigenous data-governance provisions recognize Indigenous data sovereignty. The analysis is grounded in: OCAP® principles (First Nations Information Governance Centre) — Ownership, Control, Access, Possession; First Nations, Inuit, and Métis distinctions (different nations have different governance authority); TRC Calls to Action (particularly Calls to Action 43-44 on UNDRIP adoption and Calls to Action 7, 18, 19 on aboriginal health and reconciliation); and community-controlled access for Indigenous community data. Meaningful rights-holder engagement is required before a deployment that materially affects Indigenous rights, community data, governance authority, or services. This is contextual, not a universal precondition for unrelated implementations.
 
 ## 8. Access to Justice
 

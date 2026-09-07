@@ -14,9 +14,9 @@ Purpose: Policy white paper presenting the case for AI-IDP adoption
 Audience: Policy makers, civil-society organizations, regulators, public
 Document Classification: Public
 Classification: policy
-Version: 2.0.0
+Version: 2.1.0
 Status: Submission-ready
-Last Material Revision: 2026-08-01
+Last Material Revision: 2026-09-07
 Dependencies: spec/AI-IDP-CORE.md; AI-IDP-CANADA.md
 Source Basis: Master Execution Prompt; Canadian public-record legal materials
 Invariants: Distinguishes current law from proposed law
@@ -53,7 +53,7 @@ AI-IDP's privacy safeguards include: minimization (only necessary personal infor
 
 The framework's human-rights safeguards include: Charter compliance (ss. 2(b), 7, 8, 15); privacy-law compliance (PIPEDA, Privacy Act, provincial statutes); access to justice (recourse mechanism accessible without legal representation; provincial legal-aid coverage; admissibility in Canadian courts); non-discrimination (monitoring for discriminatory effects; accessible recourse; small-developer and open-source profiles reduce barriers).
 
-The framework's Indigenous data-governance provisions respect Indigenous data sovereignty: recognition of Indigenous data sovereignty; OCAP®-aligned handling (Ownership, Control, Access, Possession); First Nations, Inuit, and Métis distinctions-based approach; TRC Calls to Action alignment; community-controlled access for Indigenous community data; consultation with rights-holders as a precondition for implementation.
+The framework's Indigenous data-governance provisions recognize Indigenous data sovereignty through OCAP®-aligned handling (Ownership, Control, Access, Possession), First Nations, Inuit, and Métis distinctions-based approaches, TRC Calls to Action alignment, and community-controlled access where applicable. Meaningful rights-holder engagement is required before deployments that materially affect Indigenous rights, community data, governance authority, or services; it is not a universal precondition for unrelated implementations.
 
 ## 5. Implementation Pathways
 

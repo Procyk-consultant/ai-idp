@@ -10,9 +10,9 @@ Title: Filing Instructions — What Goes Where, To Who, Why, What For
 Purpose: Practical guide for Pierre-Edward Procyk to sort, file, and submit project documents
 Audience: Pierre-Edward Procyk (only)
 Document Classification: Confidential
-Version: 2.0.0
+Version: 2.1.0
 Status: Final
-Last Material Revision: 2026-08-01
+Last Material Revision: 2026-09-07
 Licence Status: No licence selected unless approved in writing by Pierre-Edward Procyk
 ---
 
@@ -153,9 +153,9 @@ These are internal documents you keep for your own reference, governance, and au
 
 | File | What it is | Who to share with | Why |
 |------|-----------|-------------------|-----|
-| `research/synthesis/INDIGENOUS_DATA_GOVERNANCE_ANALYSIS.md` | Indigenous data governance analysis | First Nations, Inuit, and Métis organizations; FNIGC; ITK; MNC | Consultation precondition |
+| `research/synthesis/INDIGENOUS_DATA_GOVERNANCE_ANALYSIS.md` | Indigenous data governance analysis | First Nations, Inuit, and Métis organizations; FNIGC; ITK; MNC | Contextual engagement where materially implicated |
 | `government/PRIVACY_AND_HUMAN_RIGHTS_ANALYSIS.pdf` (Section on Indigenous data) | Privacy/HR analysis (Indigenous section) | Same as above | Same as above |
-| **Important** | Consultation with rights-holders is a precondition for implementation. Do not proceed with implementation without meaningful consultation. | | |
+| **Important** | Meaningful engagement with the relevant rights-holders is required before an implementation that materially affects Indigenous rights, community data, governance authority, or services. This is not a universal condition for unrelated implementations. | | |
 
 ### 3.5 For Implementers and Developers
 
@@ -249,7 +249,7 @@ These are internal documents you keep for your own reference, governance, and au
 - **Do NOT** generate a replacement logo
 - **Do NOT** invent author, organization, contact, or business data
 - **Do NOT** release synthetic data as empirical observation
-- **Do NOT** proceed with implementation without Indigenous data-governance consultation
+- **Do NOT** proceed with an implementation that materially affects Indigenous rights, community data, governance authority, or services without the applicable distinctions-based rights-holder engagement; unrelated implementations do not inherit this gate
 - **Do NOT** suppress criticism, contradictions, or negative findings
 
 ### What to Do Before Any External Submission

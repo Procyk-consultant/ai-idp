@@ -5,8 +5,8 @@ Author: Pierre-Edward Procyk
 Copyright: © 2026 Pierre-Edward Procyk. All rights reserved.
 File: project-control/ASSUMPTION_REGISTER.md
 Title: Assumption Register
-Version: 2.0.0
-Last Material Revision: 2026-08-01
+Version: 2.1.0
+Last Material Revision: 2026-09-07
 ---
 
 # Assumption Register
@@ -58,7 +58,7 @@ Assumptions made when verified information was unavailable. Each assumption is r
 - **Basis:** Master Prompt §0 forbids external publication; validation must therefore be internal.
 - **Reversibility:** External peer review remains a precondition for external publication.
 
-## A-010 — Indigenous data governance consultation
-- **Assumption:** Indigenous data-governance analysis is grounded in publicly available frameworks (OCAP® principles, First Nations Information Governance Centre materials, Inuit Tapiriit Kanatami and Métis National Council policy positions, TRC Calls to Action). The analysis is not a substitute for consultation with rights-holders.
+## A-010 — Context-specific Indigenous data governance engagement
+- **Assumption:** Indigenous data-governance analysis is grounded in publicly available frameworks (OCAP® principles, First Nations Information Governance Centre materials, Inuit Tapiriit Kanatami and Métis National Council policy positions, TRC Calls to Action). The analysis is not a substitute for meaningful rights-holder engagement when a deployment materially affects Indigenous rights, community data, governance authority, or services. This engagement is not a universal prerequisite for unrelated implementations.
 - **Basis:** Public-record frameworks.
-- **Reversibility:** Consultation outcomes must be reflected in revised versions of the Indigenous data-governance analysis.
+- **Reversibility:** Engagement outcomes, where the material nexus exists, must be reflected in revised versions of the Indigenous data-governance analysis.

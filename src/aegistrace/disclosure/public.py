@@ -5,13 +5,14 @@ Copyright: © 2026 Pierre-Edward Procyk. All rights reserved.
 File: src/aegistrace/disclosure/public.py
 Purpose: Strict public-tier event projection
 Classification: service
-Version: 2.0.0
-Last Material Revision: 2026-08-17
+Version: 2.1.0
+Last Material Revision: 2026-09-07
 Licence Status: No licence selected unless approved in writing by Pierre-Edward Procyk.
 """
 from __future__ import annotations
 
-from typing import Any, Iterable
+from collections.abc import Iterable
+from typing import Any
 
 from aegistrace.events.models import Event
 

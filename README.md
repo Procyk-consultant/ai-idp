@@ -1,13 +1,13 @@
 # AI-IDP
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21769036.svg)](https://doi.org/10.5281/zenodo.21769036) / AegisTrace
 
-Last Material Revision: 2026-08-17
+Last Material Revision: 2026-09-07
 
 **A Universal Canadian Framework for Persistent AI Actor Identity, Permanent Traceability, Delegation, Quality Assurance, and Accountable AI Operation**
 
 © 2026 Pierre-Edward Procyk. Cognitive Industries — Les Industries Cognitives. All rights reserved.
 
-> **Status:** v2.0.0 is public on GitHub and archived on Zenodo (DOI: [10.5281/zenodo.21769036](https://doi.org/10.5281/zenodo.21769036)). The initial LinkedIn article was published on 2026-08-08. arXiv is deferred with no identifier assigned; government and standards submissions have no verified dispatch record. The project remains All Rights Reserved; no public licence has been granted.
+> **Authoritative current state:** v2.1.0 is the local working version. It incorporates the post-v2.0.0 reconciliation source and the 2026-09-07 verification/repair pass. It has not been merged to public `main`, tagged, released, deployed, or published online. The public GitHub/Zenodo v2.0.0 record remains a historical public baseline, not the current local authority. The project remains All Rights Reserved; no public licence has been granted.
 
 ---
 
@@ -254,6 +254,8 @@ LinkedIn: [linkedin.com/in/pierre-edward-procyk-223b75305](https://www.linkedin.
 
 ## Citation
 
+Historical public v2.0.0 citation:
+
 ```bibtex
 @misc{aegistrace2026,
   author = {Pierre-Edward Procyk},
@@ -273,7 +275,11 @@ LinkedIn: [linkedin.com/in/pierre-edward-procyk-223b75305](https://www.linkedin.
 
 See `project-control/PROJECT_STATUS.md`, `project-control/VALIDATION_STATUS.md`, `project-control/SOURCE_HARDENING_COMPLETION_2026-08-17.md`, `project-control/CRYPTO_BACKEND_COMPLETION_2026-08-17.md`, `project-control/STATIC_CONFORMANCE_PATCH_LOG_2026-08-17.md`, `release/RECONCILIATION_VALIDATION_STATUS_2026-08-17.md`, and `release/VALIDATION_REPORT.md`.
 
-**Historical validated baseline:** v2.0.0 / 2026-08-02 — 113/113 tests recorded  
-**Current reconciliation source material:** 2026-08-17 — source implementation/hardening complete; fresh runtime and external target-environment validation pending  
-**Version:** 2.0.0  
+**Historical validated baseline:** v2.0.0 / 2026-08-02 — 113/113 tests recorded
+
+**Current authoritative local version:** v2.1.0 — based on the 2026-08-17 reconciliation line plus the 2026-09-07 repair and verification pass
+
+**Online/public version:** v2.0.0 historical baseline; local v2.1.0 is not published
+
+**Version:** 2.1.0
 **Research paper:** last recorded clean Tectonic compile passed on 2026-08-02; public archival record at https://doi.org/10.5281/zenodo.21769036

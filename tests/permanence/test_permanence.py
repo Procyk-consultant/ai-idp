@@ -4,8 +4,8 @@ Author and Intellectual Property Owner: Pierre-Edward Procyk
 Copyright: © 2026 Pierre-Edward Procyk. All rights reserved.
 File: tests/permanence/test_permanence.py
 Purpose: Permanence tests - revocation, termination, key rotation, archival
-Version: 2.0.0
-Last Material Revision: 2026-08-01
+Version: 2.1.0
+Last Material Revision: 2026-09-07
 Licence Status: No licence selected unless approved in writing by Pierre-Edward Procyk.
 """
 from __future__ import annotations
@@ -81,7 +81,7 @@ class TestPermanence:
             resource_id="urn:web:1",
         )
         # Rotate
-        new_sk = stack["keys"].rotate("aitrace://ca/key/k1", "aitrace://ca/key/k2")
+        stack["keys"].rotate("aitrace://ca/key/k1", "aitrace://ca/key/k2")
         # Sign a new event with the new key
         stack["collector"].record(
             actor=stack["actor"], execution_context=stack["ec"], task_id=str(make_identifier("task", "t2")),

@@ -2,165 +2,100 @@
 Organization: Cognitive Industries — Les Industries Cognitives
 Project: AI-IDP / AegisTrace
 Author: Pierre-Edward Procyk
-Role: Founder / CEO
 Copyright: © 2026 Pierre-Edward Procyk. All rights reserved.
-Contact: p.procyk.media@gmail.com
 File: project-control/PROJECT_STATUS.md
 Title: Project Status
-Purpose: Living snapshot of project progress, validation state, source implementation, and external dependencies
-Version: 2.0.0-reconciliation
-Status: Public Baseline Published / Reconciliation Source Complete / Fresh Validation Pending
-Last Material Revision: 2026-08-17
-Branch: reconcile-2026-08-14
+Purpose: Controlling local project status and evidence boundaries
+Version: 2.1.0
+Status: Authoritative Locally / Not Published Online
+Last Material Revision: 2026-09-07
+Branch: local/2.1.0-reconciliation
+Source Branch: reconcile-2026-08-14
 Historical Public Baseline: b13e51baa51c9e2bb0a5bff4f3911a6902b51206
+Licence Status: All Rights Reserved; no public licence granted
 ---
 
-# Project Status — AI-IDP / AegisTrace
+# Project Status — AI-IDP / AegisTrace 2.1.0
 
-## Project Identity
+## Controlling state
 
-- **Project:** AI-IDP — Universal AI Identity, Delegation, Provenance, Traceability, Quality, Accountability, and Permanent Audit Standard
-- **Reference Implementation:** AegisTrace
-- **Project Originator, Author, and IP Owner:** Pierre-Edward Procyk
-- **Organization:** Cognitive Industries — Les Industries Cognitives
-- **Primary Jurisdiction / Proposal Context:** Canada
-- **Project Character:** proposed Canadian legal/technical standard and governance framework; AegisTrace reference implementation; scientific/technical research corpus; university/government/policy packages; conformity architecture; public GitHub source/specification repository; Zenodo archival research record.
+The authoritative current project state is **local version 2.1.0**. It is based on the 124-commit `reconcile-2026-08-14` line plus the 2026-09-07 evidence repair and verification pass on `local/2.1.0-reconciliation`.
 
-AI-IDP intentionally states the full target standard and expected end-state. It is **not current Canadian law, not an adopted National Standard of Canada, and not an externally certified conformance regime**.
+Version 2.1.0 has **not** been merged to public `main`, tagged, released, deployed, or published online. Public GitHub `main` and the Zenodo DOI remain the historical v2.0.0 baseline. Historical v2.0.0 release records remain intact and must not be relabelled as 2.1.0 evidence.
 
-## Public / External State
+## Current verified implementation
 
-Verified project-facing state represented by the repository documentation:
-
-- GitHub repository: public.
-- Zenodo DOI: `10.5281/zenodo.21769036`.
-- arXiv: deferred; no identifier assigned.
-- Government/standards adoption or dispatch: no verified record claimed.
-- External certification/accreditation: not claimed.
-- Licence: All Rights Reserved; no public implementation/reproduction licence granted by implication.
-
-The historical statement that no external repository publication had occurred is superseded by the public GitHub + Zenodo state.
-
-## Engineering Baseline and Current Branch
-
-### Historical executed baseline — 2026-08-02
-
-The last fully executed project-wide validation recorded:
-
-- **113/113 tests passed**;
-- governed/demo/ledger evidence as recorded for that baseline;
-- 14 JSON schemas in that validated corpus;
-- successful Tectonic paper compilation;
-- historical release/checksum/archive evidence.
-
-### Current reconciliation branch — 2026-08-17
-
-`reconcile-2026-08-14` contains substantial source changes after that executed baseline.
-
-Current source implementation includes/hardens:
+The local 2.1.0 source includes:
 
 - persistent identity and key lifecycle;
-- strict cryptographic verification and public verification-key export;
-- append-only/hash-chained ledger with duplicate detection;
-- fail-closed multidimensional authorization;
-- exact action-intent approvals including visibility;
-- approver-entitlement policy;
-- single/dual approval and atomic consumption;
-- recursive bounded delegation;
-- governed operational-event boundary and denial evidence;
-- API proof-of-possession and replay resistance;
-- durable SQLite/shared PostgreSQL replay state;
-- durable/shared approval-consumption state;
-- public-safe disclosure projections;
-- WAL corruption quarantine/recovery;
-- parallel verification;
-- PostgreSQL persistence hardening;
-- PKCS#11 and managed-KMS signing source paths;
-- ML-DSA/SLH-DSA liboqs source paths;
-- OpenTelemetry and GitHub remote integration paths;
-- signed federation gateway and disclosed-chain verification;
-- 15 current JSON schemas, including exact-action approval schema;
-- strengthened security/privacy/federation/durable-state/conformance test source.
+- fail-closed multidimensional authorization and exact action-intent approvals;
+- approver entitlements, single/dual approval, and atomic consumption;
+- bounded recursive delegation;
+- authenticated governed API writes with nonce replay resistance;
+- denial evidence and strict public disclosure projections;
+- append-only/hash-chained ledgers, WAL recovery, and parallel verification;
+- SQLite and PostgreSQL durability paths;
+- PKCS#11 and managed KMS signing paths;
+- crypto-agility paths for Ed25519, ML-DSA-65, and SLH-DSA-128s;
+- OpenTelemetry and GitHub adapter paths;
+- signed federation agreements and disclosed-chain verification;
+- 25 specification documents, 15 JSON schemas, 58 Python source files, and 22 Python test/support files.
 
-**No fresh runtime validation or recompilation is claimed for this branch.**
+External services, hardware, credentials, independent operators, and target-environment activation remain separate from implemented source.
 
-## Gate State
+## Fresh local verification — 2026-09-07
 
-| Gate | Description | Current status |
-|---|---|---|
-| 0 | Initial comprehension | PASSED historically |
-| 1 | Environment/source inventory | PASSED historically; repository state reconciled |
-| 2 | Research protocol | PASSED historically |
-| 3 | Evidence sufficiency | PARTIAL — documented evidence corpus; external scholarly validation/time-sensitive refresh remains applicable |
-| 4 | Cross-domain synthesis | PASSED historically |
-| 5 | Formal architecture | SOURCE RECONCILED — 25 specs / 15 current schemas; fresh schema/runtime gate pending |
-| 6 | Functional implementation | SOURCE IMPLEMENTATION COMPLETE on reconciliation branch; fresh execution pending |
-| 7 | Engineering verification | HISTORICAL PASS: 113/113 on 2026-08-02; current branch NOT RERUN |
-| 8 | Scientific evaluation | PARTIAL — historical/synthetic evidence; real deployment evidence remains external |
-| 9 | University package | HISTORICAL DELIVERABLE COMPLETE with documented rendering limits |
-| 10 | Research-paper package | HISTORICAL COMPILE PASS; not recompiled after current source work |
-| 11 | Government/policy package | HISTORICAL DELIVERABLE COMPLETE; adoption/dispatch not claimed |
-| 12 | Independent validation | PARTIAL — internal/adversarial records exist; independent external review pending |
-| 13 | Historical release/archive | PASSED for historical release state; next release artifacts require new validation/checksums |
+| Gate | Result |
+|---|---|
+| Python | 3.12.10 |
+| Windows one-click build | PASS: `BUILD_WINDOWS.bat` completed all seven stages and returned exit 0 |
+| Ruff | PASS on `src` and `tests` |
+| MyPy | PASS; no issues in 80 source/test files |
+| Pytest | PASS: 162 passed, 2 skipped, 164 collected |
+| Native PQC | 2 live liboqs tests intentionally skipped unless `AEGISTRACE_RUN_LIBOQS_TESTS=1` |
+| Package metadata | PASS: installed package and runtime both report 2.1.0 |
+| Wheel | PASS: `aegistrace-2.1.0-py3-none-any.whl`, 115,507 bytes, SHA-256 `70f908c90b400f2a35358fc30ac297e2c71fcf31d9feb927fabe34017e3956a6` |
+| Governed demo | PASS: 4 events, governance mode `GOVERNED`, verification `OK` |
+| Independent ledger verification | PASS: event hashes, hash chain, and 4 signatures verified |
+| Paper | PASS: Tectonic 0.16.9 exit 0; 13-page PDF; disclosed underfull-box/fontconfig warnings |
+| Container | BLOCKED BY ENVIRONMENT: Docker CLI present, Docker Desktop Linux engine unavailable |
 
-## Deliverable Index
+Two dependency deprecation warnings were emitted by the FastAPI/Starlette test client. They did not fail the suite and remain dependency-maintenance items.
 
-| Category | Location | Current status |
-|---|---|---|
-| Project control | `project-control/` | CURRENT — reconciliation/validation trail added |
-| Brand assets | `brand/` | Preserved project assets |
-| Research | `research/` | Public research corpus |
-| University | `university/` | Historical deliverable package |
-| Science | `science/` | Research/evaluation package with limitations |
-| Technical specification | `spec/` | Reconciled toward current runtime model |
-| JSON Schemas | `schemas/` | 15 current source schemas; fresh validation pending |
-| AegisTrace runtime | `src/aegistrace/` | Source implementation/hardening complete; execution pending |
-| Tests | `tests/` | Strengthened source corpus; fresh run pending |
-| Conformance | `tests/conformance/`; `spec/CONFORMANCE_LEVELS.md` | Source reconciled; external certification not claimed |
-| Examples | `examples/` | Reference examples |
-| Threat model | `threat-model/` | Project threat-model corpus |
-| Developer/auditor/regulator docs | `docs/` | Reconciled where affected |
-| Paper | `paper/` | Historical compiled artifact retained; no current recompile |
-| Government package | `government/` | Proposal/policy package; no adoption/dispatch claim |
-| Impact | `impact/` | Impact analysis corpus |
-| Administration | `administration/` | Administrative proposal/implementation corpus |
-| Release | `release/` | Historical evidence + reconciliation validation addendum |
+## Defects found and repaired in this pass
 
-## External / Institutional Dependencies
+1. The API replaced a caller-supplied empty ledger because `ledger or AppendOnlyLedger()` treated an empty ledger as false. The boundary now distinguishes `None` explicitly.
+2. Event collection was typed to one concrete ledger even though the runtime supports both append-only and batched ledgers. A minimal `EventLedger` protocol now defines the required contract.
+3. GCP KMS verification accepted a broad public-key union at the type boundary. It now fails closed unless the loaded public key is elliptic-curve.
+4. A leaf delegation returned a scope-widening reason before enforcing the leaf boundary. Delegation depth is now validated first.
+5. The standard `test-full` extra installed `liboqs-python`; importing it can download and compile a native liboqs tree when the library is absent. Native PQC tests are now explicit opt-in and the dependency remains available through the separate `pqc` extra.
+6. Current package/API/container metadata still identified the reconciled code as 2.0.0. Current-facing runtime metadata now identifies version 2.1.0 while historical 2.0.0 records remain historical.
 
-The following are not unfinished core source code:
+## Indigenous data-governance decision
 
-- live production database/performance/failover evidence;
-- actual PKCS#11/HSM/KMS device/account validation;
-- live liboqs runtime and deployment assurance;
-- live OTLP collector and credentialed GitHub remote targets;
-- organization-specific external IAM/directory configuration;
-- real independent federation operators and controlled/sealed disclosure channels;
-- independent archive/regulator-operated vault/transparency infrastructure;
-- third-party peer review, accreditation, certification, government/standards adoption.
+The controlling rule is context-specific:
 
-See `LIMITATIONS.md`, `project-control/VALIDATION_STATUS.md`, `project-control/SOURCE_HARDENING_COMPLETION_2026-08-17.md`, `project-control/CRYPTO_BACKEND_COMPLETION_2026-08-17.md`, and `release/RECONCILIATION_VALIDATION_STATUS_2026-08-17.md`.
+- meaningful, distinctions-based rights-holder engagement is required before a deployment that materially affects Indigenous rights, community data, governance authority, or services;
+- this is **not a universal implementation gate** for unrelated deployments without that material nexus;
+- AI-IDP does not remove or override legal duties, agreements, or community governance requirements where they apply.
 
-## Next Evidence Gate
+This rule is corroborated by the 2.1.0 French synthesis PDF, the current README/privacy/specification text, and the relevant source-branch commits. Stale universal-precondition wording was corrected in current active documents. Historical release snapshots retain their historical wording.
 
-The next engineering step is **not additional speculative architecture work**. It is a controlled validation of the exact reconciliation commit when authorized: lint/type-check/test suites, governed demo, cryptographic verification, hardening negative cases, federation/durable-state cases, and available external integration tests.
+## Communications and content evidence
 
-Until that gate executes:
+- **Emails/contacts:** Pierre-Edward Procyk states that emails were sent and contacts completed. The inspected local archive contains drafts and a reviewed Gmail-draft transcript, but no sent-mail receipt, message header, or communications log proving the completed sends. Classification: **user-confirmed; independent receipt evidence unavailable in the inspected files**. The project must not revert this to “not sent,” but it also must not invent dates, recipients, or message identifiers.
+- **Content work:** verified local evidence includes a structured five-series/15-post LinkedIn package, two scheduler-ready text exports, a 15-image prompt set, at least 18 named AI-IDP/AegisTrace visual assets in `Visual_components`, a visually sound three-page French 2.1.0 synthesis PDF, and the repository's paper, government, technical, impact, research, specification, and presentation-support corpus. These files prove substantial drafting/production work; they do not by themselves prove publication.
 
-- historical `113/113` remains historical evidence;
-- no new test count is claimed;
-- no new validated release is claimed;
-- `main` remains the public baseline;
-- the reconciliation branch remains unmerged.
+## GitHub and CI state
 
-## Recovery
+- Public `main`: `b13e51baa51c9e2bb0a5bff4f3911a6902b51206`.
+- Public reconciliation branch: `e148cf484b782872416121704a7887935a21bc71`, 124 commits ahead of public `main` and 0 behind at the inspected merge base.
+- Public update branch: `54c8367bb62b68a1a7b36ecd54428183365367ee`.
+- Current authoritative 2.1.0 branch: local only; no remote push performed in this pass.
+- Latest public CI run inspected: run `31344416895`, job `93323578720`, 0 workflow steps, runner ID 0. GitHub's annotation says the job was not started because the account is locked due to a billing issue.
 
-If context is lost, read this file together with:
+The CI evidence proves a pre-execution GitHub account/billing lock, not a code failure. Because GitHub documents standard hosted runners as free for public repositories, an erroneous or stale account/subscription billing state is plausible. Proving that it is specifically a GitHub subscription bug requires authenticated billing/support evidence that was not available to this local inspection.
 
-1. `project-control/VALIDATION_STATUS.md`
-2. `project-control/STATIC_CONFORMANCE_PATCH_LOG_2026-08-17.md`
-3. `project-control/SOURCE_HARDENING_COMPLETION_2026-08-17.md`
-4. `project-control/CRYPTO_BACKEND_COMPLETION_2026-08-17.md`
-5. `release/RECONCILIATION_VALIDATION_STATUS_2026-08-17.md`
+## External action boundary
 
-Continue from the lowest unresolved **validation or external-activation** dependency rather than reopening completed source implementation without evidence of a new defect.
+No public merge, push, tag, release, deployment, publication, post, email, account change, billing change, or licence change was performed by the 2026-09-07 local reconciliation. Any later GitHub update must name the exact branch/commit and receive explicit action-time authorization.

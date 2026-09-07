@@ -4,8 +4,8 @@ Author and Intellectual Property Owner: Pierre-Edward Procyk
 Copyright: © 2026 Pierre-Edward Procyk. All rights reserved.
 File: tests/unit/test_ledger.py
 Purpose: Unit tests for ledger module
-Version: 2.0.0
-Last Material Revision: 2026-08-01
+Version: 2.1.0
+Last Material Revision: 2026-09-07
 Licence Status: No licence selected unless approved in writing by Pierre-Edward Procyk.
 """
 from __future__ import annotations
@@ -16,7 +16,6 @@ from aegistrace.events.collector import EventCollector
 from aegistrace.events.models import Actor, ExecutionContext
 from aegistrace.identity.ids import make_identifier
 from aegistrace.identity.keys import KeyService
-from aegistrace.identity.lifecycle import Registry
 from aegistrace.ledger.append_only import AppendOnlyLedger, LedgerVerifier
 from aegistrace.ledger.merkle import merkle_proof, merkle_root
 
@@ -42,7 +41,6 @@ def make_ec():
 def make_collector():
     ledger = AppendOnlyLedger()
     keys = KeyService()
-    registry = Registry()
     collector = EventCollector(ledger, keys)
     # Register entities and create signing key
     actor = make_actor()

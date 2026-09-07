@@ -14,9 +14,9 @@ Purpose: Analyze federal and provincial jurisdiction over AI agent identity and 
 Audience: Legal reviewers, constitutional experts, policy analysts
 Document Classification: Public
 Classification: legal
-Version: 2.0.0
+Version: 2.1.0
 Status: Submission-ready
-Last Material Revision: 2026-08-01
+Last Material Revision: 2026-09-07
 Dependencies: spec/AI-IDP-CORE.md; AI-IDP-CANADA.md
 Source Basis: Master Execution Prompt; Canadian public-record legal materials
 Invariants: Distinguishes current law from proposed law
@@ -61,7 +61,7 @@ The Canadian Charter of Rights and Freedoms applies to AI-IDP. Section 2(b) (fre
 
 ## 9. Aboriginal and Treaty Rights
 
-Section 35 of the Constitution Act 1982 recognizes and affirms Aboriginal and treaty rights. AI-IDP's Indigenous data-governance provisions (OCAP®-aligned handling, distinctions-based approach, TRC Calls to Action alignment, community-controlled access) respect Aboriginal and treaty rights. Consultation with rights-holders is a precondition for implementation.
+Section 35 of the Constitution Act 1982 recognizes and affirms Aboriginal and treaty rights. AI-IDP's Indigenous data-governance provisions (OCAP®-aligned handling, distinctions-based approach, TRC Calls to Action alignment, community-controlled access) are intended to respect Aboriginal and treaty rights. Meaningful rights-holder engagement is required where a proposed deployment materially affects Indigenous rights, community data, governance authority, or services; it is not a universal precondition for unrelated implementations.
 
 ## 10. Conclusion
 

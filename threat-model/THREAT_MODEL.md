@@ -11,9 +11,9 @@ Purpose: Define the threat model, attack trees, abuse cases, and mitigations for
 Audience: Security researchers, auditors, implementers
 Document Classification: Public
 Classification: documentation
-Version: 2.0.0
+Version: 2.1.0
 Status: Submission-ready
-Last Material Revision: 2026-08-01
+Last Material Revision: 2026-09-07
 Dependencies: spec/AI-IDP-CORE.md; spec/EVENT_PROTOCOL.md; src/aegistrace/
 Source Basis: Master Execution Prompt; STRIDE/attack-tree methodology; NIST cybersecurity guidance
 Invariants: Each threat has a documented mitigation and an automated test
@@ -200,7 +200,7 @@ The threat model uses a combination of STRIDE (Spoofing, Tampering, Repudiation,
 
 **Description.** AI-IDP's permanent records conflict with Indigenous data sovereignty (OCAP® principles, First Nations, Inuit, and Métis distinctions).
 
-**Mitigation.** Indigenous data-governance provisions respect Indigenous data sovereignty. Community-controlled access for Indigenous community data. Consultation with rights-holders as a precondition for implementation. TRC Calls to Action alignment.
+**Mitigation.** Indigenous data-governance provisions recognize Indigenous data sovereignty, community-controlled access for Indigenous community data, TRC Calls to Action alignment, and meaningful rights-holder engagement before deployments that materially affect Indigenous rights, community data, governance authority, or services. Unrelated implementations do not inherit a universal engagement gate.
 
 ## 3. Risk Assessment
 
@@ -229,7 +229,7 @@ The threat model uses a combination of STRIDE (Spoofing, Tampering, Repudiation,
 | T-021 | Replay attack | Medium | Medium | Mitigated, tested |
 | T-022 | Cryptographic obsolescence | Medium | Medium (long horizon) | Mitigated (interface-ready) |
 | T-023 | Privacy-vs-permanence conflict | High | Medium | Mitigated |
-| T-024 | Indigenous data sovereignty conflict | Medium | Medium | Mitigated, consultation required |
+| T-024 | Indigenous data sovereignty conflict | Medium | Medium | Mitigated; rights-holder engagement required where materially implicated |
 
 ## 4. Conclusion
 

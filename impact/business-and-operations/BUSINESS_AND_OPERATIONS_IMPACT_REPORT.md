@@ -11,9 +11,9 @@ Purpose: Analyze the business, operational, procurement, vendor-management, IT-o
 Audience: Business leaders, operations executives, procurement officers, risk officers, compliance officers
 Document Classification: Public
 Classification: impact
-Version: 2.0.0
+Version: 2.1.0
 Status: Submission-ready
-Last Material Revision: 2026-08-01
+Last Material Revision: 2026-09-07
 Dependencies: spec/AI-IDP-CORE.md; spec/CONFORMANCE_LEVELS.md; impact/business-and-operations/
 Source Basis: Master Execution Prompt; Canadian public-record legal materials; international technical standards
 Invariants: Analysis is evidence-based and distinguishes current from proposed
@@ -146,7 +146,7 @@ The recommendations are:
 
 ## 17. Limitations
 
-The cost-benefit analysis uses parametric models based on analogies to existing regulatory regimes; real deployment data is not yet available. Insurance-market development is assumed but not guaranteed. Provincial agreement to the cooperative-federalism model is required but not certain. Indigenous data-governance consultation is a precondition for implementation but not performed in this analysis. The analysis does not account for macroeconomic effects (productivity, employment, innovation) that are addressed in the Economic Impact Researcher's analysis (A18).
+The cost-benefit analysis uses parametric models based on analogies to existing regulatory regimes; real deployment data is not yet available. Insurance-market development is assumed but not guaranteed. Provincial agreement to the cooperative-federalism model is required but not certain. The analysis does not substitute for meaningful rights-holder engagement where a deployment would materially affect Indigenous rights, community data, governance authority, or services; unrelated implementations do not inherit a universal consultation gate. The analysis does not account for macroeconomic effects (productivity, employment, innovation) that are addressed in the Economic Impact Researcher's analysis (A18).
 
 ## 18. Conclusion
 

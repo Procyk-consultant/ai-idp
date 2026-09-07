@@ -11,9 +11,9 @@ Purpose: University-level research report on AI-IDP
 Audience: Academic reviewers, university supervisors
 Document Classification: Public
 Classification: research
-Version: 2.0.0
+Version: 2.1.0
 Status: Submission-ready
-Last Material Revision: 2026-08-01
+Last Material Revision: 2026-09-07
 Dependencies: spec/AI-IDP-CORE.md; research/; paper/
 Source Basis: Master Execution Prompt; Canadian public-record legal materials; international technical standards
 Invariants: Neutral academic format; no invented university affiliation
@@ -128,7 +128,7 @@ The societal implications are documented in `impact/societal/SOCIETAL_IMPACT_ASS
 
 ## 23. Ethical Implications
 
-The ethical implications include: (1) the framework's permanent records could chill lawful expression and association (mitigated by pseudonymous identifiers and sealed identity resolution); (2) the framework could exacerbate inequality if conformance costs exclude small developers or marginalized communities (mitigated by tiered conformance and small-developer/open-source profiles); (3) the framework's Indigenous data governance must respect First Nations, Inuit, and Métis data sovereignty (mitigated by OCAP®-aligned handling and consultation precondition); (4) the framework's AI assistance disclosure (this report was produced with AI assistance under the Autonomous Master Execution Prompt; all original IP remains Pierre-Edward Procyk's).
+The ethical implications include: (1) the framework's permanent records could chill lawful expression and association (mitigated by pseudonymous identifiers and sealed identity resolution); (2) the framework could exacerbate inequality if conformance costs exclude small developers or marginalized communities (mitigated by tiered conformance and small-developer/open-source profiles); (3) the framework's Indigenous data governance must recognize First Nations, Inuit, and Métis data sovereignty (mitigated by OCAP®-aligned handling and context-specific rights-holder engagement where materially implicated, without a universal gate for unrelated implementations); (4) the framework's AI assistance disclosure (this report was produced with AI assistance under the Autonomous Master Execution Prompt; all original IP remains Pierre-Edward Procyk's).
 
 ## 24. Security Implications
 

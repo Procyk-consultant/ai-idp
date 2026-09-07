@@ -14,9 +14,9 @@ Purpose: Top-level pointer to the assumption register
 Audience: All readers
 Document Classification: Internal
 Classification: documentation
-Version: 2.0.0
+Version: 2.1.0
 Status: Approved
-Last Material Revision: 2026-08-01
+Last Material Revision: 2026-09-07
 Dependencies: project-control/ASSUMPTION_REGISTER.md
 Source Basis: Master Execution Prompt
 Invariants: Assumptions are documented and labelled
@@ -31,6 +31,6 @@ See `project-control/ASSUMPTION_REGISTER.md` for the authoritative assumption re
 
 ## Summary
 
-The project proceeds on 10 documented assumptions (A-001 through A-010) covering: Canadian primary-source availability; AIDA as policy reference (proposed, not enacted); Treasury Board Directive on Automated Decision-Making as operative AIA framework; Ed25519 long-term cryptographic suitability; JSONL ledger scalability for reference implementation; GitHub dual-repository evidence pattern; bilingual treatment; synthetic benchmark data; autonomous validation depth; Indigenous data-governance consultation precondition.
+The project proceeds on 10 documented assumptions (A-001 through A-010) covering: Canadian primary-source availability; AIDA as policy reference (proposed, not enacted); Treasury Board Directive on Automated Decision-Making as operative AIA framework; Ed25519 long-term cryptographic suitability; JSONL ledger scalability for reference implementation; GitHub dual-repository evidence pattern; bilingual treatment; synthetic benchmark data; autonomous validation depth; and context-specific Indigenous data-governance engagement when Indigenous rights, community data, governance authority, or services are materially implicated.
 
 Each assumption is reasonable, documented, reversible, and labelled as an assumption (not as fact) in downstream artifacts.
