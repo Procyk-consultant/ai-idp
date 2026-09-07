@@ -134,14 +134,16 @@ ai-idp-aegistrace/
 - **pytest** for testing (113 passing tests)
 - **Tectonic** for LaTeX compilation
 
-### Production Hardening (v2.0.0+)
+### Production-oriented components (v2.0.0)
 
-- **PostgreSQL storage backend** with JSONB, BIGSERIAL, SSL-by-default
-- **HSM-backed key management** (PKCS#11, AWS KMS, Azure Key Vault, GCP KMS)
-- **Batched high-throughput ledger** with write-ahead log (WAL)
-- **OpenTelemetry runtime exporter** for observability
-- **Post-quantum signature migration** (ML-DSA per FIPS 204, SLH-DSA per FIPS 205)
-- **Live GitHub remote integration** for Merkle anchor pushing
+- **PostgreSQL storage backend** with JSONB, BIGSERIAL, and SSL-by-default configuration
+- **HSM/KMS integration interfaces** for PKCS#11, AWS KMS, Azure Key Vault, and Google Cloud KMS; live use requires the applicable provider dependency, credentials, and infrastructure
+- **Batched ledger** with an optional write-ahead log (WAL)
+- **Optional OpenTelemetry adapter** for observability
+- **Post-quantum migration interfaces** for ML-DSA and SLH-DSA; live signing requires a supported cryptographic provider
+- **GitHub remote-push adapter** for Merkle anchors; live anchoring requires a configured repository, token, and controlled deployment
+
+These components are part of the reference implementation. They do not by themselves evidence a production deployment, a live public anchor, hardware-backed signing, or external operational validation. See `LIMITATIONS.md` and `technical/AEGISTRACE_TECHNICAL_ARCHITECTURE.md`.
 
 ---
 

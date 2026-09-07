@@ -15,28 +15,28 @@ Audience: All readers
 Document Classification: Internal
 Classification: documentation
 Version: 2.0.0
-Status: Approved
-Last Material Revision: 2026-08-01
-Dependencies: project-control/ARTIFACT_MANIFEST.csv
+Status: Historical v2.0.0 inventory with current reconciliation overlay
+Last Material Revision: 2026-09-06
+Dependencies: project-control/ARTIFACT_MANIFEST.csv; project-control/ARTIFACT_MANIFEST_RECONCILIATION_2026-09-06.md
 Source Basis: Master Execution Prompt
-Invariants: Manifest matches actual artifacts
-Failure Behaviour: Missing artifacts are a defect
+Invariants: Current membership claims are reconciled against the Git-controlled public corpus
+Failure Behaviour: Unreconciled missing artifacts block current completeness claims
 Trace Policy: Manifest updates are AegisTrace events
 Licence Status: No licence selected unless approved in writing by Pierre-Edward Procyk
 ---
 
 # Artifact Manifest
 
-The complete machine-readable manifest is `project-control/ARTIFACT_MANIFEST.csv`. This file is a human-readable summary.
+`project-control/ARTIFACT_MANIFEST.csv` is the original v2.0.0 release inventory. It is preserved as historical evidence and is not, by itself, a current working-tree manifest. The current disposition of its 21 absent paths is recorded in `project-control/ARTIFACT_MANIFEST_RECONCILIATION_2026-09-06.md`.
 
 ## Categories
 
-The manifest covers project control, governance and intellectual-property records, preserved brand originals, research and scientific evidence, 25 specification documents, 14 JSON Schemas, the AegisTrace implementation and adapters, the 113-test suite, examples, documentation, the arXiv paper, university materials, Canadian government documents, impact reports, administration, the threat model, deterministic build tools, metadata, checksums, and the ten numbered release packages.
+The historical inventory covers project control, governance and intellectual-property records, preserved brand originals, research and scientific evidence, 25 specification documents, 14 JSON Schemas, the AegisTrace implementation and adapters, the test suite, examples, documentation, the paper, university materials, Canadian government documents, impact reports, administration, the threat model, deterministic build tools, metadata, checksums, and ten numbered release packages. Some listed privacy-bearing records were intentionally retired, four government deliverables were never tracked in this repository history, and the numbered packages are retained only in the ignored historical archive.
 
 ## Checksums
 
-Canonical-file checksums are in `release/CHECKSUMS.sha256`. Hashes for the ten numbered packages are in `release/NUMBERED_ARCHIVES.sha256`.
+Current Git-controlled public-corpus checksums are in `release/CHECKSUMS.sha256`; `scripts/reconcile_release_checksums.py` derives membership from the Git index so unrelated untracked or ignored files cannot enter the manifest accidentally. `release/NUMBERED_ARCHIVES.sha256` preserves the hashes of the ten historical numbered packages; those packages are not current root-level Git artifacts.
 
 ## Validation
 
-Each artifact has an associated validation status in `project-control/VALIDATION_STATUS.md`. Major PDFs have per-PDF validation records in their respective `validation/` subdirectories.
+Historical validation status is retained in `project-control/VALIDATION_STATUS.md`. It does not replace current verification. Current repository state, limitations, and approval boundaries are maintained in `project-control/PHASE_FOLLOW_UP.md` and the dated reconciliation record.

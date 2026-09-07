@@ -16,7 +16,7 @@ Document Classification: Internal
 Classification: release
 Version: 2.0.0
 Status: Approved
-Last Material Revision: 2026-08-01
+Last Material Revision: 2026-09-06
 Dependencies: VALIDATION_STATUS.md
 Source Basis: Master Execution Prompt
 Invariants: Releases are assembled only from validated artifacts
@@ -37,7 +37,7 @@ A release may be prepared only when all 13 validation gates in `project-control/
 
 ## Release Artefacts
 
-The release control directory contains `release/metadata/` (author, organization, contact, publication metadata), `release/CHECKSUMS.sha256` (canonical-file checksums), `release/NUMBERED_ARCHIVES.sha256` (hashes for the ten numbered root-level ZIP packages), `release/VALIDATION_REPORT.md`, `release/FINAL_COMPLETION_REPORT.md`, and `release/release_summary.json`.
+The release control directory contains the privacy-safe `release/metadata/publication_metadata.json`, `release/CHECKSUMS.sha256` (checksums for the Git-controlled public corpus), `release/NUMBERED_ARCHIVES.sha256` (historical hashes for ten numbered ZIP packages retained outside the active Git corpus), `release/VALIDATION_REPORT.md`, `release/FINAL_COMPLETION_REPORT.md`, and `release/release_summary.json`. Author, organization, and contact metadata files removed in the 2026-08-03 privacy change are not current public-corpus requirements. See `project-control/ARTIFACT_MANIFEST_RECONCILIATION_2026-09-06.md` before asserting release completeness.
 
 ## Versioning
 
