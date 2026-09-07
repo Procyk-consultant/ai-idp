@@ -7,14 +7,14 @@ File: MASTER_HANDOFF.md
 Title: Master Handoff
 Purpose: Point to the controlling project handoff state
 Version: 2.1.0
-Status: GitHub Main Publication Candidate / Explicitly Authorized
+Status: Published on GitHub Main / Remote Ref Verified
 Last Material Revision: 2026-09-07
 Licence Status: All Rights Reserved; no public licence granted
 ---
 
 # Master Handoff — 2.1.0
 
-The authoritative current state is **AI-IDP / AegisTrace 2.1.0** on `publish/2.1.0-consumer-main`, based on verified local commit `0f2c0b19004afae0eed97d1ade0c19379b88d44b`. Publication of the current code, consumer presentation, official project marks, and selected existing article/post visuals to GitHub `main` is explicitly authorized. The Zenodo DOI remains an earlier historical archive and is not relabelled.
+The authoritative current state is **AI-IDP / AegisTrace 2.1.0** on GitHub `main`. The code, consumer presentation, official project marks, and selected existing article/post visuals were published in payload commit `e9c13b9b4504c1f39e516f8c0b29f7faba3f816f`; the exact remote ref was read back successfully after the non-force fast-forward. The Zenodo DOI remains an earlier historical archive and is not relabelled.
 
 Read in this order:
 
@@ -28,6 +28,6 @@ Read in this order:
 
 Pierre-Edward Procyk reports that outreach emails were sent and contacts completed. No sent-mail receipt or communications log was available in the inspected local evidence, so exact recipients, dates, attachments, delivery, and replies are not independently claimed here.
 
-The earlier reconciliation performed no external action. The current publication authorization is limited to updating GitHub `main` and verifying the resulting remote state. It does not authorize a version tag, GitHub release object, DOI/Zenodo change, deployment, post, email send, third-party submission, billing change, or licence change.
+The authorized GitHub `main` publication is complete. No version tag, GitHub release object, DOI/Zenodo change, deployment, post, email send, third-party submission, billing change, or licence change was performed.
 
 Pierre-Edward Procyk remains the final authority for each external publication, licensing, submission, release, or account action.

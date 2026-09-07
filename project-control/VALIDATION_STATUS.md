@@ -7,9 +7,9 @@ File: project-control/VALIDATION_STATUS.md
 Title: Validation Status
 Purpose: Separate verified 2.1.0 evidence from historical, publication, and external-activation claims
 Version: 2.1.0
-Status: Local Engineering Gates Passed / External Activation Not Verified
+Status: Local Gates Passed / GitHub Main Published / External Activation Not Verified
 Last Material Revision: 2026-09-07
-Branch: publish/2.1.0-consumer-main
+Branch: main
 Historical Public Baseline: b13e51baa51c9e2bb0a5bff4f3911a6902b51206
 ---
 
@@ -43,6 +43,8 @@ These terms are not interchangeable.
 | Consumer document targets | Local Markdown links and image paths | PASS; 44 references resolved |
 | Included media integrity | Project and social-media SHA-256 manifests | PASS; 14 files verified |
 | Included media decoding | PNG decoder over project and social images | PASS; 14 images decoded |
+| GitHub main publication | Non-force push plus `origin/main` and `git ls-remote` readback | PASS; payload `e9c13b9b4504c1f39e516f8c0b29f7faba3f816f` matched exactly |
+| GitHub Actions | Run `34154350019`, job `101842947804` | NOT EXECUTED; zero steps; GitHub reports account locked due to a billing issue |
 | Paper build | Tectonic 0.16.9 | PASS; exit 0; 13 pages |
 | Container | Docker Desktop Linux engine | NOT EXECUTED; engine unavailable |
 
@@ -62,7 +64,7 @@ Warnings disclosed:
 - independently operated federation registries;
 - external certification, accreditation, legal adoption, or government acceptance;
 - email delivery receipts and recipient responses;
-- publication of the local 2.1.0 branch.
+- successful GitHub-hosted CI execution while the account-level billing lock remains.
 
 ## Historical evidence retained
 
@@ -70,4 +72,4 @@ The 2026-08-02 v2.0.0 release recorded 113/113 tests, a successful demo/ledger v
 
 ## Veritas contradiction check
 
-Strongest alternative explanation: the version could be called 2.1.0 merely because one D-drive PDF uses that number while the runnable package remained 2.0.0. That explanation was initially supported by the fresh package build, which produced 2.0.0 before this pass. It is no longer the current runtime state: package metadata, runtime `__version__`, API health/version, container label, Compose image, README, changelog, and metadata tests now agree on 2.1.0, and the fresh local suite passes. The historical public state nevertheless remains 2.0.0 until a separately authorized external update occurs.
+Strongest alternative explanation: the version could be called 2.1.0 merely because one D-drive PDF uses that number while the runnable package remained 2.0.0. That explanation was initially supported by the fresh package build, which produced 2.0.0 before this pass. It is no longer the current state: package metadata, runtime `__version__`, API health/version, container label, Compose image, README, changelog, and metadata tests agree on 2.1.0; the fresh local suite passes; and the consumer/code payload is now independently verified on GitHub `main`. The Zenodo archive remains the separate historical 2.0.0 record.

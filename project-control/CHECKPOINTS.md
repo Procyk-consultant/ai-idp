@@ -8,7 +8,9 @@
 - Preserved all Cognitive Industries originals and copied the selected AI-IDP/AegisTrace marks and article/post visuals byte-for-byte.
 - Added a consumer-first README, bilingual plain-language guide, visual gallery, brand index, checksum files, and media manifest.
 - Excluded private outreach/transcript/workspace material, a duplicate visual, and an illustrative payment graphic.
-- GitHub `main` push and remote verification remain pending at this checkpoint.
+- Committed the consumer/code payload as `e9c13b9b4504c1f39e516f8c0b29f7faba3f816f` and published it through a non-force fast-forward of GitHub `main`.
+- Independently confirmed that the local commit, `origin/main`, and `git ls-remote` all returned the exact payload commit after publication.
+- Inspected GitHub Actions run `34154350019`: job `101842947804` had runner ID 0, zero steps, and a GitHub annotation stating that the account is locked due to a billing issue. This is a pre-execution account state, not a code-test result.
 
 ## 2026-09-07 — Local 2.1.0 reconciliation
 

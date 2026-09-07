@@ -19,7 +19,7 @@ action_ticket:
   outputs: [IP_HEADER_BLOCK, CODE, TEST, RATIONALE]
   owner: Codex
   due: 2026-09-07
-  status: in_progress
+  status: done
 ```
 
 ```yaml
@@ -84,5 +84,5 @@ action_ticket:
   outputs: [IP_HEADER_BLOCK, CODE, TEST, RATIONALE]
   owner: Codex
   due: 2026-09-07
-  status: verify
+  status: done
 ```

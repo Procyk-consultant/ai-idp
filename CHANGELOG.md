@@ -15,7 +15,7 @@ Audience: All readers
 Document Classification: Public
 Classification: documentation
 Version: 2.1.0
-Status: GitHub main publication candidate; publication explicitly authorized
+Status: Published on GitHub main
 Last Material Revision: 2026-09-07
 Dependencies: release metadata
 Source Basis: Master Execution Prompt
@@ -31,7 +31,7 @@ All material revisions are recorded here. Semantic versioning is used.
 
 ## [2.1.0] — 2026-09-07 — Reconciliation, evidence repair, and consumer publication
 
-- Established v2.1.0 as the authoritative local project version while retaining v2.0.0 as the historical public GitHub/Zenodo baseline.
+- Established v2.1.0 as the authoritative project version on GitHub `main` while retaining v2.0.0 as the historical Zenodo baseline.
 - Integrated the 124-commit post-v2.0.0 reconciliation line containing authorization, authenticated API writes, replay resistance, durable approval state, public disclosure controls, federation, storage, signing, and test hardening.
 - Fixed dependency injection of an empty append-only ledger in the API; the former falsey-value fallback discarded the caller-supplied ledger.
 - Added a narrow ledger protocol at the event-collection boundary so both append-only and batched ledgers satisfy the typed contract.
@@ -47,6 +47,7 @@ All material revisions are recorded here. Semantic versioning is used.
 - Added the Python `build` frontend to the development and full-validation profiles because wheel creation is a documented release gate.
 - Modernized package licence metadata to PEP 639 using `LicenseRef-Proprietary` and explicit legal files without changing the All Rights Reserved terms.
 - Publication to GitHub `main` was explicitly authorized on 2026-09-07; tagging, GitHub release creation, DOI/Zenodo changes, deployment, and third-party publication remain separate actions.
+- Published the consumer/code payload as commit `e9c13b9b4504c1f39e516f8c0b29f7faba3f816f` and independently confirmed the exact GitHub `main` ref after the non-force fast-forward.
 
 ## [2.0.0] — 2026-08-01 — Coherence alignment pass
 

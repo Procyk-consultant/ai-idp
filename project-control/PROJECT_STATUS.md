@@ -7,9 +7,9 @@ File: project-control/PROJECT_STATUS.md
 Title: Project Status
 Purpose: Controlling project status and evidence boundaries
 Version: 2.1.0
-Status: GitHub Main Publication Candidate / Explicitly Authorized
+Status: Published on GitHub Main / Remote Ref Verified
 Last Material Revision: 2026-09-07
-Branch: publish/2.1.0-consumer-main
+Branch: main
 Source Branch: reconcile-2026-08-14
 Historical Public Baseline: b13e51baa51c9e2bb0a5bff4f3911a6902b51206
 Licence Status: All Rights Reserved; no public licence granted
@@ -19,13 +19,13 @@ Licence Status: All Rights Reserved; no public licence granted
 
 ## Controlling state
 
-The authoritative current project state is **version 2.1.0**. It is based on the 124-commit `reconcile-2026-08-14` line, the 2026-09-07 evidence repair and verification pass on `local/2.1.0-reconciliation`, and the consumer/brand publication package on `publish/2.1.0-consumer-main`.
+The authoritative current project state is **version 2.1.0** on GitHub `main`. It is based on the 124-commit `reconcile-2026-08-14` line, the 2026-09-07 evidence repair and verification pass on `local/2.1.0-reconciliation`, and the consumer/brand payload published as `e9c13b9b4504c1f39e516f8c0b29f7faba3f816f`.
 
-Publication of this package to GitHub `main` is explicitly authorized. Remote confirmation is pending until the publication commit is pushed and independently read back. Tagging, GitHub release creation, DOI/Zenodo changes, deployment, and third-party publication remain separate actions. Historical archived release records remain intact and must not be relabelled as 2.1.0 evidence.
+Publication of this package to GitHub `main` completed through a non-force fast-forward, and the exact payload commit was independently read back from both `origin/main` and `git ls-remote`. Tagging, GitHub release creation, DOI/Zenodo changes, deployment, and third-party publication remain separate actions. Historical archived release records remain intact and must not be relabelled as 2.1.0 evidence.
 
 ## Current verified implementation
 
-The local 2.1.0 source includes:
+The published 2.1.0 source includes:
 
 - persistent identity and key lifecycle;
 - fail-closed multidimensional authorization and exact action-intent approvals;
@@ -92,11 +92,12 @@ This rule is corroborated by the 2.1.0 French synthesis PDF, the current README/
 
 ## GitHub and CI state
 
-- Public `main`: `b13e51baa51c9e2bb0a5bff4f3911a6902b51206`.
-- Public reconciliation branch: `e148cf484b782872416121704a7887935a21bc71`, 124 commits ahead of public `main` and 0 behind at the inspected merge base.
+- Public `main` payload: `e9c13b9b4504c1f39e516f8c0b29f7faba3f816f`, independently verified after publication.
+- Pre-publication public `main`: `b13e51baa51c9e2bb0a5bff4f3911a6902b51206`.
+- Public reconciliation branch: `e148cf484b782872416121704a7887935a21bc71`; it was 124 commits ahead of the pre-publication `main` and 0 behind at the inspected merge base.
 - Public update branch: `54c8367bb62b68a1a7b36ecd54428183365367ee`.
-- Current 2.1.0 publication branch: `publish/2.1.0-consumer-main`; GitHub `main` update explicitly authorized and pending remote verification.
-- Latest public CI run inspected: run `31344416895`, job `93323578720`, 0 workflow steps, runner ID 0. GitHub's annotation says the job was not started because the account is locked due to a billing issue.
+- Current authoritative branch: GitHub `main`; the consumer/code payload was published by non-force fast-forward.
+- Latest public CI run inspected: run `34154350019`, job `101842947804`, 0 workflow steps, runner ID 0. GitHub's annotation says the job was not started because the account is locked due to a billing issue.
 
 The CI evidence proves a pre-execution GitHub account/billing lock, not a code failure. Because GitHub documents standard hosted runners as free for public repositories, an erroneous or stale account/subscription billing state is plausible. Proving that it is specifically a GitHub subscription bug requires authenticated billing/support evidence that was not available to this local inspection.
 

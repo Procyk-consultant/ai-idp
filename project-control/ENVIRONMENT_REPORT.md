@@ -31,8 +31,8 @@ The original task-created paths no longer exist. Nothing was deleted. The test c
 - Package/wheel build: available and verified.
 - Tectonic paper build: available and verified.
 - Git and credential-free public remote inspection: available and verified.
-- GitHub CLI: unavailable; publication will use Git with the configured Git credential path.
-- Fresh remote fetch: available and verified; `origin/main` remained `b13e51baa51c9e2bb0a5bff4f3911a6902b51206` before publication preparation.
+- GitHub CLI: unavailable; publication used Git with the configured Git credential path.
+- Remote publication/readback: available and verified; GitHub `main` accepted payload commit `e9c13b9b4504c1f39e516f8c0b29f7faba3f816f`, and `origin/main` plus `git ls-remote` returned the same hash after publication.
 - Official project-media archive: available read-only at the inspected D-drive root; selected assets passed source-to-target SHA-256 equality checks.
 - Docker CLI: available.
 - Docker Desktop Linux engine: unavailable at the named-pipe endpoint; no container build/run claim is made.

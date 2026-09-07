@@ -9,7 +9,7 @@ File: project-control/PUBLICATION_METADATA_STATUS.md
 Title: Publication Metadata Status
 Purpose: Track verified external publication identifiers and forbid fabrication
 Version: 2.1.0
-Status: GitHub Main Update Authorized / Remote Verification Pending
+Status: Version 2.1.0 Published on GitHub Main / Remote Ref Verified
 Last Material Revision: 2026-09-07
 ---
 
@@ -24,7 +24,7 @@ This record distinguishes verified public availability, user-confirmed outreach,
 | arXiv identifier | NOT ASSIGNED | No external submission performed |
 | DOI | https://doi.org/10.5281/zenodo.21769036 | Zenodo record `21769036`; version 2.0.0; published 2026-08-02; updated 2026-08-08 |
 | ISBN | NOT APPLICABLE | Not a book |
-| Official repository URL | https://github.com/Procyk-consultant/ai-idp | Version 2.1.0 `main` update authorized; exact remote head must be read back before publication is marked complete |
+| Official repository URL | https://github.com/Procyk-consultant/ai-idp | Version 2.1.0 published on `main`; payload commit `e9c13b9b4504c1f39e516f8c0b29f7faba3f816f` independently read back from the remote |
 | Zenodo publication date | 2026-08-02 | Public archival record; do not describe this as peer review, endorsement, or arXiv publication |
 | LinkedIn launch article | Published 2026-08-08 | Existing article URL is recorded in `CURRENT_PUBLICATION_AND_OUTREACH_RECONCILIATION_2026-08-09.md` |
 | Government/official outreach emails | USER-CONFIRMED SENT / RECEIPTS NOT INSPECTED | Pierre-Edward Procyk reports emails sent and contacts completed; exact dates, recipients, attachments, delivery, and replies require mailbox or receipt evidence |
